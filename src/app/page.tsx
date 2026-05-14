@@ -83,6 +83,26 @@ export default function Home() {
     }
   };
 
+  const deleteChapter = async (chapterId: string) => {
+    try {
+      const { error } = await supabase.from('chapters').delete().eq('id', chapterId);
+      if (error) throw error;
+      
+      // Atualizar UI localmente
+      if (selectedBook) {
+        const updatedChapters = selectedBook.chapters.filter(c => c.id !== chapterId);
+        setSelectedBook({ ...selectedBook, chapters: updatedChapters });
+        
+        // Também atualizar na lista global
+        setDbBooks(prev => prev.map(b => 
+          b.id === selectedBook.id ? { ...b, chapters: updatedChapters } : b
+        ));
+      }
+    } catch (err) {
+      alert("Erro ao excluir capítulo");
+    }
+  };
+
   const updateBookData = async (bookId: string, fields: Partial<Book>) => {
     try {
       const { error } = await supabase.from('books').update(fields).eq('id', bookId);
@@ -204,20 +224,29 @@ export default function Home() {
                 {selectedBook.chapters.map((chapter, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-surface-2 transition-all mb-0.5 group"
-                    onClick={() => {
-                      // Logic for selecting chapter could be added here if we want to force it
-                      setIsSidebarOpen(false);
-                    }}
+                    className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-surface-2 transition-all mb-0.5 group relative"
                   >
                     <span className="text-[11px] text-text-muted w-4.5 text-center shrink-0 group-hover:text-gold transition-colors">
                       {idx + 1}
                     </span>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0" onClick={() => setIsSidebarOpen(false)}>
                       <div className="text-[13px] font-medium text-text-dim truncate group-hover:text-text transition-colors">
                         {chapter.title}
                       </div>
                     </div>
+                    
+                    {isAdminMode && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteChapter(chapter.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-400 transition-opacity"
+                        title="Excluir Faixa"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
