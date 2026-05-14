@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import AudioPlayer from '@/components/AudioPlayer';
-import { Headphones, Library, X, Search, RefreshCcw, Database } from 'lucide-react';
+import { Headphones, Library, X, Search, RefreshCcw, Database, List } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function Home() {
