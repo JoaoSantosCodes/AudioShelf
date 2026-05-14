@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0e0c0a;
+  --surface: #1a1612;
+  --surface2: #241f19;
+  --surface3: #2e2720;
+  --border: #3a3028;
+  --gold: #c9a84c;
+  --gold-dim: #8a6f30;
+  --amber: #e8b84b;
+  --text: #f0e8d8;
+  --text-dim: #9a8a72;
+  --text-muted: #5a4e3e;
+  --green: #4caf7a;
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-accent: var(--gold);
+  --color-accent-muted: var(--gold-dim);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface2);
+  --color-surface-3: var(--surface3);
+  --color-border-custom: var(--border);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  @apply rounded-2xl transition-all duration-300;
+}
+
+.glass-card:hover {
+  background: var(--surface2);
+  border-color: var(--gold-dim);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+@keyframes eq {
+  from { transform: scaleY(0.4); }
+  to { transform: scaleY(1); }
+}
+
+.chapter-playing span {
+  width: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  animation: eq 0.8s ease-in-out infinite alternate;
+}

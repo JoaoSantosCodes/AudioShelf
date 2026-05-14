@@ -1,0 +1,17 @@
+{
+  "name": "AudioShelf",
+  "short_name": "AudioShelf",
+  "description": "Seu Player de Audiobooks Premium",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e0c0a",
+  "theme_color": "#c9a84c",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3048/3048383.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
