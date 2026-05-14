@@ -239,7 +239,7 @@ export default function Home() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteChapter(chapter.id);
+                          if (chapter.id) deleteChapter(chapter.id);
                         }}
                         className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-400 transition-opacity"
                         title="Excluir Faixa"
