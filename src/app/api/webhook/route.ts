@@ -68,22 +68,16 @@ export async function POST(req: NextRequest) {
 
       if (!existingChapter) {
         // 3. Pegar a última ordem para incrementar
-        const { data: lastChapter } = await supabase
-          .from('chapters')
-          .select('chapter_order')
-          .eq('book_id', book.id)
-          .order('chapter_order', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        // Extrair número do título para ordenação correta
+        const chapterMatch = chapterTitle.match(/(\d+)/);
+        const chapterOrder = chapterMatch ? parseInt(chapterMatch[1]) : 0;
 
-        const nextOrder = lastChapter ? lastChapter.chapter_order + 1 : 0;
-
-        console.log(`Adding chapter: ${chapterTitle} (Order: ${nextOrder})`);
+        console.log(`Adding chapter: ${chapterTitle} (Order: ${chapterOrder})`);
         await supabase.from('chapters').insert({
           book_id: book.id,
           title: chapterTitle,
           telegram_file_id: file_id,
-          chapter_order: nextOrder
+          chapter_order: chapterOrder
         });
       }
     }

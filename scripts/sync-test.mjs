@@ -108,23 +108,17 @@ async function sync() {
         .maybeSingle();
 
       if (!existing) {
-        const { data: lastChapter } = await supabase
-          .from('chapters')
-          .select('chapter_order')
-          .eq('book_id', book.id)
-          .order('chapter_order', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        const nextOrder = lastChapter ? lastChapter.chapter_order + 1 : 0;
+        // Tenta extrair número do título para ordenação (ex: "01" -> 1, "Capítulo 10" -> 10)
+        const chapterMatch = chapterTitle.match(/(\d+)/);
+        const chapterOrder = chapterMatch ? parseInt(chapterMatch[1]) : 0;
         
         await supabase.from('chapters').insert({
           book_id: book.id,
           title: chapterTitle,
           telegram_file_id: file_id,
-          chapter_order: nextOrder
+          chapter_order: chapterOrder
         });
-        console.log(`✅ Capítulo adicionado!`);
+        console.log(`✅ Capítulo "${chapterTitle}" adicionado na posição ${chapterOrder}!`);
       }
     }
   }
