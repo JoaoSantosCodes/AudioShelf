@@ -282,6 +282,13 @@ export default function Home() {
                       />
                       <input 
                         type="text"
+                        placeholder="Link da Capa (Imagem URL)"
+                        defaultValue={selectedBook.cover}
+                        onBlur={(e) => updateBookData(selectedBook.id, { cover: e.target.value })}
+                        className="bg-surface-3 border border-gold/30 rounded px-2 py-1 text-xs text-gold w-full outline-none focus:border-gold"
+                      />
+                      <input 
+                        type="text"
                         placeholder="Link de Compra (Amazon, etc)"
                         defaultValue={selectedBook.purchase_url}
                         onBlur={(e) => updateBookData(selectedBook.id, { purchase_url: e.target.value })}

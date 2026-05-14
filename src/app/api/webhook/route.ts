@@ -9,6 +9,23 @@ export async function POST(req: NextRequest) {
     const post = update.channel_post;
     if (!post) return NextResponse.json({ ok: true });
 
+    // --- LÓGICA DE FOTO (CAPA) ---
+    if (post.photo) {
+      const photo = post.photo[post.photo.length - 1]; // Maior resolução
+      const bookTitle = post.caption?.trim();
+      
+      if (bookTitle) {
+        console.log(`📸 Foto recebida para o livro: ${bookTitle}`);
+        const coverUrl = `/api/stream?file_id=${photo.file_id}&type=image`;
+        
+        await supabase
+          .from('books')
+          .update({ cover: coverUrl })
+          .ilike('title', bookTitle);
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     // Aceita arquivos de áudio ou documentos que sejam áudio
     const audio = post.audio || (post.document && post.document.mime_type?.startsWith('audio/') ? post.document : null);
 
