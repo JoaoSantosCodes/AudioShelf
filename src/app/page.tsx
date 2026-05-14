@@ -83,7 +83,8 @@ export default function Home() {
     }
   };
 
-  const deleteChapter = async (chapterId: string) => {
+  const deleteChapter = async (chapterId?: string) => {
+    if (!chapterId) return;
     try {
       const { error } = await supabase.from('chapters').delete().eq('id', chapterId);
       if (error) throw error;
