@@ -151,6 +151,19 @@ export default function Home() {
     book.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const toggleAdminMode = () => {
+    if (isAdminMode) {
+      setIsAdminMode(false);
+    } else {
+      const pass = prompt("Digite a senha de administrador:");
+      if (pass === "1234") {
+        setIsAdminMode(true);
+      } else if (pass !== null) {
+        alert("Senha incorreta!");
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
       {/* HEADER */}
@@ -176,7 +189,7 @@ export default function Home() {
             Biblioteca
           </button>
           <button 
-            onClick={() => setIsAdminMode(!isAdminMode)}
+            onClick={toggleAdminMode}
             className={`px-3 py-1.5 rounded-full text-[12px] md:text-[13px] font-medium transition-all ${isAdminMode ? 'bg-amber/10 text-amber' : 'text-text-dim hover:bg-surface-2 hover:text-text'}`}
           >
             {isAdminMode ? 'Admin' : 'Gerenciar'}
