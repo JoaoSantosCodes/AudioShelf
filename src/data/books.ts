@@ -1,4 +1,5 @@
 export interface Chapter {
+  id?: string;
   title: string;
   telegram_file_id: string;
 }
