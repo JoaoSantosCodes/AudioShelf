@@ -98,9 +98,10 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 12. 🔔 Notificações & Alertas Inteligentes
 - [x] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais sincronizado.
-- [ ] **Lembretes de Tarefas:** Notificações programadas para missões que estão para vencer.
-- [ ] **Alertas Financeiros:** Avisos automáticos ao atingir limites de orçamento.
-- [/] **Telegram Push:** Envio de resumos diários e alertas críticos via Bot de Telegram (Integração em progresso).
+- [/] **Lembretes de Tarefas:** Notificações automáticas para missões com prazo curto (Vencendo em 24h).
+- [/] **Alertas Financeiros:** Avisos proativos ao atingir 80% e 100% dos limites de orçamento definidos.
+- [x] **Telegram Push (Interface):** Canal de conexão e modal de vinculação de conta implementados.
+- [ ] **Motor de Resumo Diário:** Envio programado de "Briefing Matinal" via Telegram e Dashboard.
 
 ### 13. 🔊 Mini-Player Flutuante Universal
 - [x] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Glassmorphism persistent player).

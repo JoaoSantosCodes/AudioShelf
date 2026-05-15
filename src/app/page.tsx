@@ -35,6 +35,7 @@ import GlobalSearch from '@/components/GlobalSearch';
 import { useMedia } from '@/context/MediaContext';
 import { processVoiceCommand } from '@/lib/commandProcessor';
 import PresenceIndicator from '@/components/PresenceIndicator';
+import { checkSmartAlerts, SmartNotification, generateDailyBriefing } from '@/lib/notificationEngine';
 
 export default function Home() {
   const { activeMedia, playMedia, closeMedia } = useMedia();
@@ -46,6 +47,8 @@ export default function Home() {
   const [isListening, setIsListening] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [telegramChatId, setTelegramChatId] = useState('');
+  const [smartNotifications, setSmartNotifications] = useState<any[]>([]);
+  const [dailyBriefing, setDailyBriefing] = useState<any>(null);
 
   const handleVoiceInput = async () => {
     if (!user) return;
@@ -78,10 +81,16 @@ export default function Home() {
     pendingTasks: 0
   });
 
-  const notifications = dashboardStats.pendingTasks > 0 ? [
-    { id: 1, type: 'task', title: 'Missões Pendentes', text: `Você tem ${dashboardStats.pendingTasks} tarefas para hoje`, time: 'Agora', icon: Calendar, color: 'text-gold' },
-  ] : [
-    { id: 0, type: 'system', title: 'Sistema Pronto', text: 'Tudo sincronizado e atualizado.', time: 'Agora', icon: CheckCircle2, color: 'text-emerald-400' }
+  const notifications = [
+    ...smartNotifications.map(n => ({
+      ...n,
+      icon: n.icon === 'Wallet' ? Wallet : (n.icon === 'Calendar' ? Calendar : (n.icon === 'TrendingUp' ? TrendingUp : Activity))
+    })),
+    ...(dashboardStats.pendingTasks > 0 ? [
+      { id: 1, type: 'task', title: 'Missões Pendentes', text: `Você tem ${dashboardStats.pendingTasks} tarefas para hoje`, time: 'Agora', icon: Calendar, color: 'text-gold' },
+    ] : [
+      { id: 0, type: 'system', title: 'Sistema Pronto', text: 'Tudo sincronizado e atualizado.', time: 'Agora', icon: CheckCircle2, color: 'text-emerald-400' }
+    ])
   ];
 
   const budget = 5000;
@@ -95,6 +104,8 @@ export default function Home() {
         setUser(session.user);
         fetchRecentActivities(session.user.id);
         fetchDashboardStats(session.user.id);
+        checkSmartAlerts(session.user.id).then(setSmartNotifications);
+        generateDailyBriefing(session.user.id).then(setDailyBriefing);
       }
       fetchBooks();
     });
@@ -369,6 +380,37 @@ export default function Home() {
 
         <div className="p-8 space-y-10">
           {/* SMART WIDGETS SECTION */}
+          {/* BRIEFING AI SECTION */}
+          {dailyBriefing && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-8 rounded-[2.5rem] bg-gradient-to-br from-gold/20 via-surface-1 to-surface-2 border border-gold/30 shadow-2xl relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Sparkles size={80} className="text-gold" />
+              </div>
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 bg-gold text-bg text-[9px] font-black uppercase tracking-[0.2em] rounded-full">Inteligência Estratégica</span>
+                  <span className="text-[10px] font-bold text-gold/60">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                </div>
+                <h2 className="text-3xl font-serif font-bold text-text">{dailyBriefing.title}</h2>
+                <p className="text-sm text-text-muted max-w-2xl leading-relaxed">
+                  {dailyBriefing.summary} {dailyBriefing.urgent > 0 ? `Atenção especial para as ${dailyBriefing.urgent} missões críticas.` : 'Seu dia parece sob controle.'}
+                </p>
+                <div className="flex gap-4 pt-2">
+                  <Link href="/kanban" className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border-custom rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                    <Calendar size={14} className="text-gold" /> Ver Missões
+                  </Link>
+                  <Link href="/shopping" className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border-custom rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                    <ShoppingCart size={14} className="text-gold" /> Lista de Mercado
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* GASTOS WIDGET */}
             <Link href="/financas" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-red-500/30 transition-all shadow-xl relative overflow-hidden">
