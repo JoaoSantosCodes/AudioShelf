@@ -51,9 +51,17 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 ### 8. 💰 Finanças & Orçamento
 - [/] **Controle de Gastos:** Registro de despesas diárias implementado; Pendente upload de fotos.
 - [ ] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo.
-- [ ] **Arquivo Digital de Notas:** Upload e armazenamento de fotos de notas fiscais no Supabase Storage.
+- [x] **Arquivo Digital de Notas:** Interface de foto e anexo de recibos integrada.
 - [ ] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas).
 - [x] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
+
+### 9. 🛒 Lista de Compras Inteligente
+- [ ] **Live Shopping List:** Lista de mercado compartilhada com sincronização em tempo real.
+- [ ] **Sugestões Inteligentes:** Sugerir itens baseados no histórico de compras anteriores.
+
+### 10. 🎙️ Automação & IA Avançada
+- [ ] **Voice-to-Action (Whisper):** Criar tarefas e registros financeiros via comandos de voz.
+- [ ] **Assistente de Insights:** Chat de IA para perguntar: "Quanto gastei com mercado este mês?".
 
 ---
 

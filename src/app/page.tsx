@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar, Activity, BarChart3, Wallet } from 'lucide-react';
+import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar, Activity, BarChart3, Wallet, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
@@ -168,6 +168,11 @@ export default function Home() {
               <Link href="/insights" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
                 <BarChart3 size={18} />
                 <span className="text-sm font-semibold">Insights & Resultados</span>
+              </Link>
+
+              <Link href="/shopping" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+                <ShoppingCart size={18} />
+                <span className="text-sm font-semibold">Lista de Mercado</span>
               </Link>
 
               <Link href="/financas" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">

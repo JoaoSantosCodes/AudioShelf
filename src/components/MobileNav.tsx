@@ -12,9 +12,9 @@ export default function MobileNav() {
   const navItems = [
     { name: 'Home', icon: Library, path: '/' },
     { name: 'Finanças', icon: Wallet, path: '/financas' },
+    { name: 'Mercado', icon: ShoppingCart, path: '/shopping' },
     { name: 'Agenda', icon: Calendar, path: '/agenda' },
     { name: 'Kanban', icon: LayoutDashboard, path: '/kanban' },
-    { name: 'Status', icon: BarChart3, path: '/insights' },
   ];
 
   return (
