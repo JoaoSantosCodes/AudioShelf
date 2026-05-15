@@ -86,29 +86,31 @@ export default function InsightsPage() {
   return (
     <div className="min-h-screen bg-background text-text flex flex-col">
       {/* HEADER TÁTICO */}
-      <header className="h-20 flex items-center justify-between px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold">
-            <Home size={20} />
+      <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+        <div className="flex items-center gap-3 md:gap-6">
+          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold shrink-0">
+            <Home size={18} />
           </Link>
-          <h1 className="text-xl font-serif font-bold flex items-center gap-3">
-            <BarChart3 className="text-gold" size={22} />
-            Relatório de Progresso Mensal
+          <h1 className="text-base md:text-xl font-serif font-bold flex items-center gap-2 md:gap-3 truncate">
+            <BarChart3 className="text-gold hidden xs:block" size={20} />
+            <span className="truncate">Insights <span className="hidden sm:inline">de Progresso</span></span>
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <ThemeToggle />
-          <div className="px-4 py-1.5 bg-surface-2 border border-border-custom rounded-full text-[10px] font-bold text-text-dim uppercase tracking-widest">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="hidden xs:block">
+            <ThemeToggle />
+          </div>
+          <div className="px-3 md:px-4 py-1.5 bg-surface-2 border border-border-custom rounded-full text-[9px] md:text-[10px] font-bold text-text-dim uppercase tracking-widest whitespace-nowrap">
             Maio 2026
           </div>
         </div>
       </header>
 
-      <main className="flex-1 p-8 overflow-y-auto no-scrollbar">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto no-scrollbar pb-32 md:pb-10">
+        <div className="max-w-6xl mx-auto space-y-6 md:space-y-8">
           
           {/* TOP STATS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {stats.map((stat, idx) => (
               <motion.div 
                 key={stat.title}
@@ -136,9 +138,9 @@ export default function InsightsPage() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="md:col-span-2 bg-surface-1 border border-border-custom p-8 rounded-3xl shadow-2xl"
+              className="md:col-span-2 bg-surface-1 border border-border-custom p-5 md:p-8 rounded-3xl shadow-2xl"
             >
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h3 className="text-lg font-serif font-bold text-text">Atividade Semanal</h3>
                   <p className="text-[10px] text-text-dim uppercase tracking-widest font-bold">Consistência de metas concluídas</p>

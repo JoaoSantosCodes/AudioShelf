@@ -338,37 +338,35 @@ export default function KanbanPage() {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
       {/* HEADER TÁTICO */}
-      <header className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-border-custom glass-panel shrink-0 z-50">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold">
-            <Home size={20} />
+      <header className="flex items-center justify-between px-4 md:px-10 py-4 border-b border-border-custom glass-panel shrink-0 z-50">
+        <div className="flex items-center gap-3 md:gap-6">
+          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold shrink-0">
+            <Home size={18} />
           </Link>
-          <Link href="/agenda" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-            <Calendar size={18} />
-            <span className="text-sm font-semibold">Agenda Semanal</span>
-          </Link>
+          
+          <div className="hidden lg:flex items-center gap-6">
+            <Link href="/agenda" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+              <Calendar size={18} />
+              <span className="text-sm font-semibold">Agenda Semanal</span>
+            </Link>
 
-          <Link href="/insights" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-            <BarChart3 size={18} />
-            <span className="text-sm font-semibold">Insights</span>
-          </Link>
+            <Link href="/insights" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+              <BarChart3 size={18} />
+              <span className="text-sm font-semibold">Insights</span>
+            </Link>
 
-          <Link href="/financas" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-            <Wallet size={18} />
-            <span className="text-sm font-semibold">Finanças</span>
-          </Link>
+            <Link href="/financas" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+              <Wallet size={18} />
+              <span className="text-sm font-semibold">Finanças</span>
+            </Link>
+          </div>
 
-          <Link href="/shopping" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-            <ShoppingCart size={18} />
-            <span className="text-sm font-semibold">Mercado</span>
-          </Link>
-
-          <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold ml-4">
-            <LayoutDashboard size={24} className="text-gold" />
-            <span className="text-gradient">Project Kanban</span>
+          <div className="flex items-center gap-2.5 font-serif text-lg md:text-2xl text-gold tracking-tighter font-bold md:ml-4 truncate">
+            <LayoutDashboard size={20} className="text-gold hidden xs:block" />
+            <span className="text-gradient">Kanban</span>
           </div>
           
-          <div className="hidden lg:flex relative ml-6">
+          <div className="hidden xl:flex relative ml-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
             <input 
               type="text" 
@@ -380,34 +378,36 @@ export default function KanbanPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <PresenceIndicator />
+        <div className="flex items-center gap-2 md:gap-6">
+          <div className="hidden sm:block">
+            <PresenceIndicator />
+          </div>
           <ThemeToggle />
           <button 
             onClick={() => setIsShareModalOpen(true)}
-            className="p-2.5 rounded-xl bg-surface-2 border border-border-custom text-text-dim hover:text-gold hover:border-gold/30 transition-all"
+            className="p-2 rounded-xl bg-surface-2 border border-border-custom text-text-dim hover:text-gold hover:border-gold/30 transition-all"
             title="Convidar Colaborador"
           >
-            <Share2 size={20} />
+            <Share2 size={18} />
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-gold text-bg px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-gold/20"
+            className="bg-gold text-bg px-3 md:px-4 py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-gold/20"
           >
-            <Plus size={18} /> Nova Tarefa
+            <Plus size={16} /> <span className="hidden xs:inline">Nova Tarefa</span>
           </button>
         </div>
       </header>
 
       {/* BOARD CONTENT */}
-      <main className="flex-1 overflow-x-auto p-6 md:p-10 no-scrollbar">
+      <main className="flex-1 overflow-x-auto no-scrollbar p-4 md:p-8 pb-32 md:pb-0">
         <DndContext 
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-6 h-full min-w-[900px]">
+          <div className="flex gap-4 md:gap-8 h-full min-w-[900px] md:min-w-0">
             {columns.map(column => (
               <KanbanColumn 
                 key={column.id}

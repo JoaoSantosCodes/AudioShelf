@@ -215,27 +215,29 @@ export default function ShoppingListPage() {
   return (
     <div className="min-h-screen bg-background text-text flex flex-col">
       {/* HEADER TÁTICO */}
-      <header className="h-20 flex items-center justify-between px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold">
-            <Home size={20} />
+      <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+        <div className="flex items-center gap-3 md:gap-6">
+          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold shrink-0">
+            <Home size={18} />
           </Link>
-          <h1 className="text-xl font-serif font-bold flex items-center gap-3">
-            <ShoppingCart className="text-gold" size={22} />
-            Lista de Mercado
+          <h1 className="text-base md:text-xl font-serif font-bold flex items-center gap-2 md:gap-3 truncate">
+            <ShoppingCart className="text-gold hidden xs:block" size={20} />
+            <span className="truncate">Mercado</span>
           </h1>
         </div>
-        <div className="flex items-center gap-6">
-          <PresenceIndicator />
-          <button onClick={clearBought} className="text-[10px] font-bold uppercase tracking-widest text-text-dim hover:text-red-400 transition-colors">
+        <div className="flex items-center gap-2 md:gap-6">
+          <div className="hidden sm:block">
+            <PresenceIndicator />
+          </div>
+          <button onClick={clearBought} className="hidden sm:block text-[10px] font-bold uppercase tracking-widest text-text-dim hover:text-red-400 transition-colors">
             Limpar Comprados
           </button>
           <ThemeToggle />
         </div>
       </header>
 
-      <main className="flex-1 p-8 overflow-y-auto no-scrollbar">
-        <div className="max-w-3xl mx-auto space-y-8">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto no-scrollbar pb-32 md:pb-10">
+        <div className="max-w-3xl mx-auto space-y-6 md:space-y-8">
           
           {/* AI SUGGESTIONS */}
           {suggestions.length > 0 && (
@@ -265,23 +267,23 @@ export default function ShoppingListPage() {
           )}
 
           {/* ADD ITEM INPUT */}
-          <div className="bg-surface-1 border border-border-custom p-6 rounded-3xl shadow-xl space-y-4">
-            <div className="flex gap-4">
+          <div className="bg-surface-1 border border-border-custom p-4 md:p-6 rounded-3xl shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
               <div className="relative flex-1">
                 <input 
                   type="text" 
-                  placeholder="O que está faltando? (ex: Café)"
+                  placeholder="O que falta?"
                   value={newItemName}
                   onChange={e => setNewItemName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addItem()}
-                  className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 text-lg font-semibold focus:border-gold/50 outline-none transition-all"
+                  className="w-full bg-surface-2 border border-border-custom rounded-2xl py-3 md:py-4 px-4 md:px-6 text-base md:text-lg font-semibold focus:border-gold/50 outline-none transition-all"
                 />
               </div>
               <button 
                 onClick={addItem}
-                className="px-8 bg-gold text-bg rounded-2xl font-bold hover:bg-gold-bright transition-all shadow-lg shadow-gold/20 flex items-center gap-2"
+                className="py-3 md:py-0 px-8 bg-gold text-bg rounded-2xl font-bold hover:bg-gold-bright transition-all shadow-lg shadow-gold/20 flex items-center justify-center gap-2"
               >
-                <Plus size={20} /> Add
+                <Plus size={18} /> <span className="sm:hidden">Adicionar Item</span><span className="hidden sm:inline">Add</span>
               </button>
             </div>
 

@@ -104,32 +104,32 @@ export default function AgendaPage() {
   return (
     <div className="min-h-screen bg-background text-text flex flex-col">
       {/* HEADER TÁTICO */}
-      <header className="h-20 flex items-center justify-between px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold">
-            <Home size={20} />
+      <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+        <div className="flex items-center gap-3 md:gap-6">
+          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold shrink-0">
+            <Home size={18} />
           </Link>
           <div>
-            <h1 className="text-xl font-serif font-bold flex items-center gap-3">
-              <CalendarIcon className="text-gold" size={22} />
-              Agenda Semanal
+            <h1 className="text-base md:text-xl font-serif font-bold flex items-center gap-2 md:gap-3 truncate">
+              <CalendarIcon className="text-gold hidden xs:block" size={20} />
+              <span className="truncate">Agenda</span>
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-surface-2 p-1 rounded-xl border border-border-custom">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1 md:gap-2 bg-surface-2 p-1 rounded-xl border border-border-custom">
             <button 
               onClick={() => {
                 const newDate = new Date(currentDate);
                 newDate.setDate(currentDate.getDate() - 7);
                 setCurrentDate(newDate);
               }}
-              className="p-2 text-text-dim hover:text-gold transition-colors"
+              className="p-1.5 md:p-2 text-text-dim hover:text-gold transition-colors"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={16} />
             </button>
-            <span className="px-4 text-xs font-bold uppercase tracking-widest text-text-muted">
+            <span className="px-2 md:px-4 text-[9px] md:text-xs font-bold uppercase tracking-widest text-text-muted whitespace-nowrap">
               {weekDays[0].toLocaleDateString('pt-BR', { month: 'short' })} {weekDays[0].getDate()} - {weekDays[6].getDate()}
             </span>
             <button 
@@ -138,21 +138,23 @@ export default function AgendaPage() {
                 newDate.setDate(currentDate.getDate() + 7);
                 setCurrentDate(newDate);
               }}
-              className="p-2 text-text-dim hover:text-gold transition-colors"
+              className="p-1.5 md:p-2 text-text-dim hover:text-gold transition-colors"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={16} />
             </button>
           </div>
-          <ThemeToggle />
-          <button className="px-5 py-2 bg-gold text-bg rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-gold-bright transition-all shadow-lg shadow-gold/20">
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
+          <button className="hidden sm:flex px-5 py-2 bg-gold text-bg rounded-xl text-xs font-bold items-center gap-2 hover:bg-gold-bright transition-all shadow-lg shadow-gold/20">
             <Plus size={16} /> Novo Plano
           </button>
         </div>
       </header>
 
       {/* AGENDA GRID */}
-      <main className="flex-1 overflow-x-auto no-scrollbar p-8">
-        <div className="flex gap-6 min-w-[1200px] h-full">
+      <main className="flex-1 overflow-x-auto no-scrollbar p-4 md:p-8 pb-32 md:pb-10">
+        <div className="flex gap-4 md:gap-6 min-w-[1000px] lg:min-w-0 lg:grid lg:grid-cols-7 h-full">
           {weekDays.map((day, idx) => {
             const dateStr = day.toISOString().split('T')[0];
             const dayItems = items.filter(item => item.scheduled_date.startsWith(dateStr));
