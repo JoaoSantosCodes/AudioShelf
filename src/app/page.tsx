@@ -19,7 +19,8 @@ import {
   BarChart3, 
   Wallet, 
   ShoppingCart,
-  Bell
+  Bell,
+  CheckCircle2
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
