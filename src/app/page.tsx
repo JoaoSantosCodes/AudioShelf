@@ -54,6 +54,10 @@ export default function Home() {
     });
   };
 
+  const signInAnonymously = async () => {
+    await supabase.auth.signInAnonymously();
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -227,6 +231,18 @@ export default function Home() {
             >
               <img src="https://github.githubassets.com/favicons/favicon.svg" className="w-5 h-5 invert" alt="" />
               Entrar com GitHub
+            </button>
+            <div className="flex items-center gap-3 my-2">
+              <div className="h-px bg-border-custom flex-1"></div>
+              <span className="text-[10px] uppercase tracking-widest text-text-muted font-bold">Ou</span>
+              <div className="h-px bg-border-custom flex-1"></div>
+            </div>
+            <button 
+              onClick={signInAnonymously}
+              className="flex items-center justify-center gap-3 w-full bg-gold/5 border border-gold/30 hover:bg-gold/10 py-3.5 rounded-xl text-gold font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Headphones size={18} />
+              Entrar como Visitante
             </button>
           </div>
         </div>
