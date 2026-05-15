@@ -139,15 +139,18 @@ export default function Home() {
                 <BarChart3 size={18} />
                 <span className="text-sm font-semibold">Insights & Resultados</span>
               </Link>
-
               <Link href="/shopping" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
                 <ShoppingCart size={18} />
                 <span className="text-sm font-semibold">Lista de Mercado</span>
               </Link>
 
-              <Link href="/financas" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+              <Link href="/financas" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 text-text-dim hover:text-gold transition-all group">
                 <Wallet size={18} />
-                <span className="text-sm font-semibold">Finanças & Notas</span>
+                <span className="text-xs font-bold uppercase tracking-widest">Finanças</span>
+              </Link>
+              <Link href="/insights" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 text-text-dim hover:text-gold transition-all group">
+                <BarChart3 size={18} />
+                <span className="text-xs font-bold uppercase tracking-widest">Insights</span>
               </Link>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>

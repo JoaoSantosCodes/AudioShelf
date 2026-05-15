@@ -13,6 +13,7 @@ export default function MobileNav() {
     { name: 'Home', icon: Library, path: '/' },
     { name: 'Finanças', icon: Wallet, path: '/financas' },
     { name: 'Mercado', icon: ShoppingCart, path: '/shopping' },
+    { name: 'Insights', icon: BarChart3, path: '/insights' },
     { name: 'Agenda', icon: Calendar, path: '/agenda' },
     { name: 'Kanban', icon: LayoutDashboard, path: '/kanban' },
   ];
