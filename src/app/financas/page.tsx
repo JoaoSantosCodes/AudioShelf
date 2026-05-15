@@ -519,9 +519,7 @@ export default function FinancePage() {
               </motion.div>
             </div>
           )}
-          </div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
     </div>
   );
 }
