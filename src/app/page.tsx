@@ -33,6 +33,7 @@ import MediaExpandedView from '@/components/MediaExpandedView';
 import GlobalSearch from '@/components/GlobalSearch';
 import { useMedia } from '@/context/MediaContext';
 import { processVoiceCommand } from '@/lib/commandProcessor';
+import PresenceIndicator from '@/components/PresenceIndicator';
 
 export default function Home() {
   const { activeMedia, playMedia, closeMedia } = useMedia();
@@ -290,6 +291,7 @@ export default function Home() {
             <h2 className="text-xl font-serif font-bold text-text">Sua Biblioteca</h2>
           </div>
           <div className="flex items-center gap-4">
+            <PresenceIndicator />
             <GlobalSearch />
             <ThemeToggle />
             

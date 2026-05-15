@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import PresenceIndicator from '@/components/PresenceIndicator';
 import ThemeToggle from '@/components/ThemeToggle';
 import { User } from '@supabase/supabase-js';
 
@@ -161,7 +162,8 @@ export default function ShoppingListPage() {
             Lista de Mercado
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          <PresenceIndicator />
           <button onClick={clearBought} className="text-[10px] font-bold uppercase tracking-widest text-text-dim hover:text-red-400 transition-colors">
             Limpar Comprados
           </button>

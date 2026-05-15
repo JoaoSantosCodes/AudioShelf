@@ -87,14 +87,14 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [ ] **Sugestões Inteligentes:** Sugerir itens baseados no histórico de compras anteriores.
 
 ### 10. 🎙️ Automação & IA Avançada
-- [ ] **Voice-to-Action (Whisper):** Criar tarefas e registros financeiros via comandos de voz reais.
+- [x] **Voice-to-Action (Whisper):** Processador central que interpreta comandos de voz para Finanças, Mercado e Kanban.
 - [ ] **Assistente de Insights:** Chat de IA para perguntar: "Quanto gastei com mercado este mês?".
 
 ### 11. 🔍 Ecossistema Unificado & Refinamentos de IA
 - [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar Livros, Tarefas, Notas e Compras.
 - [x] **OCR de Notas Fiscais Inteligente:** Simulação de alta fidelidade com histórico e processamento multi-step.
 - [x] **Dashboard de Widgets:** Resumo visual na Home com dados reais de Finanças, Mercado e Kanban.
-- [ ] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento.
+- [/] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento (Avatares Live).
 
 ### 12. 🔔 Notificações & Alertas Inteligentes
 - [x] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais sincronizado.
@@ -115,8 +115,8 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ## 📈 Critérios de Sucesso
 1. **Instabilidade Zero:** Build estável no Vercel com 100% de lighthouse score.
-2. **Engajamento:** Sensação de "app nativo" ao usar no smartphone.
-3. **Produtividade:** Redução do tempo gasto organizando artes e músicas manualmente.
+2. **Interação Natural:** Uso de comandos de voz para 50% das entradas rápidas.
+3. **Colaboração Live:** Sincronização e presença em tempo real sem latência perceptível.
 
 ---
 

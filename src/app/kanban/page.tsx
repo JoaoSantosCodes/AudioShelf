@@ -43,6 +43,7 @@ import KanbanColumn from '@/components/kanban/KanbanColumn';
 import SortableTask from '@/components/kanban/SortableTask';
 import ThemeToggle from '@/components/ThemeToggle';
 import { supabase } from '@/lib/supabase';
+import PresenceIndicator from '@/components/PresenceIndicator';
 import { User } from '@supabase/supabase-js';
 import { books as initialBooks, Book } from '@/data/books';
 import { useMedia } from '@/context/MediaContext';
@@ -303,7 +304,8 @@ export default function KanbanPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          <PresenceIndicator />
           <ThemeToggle />
           <button 
             onClick={() => setIsShareModalOpen(true)}

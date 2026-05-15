@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import PresenceIndicator from '@/components/PresenceIndicator';
 import ThemeToggle from '@/components/ThemeToggle';
 import { User } from '@supabase/supabase-js';
 import { processVoiceCommand, CommandResponse } from '@/lib/commandProcessor';
@@ -203,7 +204,8 @@ export default function FinancePage() {
             Fluxo de Caixa Familiar
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          <PresenceIndicator />
           <ThemeToggle />
           <button 
             onClick={() => setIsModalOpen(true)}
