@@ -26,17 +26,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Aceita arquivos de áudio ou documentos que sejam áudio
+    // Aceita arquivos de áudio ou vídeo (ou documentos que sejam mídia)
     const audio = post.audio || (post.document && post.document.mime_type?.startsWith('audio/') ? post.document : null);
+    const video = post.video || (post.document && post.document.mime_type?.startsWith('video/') ? post.document : null);
 
-    if (!audio) {
-      return NextResponse.json({ ok: true, message: 'No audio found' });
+    const media = audio || video;
+    if (!media) {
+      return NextResponse.json({ ok: true, message: 'No media found' });
     }
 
-    const file_id = audio.file_id;
-    const rawTitle = audio.title || audio.file_name || "Sem Título";
-    const author = audio.performer || "Autor Desconhecido";
-    const duration = audio.duration ? `${Math.floor(audio.duration / 60)} min` : "??";
+    const type = video ? 'video' : 'audio';
+    const file_id = media.file_id;
+    const rawTitle = media.title || media.file_name || "Sem Título";
+    const author = media.performer || "Autor Desconhecido";
+    const duration = media.duration ? `${Math.floor(media.duration / 60)} min` : "??";
 
     // Lógica simples de Split: "1984 - Capítulo 01" -> Livro: "1984", Capítulo: "Capítulo 01"
     let bookTitle = rawTitle;
@@ -94,7 +97,8 @@ export async function POST(req: NextRequest) {
           book_id: book.id,
           title: chapterTitle,
           telegram_file_id: file_id,
-          chapter_order: chapterOrder
+          chapter_order: chapterOrder,
+          type: type
         });
       }
     }

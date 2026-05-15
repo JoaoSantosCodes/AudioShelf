@@ -6,6 +6,7 @@ import BookCard from '@/components/BookCard';
 import AudioPlayer from '@/components/AudioPlayer';
 import { Headphones, Library, X, Search, RefreshCcw, Database, List } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 export default function Home() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -14,6 +15,39 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // 1. Checar sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // 2. Ouvir mudanças na autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+  };
+
+  const signInWithGitHub = async () => {
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'github',
+      options: { redirectTo: window.location.origin }
+    });
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   // ... (previous functions fetchBooks, deleteBook, etc remain same)
   // I will just keep the state here and modify the return block
@@ -44,7 +78,8 @@ export default function Home() {
             .map((c: any) => ({
               id: c.id,
               title: c.title,
-              telegram_file_id: c.telegram_file_id
+              telegram_file_id: c.telegram_file_id,
+              type: c.type || 'audio'
             }))
         }));
         setDbBooks(transformed);
@@ -166,6 +201,34 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+      {/* AUTH SELECTION OVERLAY */}
+      {!user && (
+        <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+          <div className="w-20 h-20 bg-gold/10 rounded-3xl flex items-center justify-center mb-8 border border-gold/20 shadow-2xl shadow-gold/5">
+            <span className="text-4xl">📚</span>
+          </div>
+          <h2 className="font-serif text-3xl md:text-5xl text-text mb-4 tracking-tight text-center">Bem-vindo ao AudioShelf</h2>
+          <p className="text-text-dim mb-12 text-center max-w-md">Sua biblioteca pessoal de audiobooks premium, sincronizada em todos os seus dispositivos.</p>
+          
+          <div className="flex flex-col gap-4 w-full max-w-[320px]">
+            <button 
+              onClick={signInWithGoogle}
+              className="flex items-center justify-center gap-3 w-full bg-surface-2 border border-border-custom hover:bg-surface-3 py-3.5 rounded-xl text-text font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            >
+              <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="" />
+              Entrar com Google
+            </button>
+            <button 
+              onClick={signInWithGitHub}
+              className="flex items-center justify-center gap-3 w-full bg-surface-2 border border-border-custom hover:bg-surface-3 py-3.5 rounded-xl text-text font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            >
+              <img src="https://github.githubassets.com/favicons/favicon.svg" className="w-5 h-5 invert" alt="" />
+              Entrar com GitHub
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* HEADER */}
       <header className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 border-b border-border-custom bg-surface shrink-0 z-[60]">
         <div className="flex items-center gap-2.5 font-serif text-lg md:text-xl text-gold tracking-tight">
@@ -197,9 +260,22 @@ export default function Home() {
         </nav>
         
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-sm cursor-pointer hover:bg-surface-2 transition-colors">
-            👤
-          </div>
+          <button 
+            onClick={handleSignOut}
+            className="flex items-center gap-2 group"
+            title="Sair da Conta"
+          >
+            <div className="w-8 h-8 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-sm group-hover:bg-red-500/20 group-hover:border-red-500/50 transition-all overflow-hidden">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="" />
+              ) : (
+                '👤'
+              )}
+            </div>
+            <span className="hidden md:inline text-[13px] text-text-dim group-hover:text-red-500 font-medium truncate max-w-[120px]">
+              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Perfil'}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -425,8 +501,11 @@ export default function Home() {
       </div>
 
       {/* PLAYER BAR (Visible when book selected) */}
-      {selectedBook && (
-        <AudioPlayer book={selectedBook} />
+      {selectedBook && user && (
+        <AudioPlayer 
+          book={selectedBook} 
+          userId={user.id}
+        />
       )}
     </div>
   );

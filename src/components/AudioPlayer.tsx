@@ -8,11 +8,10 @@ import { supabase } from '@/lib/supabase';
 interface AudioPlayerProps {
   book: Book;
   initialChapterIndex?: number;
+  userId: string;
 }
 
-const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000000';
-
-export default function AudioPlayer({ book, initialChapterIndex = 0 }: AudioPlayerProps) {
+export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: AudioPlayerProps) {
   const [currentChapterIndex, setCurrentChapterIndex] = useState(initialChapterIndex);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -49,7 +48,7 @@ export default function AudioPlayer({ book, initialChapterIndex = 0 }: AudioPlay
         const { data, error } = await supabase
           .from('user_progress')
           .select('*')
-          .eq('user_id', DEFAULT_USER_ID)
+          .eq('user_id', userId)
           .eq('book_id', book.id)
           .maybeSingle();
 
@@ -95,7 +94,7 @@ export default function AudioPlayer({ book, initialChapterIndex = 0 }: AudioPlay
         await supabase
           .from('user_progress')
           .upsert({
-            user_id: DEFAULT_USER_ID,
+            user_id: userId,
             book_id: book.id,
             chapter_telegram_id: currentChapter.telegram_file_id,
             current_time: time,
@@ -164,37 +163,70 @@ export default function AudioPlayer({ book, initialChapterIndex = 0 }: AudioPlay
     }
   }, [currentChapterIndex, playbackRate, volume]);
 
-  return (
-    <div className="bg-surface border-t border-border-custom px-4 md:px-8 py-3 md:py-4 flex flex-col md:flex-row items-center gap-4 md:gap-6 shrink-0 z-50">
-      <audio 
-        ref={audioRef}
-        src={streamUrl}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleMetadataLoaded}
-        onEnded={() => {
-          if (currentChapterIndex < book.chapters.length - 1) {
-            setCurrentChapterIndex(prev => prev + 1);
-            setTimeout(() => {
-              if (audioRef.current) audioRef.current.play();
-              setIsPlaying(true);
-            }, 100);
-          } else {
-            setIsPlaying(false);
-          }
-        }}
-      />
+  const isVideo = currentChapter.type === 'video';
 
-      {/* BOOK INFO & MAIN CONTROLS (MOBILE GROUP) */}
-      <div className="flex items-center justify-between w-full md:w-60 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden">
-            <img src={book.cover} className="w-full h-full object-cover" alt="" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-[12px] md:text-[13px] font-medium text-text truncate">{book.title}</div>
-            <div className="text-[10px] md:text-[11px] text-text-muted truncate">{currentChapter.title}</div>
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border-custom z-50 animate-in slide-in-from-bottom duration-500">
+      {/* VÍDEO VIEWPORT (Aparece apenas para vídeos) */}
+      {isVideo && (
+        <div className="max-w-4xl mx-auto mt-4 px-4">
+          <div className="aspect-video bg-black rounded-t-xl overflow-hidden shadow-2xl border-x border-t border-gold/10 relative group">
+            <video 
+              ref={audioRef as any}
+              src={streamUrl}
+              className="w-full h-full"
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleMetadataLoaded}
+              onEnded={() => {
+                if (currentChapterIndex < book.chapters.length - 1) {
+                  setCurrentChapterIndex(prev => prev + 1);
+                } else {
+                  setIsPlaying(false);
+                }
+              }}
+              onClick={togglePlay}
+            />
+            {!isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none transition-all group-hover:bg-black/20">
+                <div className="w-16 h-16 rounded-full bg-gold/20 backdrop-blur-md flex items-center justify-center border border-gold/30">
+                  <Play size={32} className="text-gold fill-gold ml-1" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
+      )}
+
+      <div className="px-4 md:px-8 py-3 md:py-4 flex flex-col md:flex-row items-center gap-4 md:gap-6 shrink-0">
+        {!isVideo && (
+          <audio 
+            ref={audioRef as any}
+            src={streamUrl}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleMetadataLoaded}
+            onEnded={() => {
+              if (currentChapterIndex < book.chapters.length - 1) {
+                setCurrentChapterIndex(prev => prev + 1);
+              } else {
+                setIsPlaying(false);
+              }
+            }}
+          />
+        )}
+
+        {/* BOOK INFO & MAIN CONTROLS (MOBILE GROUP) */}
+        <div className="flex items-center justify-between w-full md:w-60 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            {!isVideo && (
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                <img src={book.cover} className="w-full h-full object-cover" alt="" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="text-[12px] md:text-[13px] font-medium text-text truncate">{book.title}</div>
+              <div className="text-[10px] md:text-[11px] text-text-muted truncate">{currentChapter.title}</div>
+            </div>
+          </div>
         
         {/* Mobile Play Button */}
         <button 
