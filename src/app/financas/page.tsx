@@ -22,7 +22,9 @@ import {
   DollarSign,
   Eye,
   Sparkles,
-  Loader2
+  Loader2,
+  Mic,
+  Volume2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -53,6 +55,7 @@ export default function FinancePage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
@@ -105,6 +108,20 @@ export default function FinancePage() {
     }, 2500);
   };
 
+  const handleVoiceInput = () => {
+    setIsListening(true);
+    // Simulação de IA Whisper extraindo Valor e Descrição
+    setTimeout(() => {
+      setNewTx({
+        ...newTx,
+        amount: '15.00',
+        description: 'Estacionamento Shopping',
+        category: 'Transporte'
+      });
+      setIsListening(false);
+    }, 3000);
+  };
+
   const handleAddTransaction = () => {
     if (!newTx.description || !newTx.amount) return;
     
@@ -124,6 +141,7 @@ export default function FinancePage() {
     setPreviewUrl(null);
     setSelectedImage(null);
     setIsScanning(false);
+    setIsListening(false);
   };
 
   return (
@@ -308,7 +326,23 @@ export default function FinancePage() {
                       onChange={e => setNewTx({...newTx, amount: e.target.value})}
                       className="w-full bg-surface-2 border border-border-custom rounded-2xl py-6 pl-16 pr-6 text-4xl font-black focus:border-gold/50 outline-none transition-all"
                     />
+                    <button 
+                      onClick={handleVoiceInput}
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-2xl transition-all ${isListening ? 'bg-gold text-bg animate-pulse shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-surface-3 text-text-dim hover:text-gold border border-border-custom'}`}
+                    >
+                      {isListening ? <Volume2 size={24} className="animate-bounce" /> : <Mic size={24} />}
+                    </button>
                   </div>
+
+                  {isListening && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-2 bg-gold/5 rounded-xl border border-gold/20"
+                    >
+                      <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] animate-pulse">Ouvindo despesa... "Gastei 15 reais no shopping"</span>
+                    </motion.div>
+                  )}
                   
                   <input 
                     type="text" 

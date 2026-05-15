@@ -21,7 +21,9 @@ import {
   Send,
   BarChart3,
   Wallet,
-  ShoppingCart
+  ShoppingCart,
+  Mic,
+  Volume2
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -170,6 +172,15 @@ export default function KanbanPage() {
     }
 
     setActiveTask(null);
+  };
+
+  const handleVoiceInput = () => {
+    setIsListening(true);
+    // Simulação de IA Whisper
+    setTimeout(() => {
+      setNewTask({ ...newTask, title: 'Terminar relatório de arquitetura' });
+      setIsListening(false);
+    }, 3000);
   };
 
   const addTask = async () => {
@@ -340,18 +351,36 @@ export default function KanbanPage() {
             >
               <div className="p-8 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-2xl font-serif font-bold text-text">Nova Missão</h3>
+          <h3 className="text-2xl font-serif font-bold text-text">Nova Missão</h3>
                   <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text"><X size={24} /></button>
                 </div>
 
                 <div className="space-y-4">
-                  <input 
-                    type="text" 
-                    placeholder="Título da tarefa..."
-                    value={newTask.title}
-                    onChange={e => setNewTask({...newTask, title: e.target.value})}
-                    className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 text-lg font-semibold focus:border-gold/50 outline-none transition-all"
-                  />
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="Qual a missão de hoje?"
+                      value={newTask.title}
+                      onChange={e => setNewTask({...newTask, title: e.target.value})}
+                      className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 pl-6 pr-16 text-lg font-semibold focus:border-gold/50 outline-none transition-all"
+                    />
+                    <button 
+                      onClick={handleVoiceInput}
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all ${isListening ? 'bg-gold text-bg animate-pulse shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-surface-3 text-text-dim hover:text-gold'}`}
+                    >
+                      {isListening ? <Volume2 size={20} className="animate-bounce" /> : <Mic size={20} />}
+                    </button>
+                  </div>
+                  
+                  {isListening && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-2"
+                    >
+                      <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] animate-pulse">Ouvindo sua voz...</span>
+                    </motion.div>
+                  )}
                   
                   <textarea 
                     placeholder="Descrição detalhada..."
