@@ -348,5 +348,6 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
         </div>
       </div>
     </div>
+  </div>
   );
 }
