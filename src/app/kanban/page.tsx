@@ -1,105 +1,107 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
 import { 
-  LayoutDashboard, 
+  Headphones, 
+  Library, 
   Plus, 
+  Database, 
+  LayoutDashboard, 
   Clock, 
   CheckCircle2, 
   Circle, 
-  ArrowLeft,
   Search,
-  Calendar
+  Calendar,
+  X,
+  Repeat,
+  MoreHorizontal,
+  Home
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import ThemeToggle from '@/components/ThemeToggle';
-import { useMedia } from '@/context/MediaContext';
-import { Book } from '@/data/books';
-import {
-  DndContext,
-  DragOverlay,
-  closestCorners,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
+import { 
+  DndContext, 
+  DragOverlay, 
+  closestCorners, 
+  KeyboardSensor, 
+  PointerSensor, 
+  useSensor, 
   useSensors,
   DragEndEvent,
-  defaultDropAnimationSideEffects,
+  defaultDropAnimationSideEffects
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import KanbanColumn from '@/components/kanban/KanbanColumn';
 import SortableTask from '@/components/kanban/SortableTask';
+import ThemeToggle from '@/components/ThemeToggle';
+import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
+import { books as initialBooks, Book } from '@/data/books';
+import { useMedia } from '@/context/MediaContext';
 
 interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'doing' | 'done';
   category: string;
-  created_at: string;
+  status: 'todo' | 'doing' | 'done';
   due_date?: string;
+  created_at: string;
   linked_book_id?: string;
-  book?: Book; // Para exibir informações do livro vinculado
+  is_recurring?: boolean;
+  frequency?: 'daily' | 'weekly' | 'monthly';
 }
 
 export default function KanbanPage() {
   const { playMedia } = useMedia();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [books, setBooks] = useState<Book[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTask, setNewTask] = useState({ 
+    title: '', 
+    description: '', 
+    category: 'Geral', 
+    status: 'todo' as 'todo' | 'doing' | 'done', 
+    due_date: '', 
+    linked_book_id: '',
+    is_recurring: false,
+    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly'
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [books, setBooks] = useState<Book[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', category: 'Geral', status: 'todo' as 'todo' | 'doing' | 'done', due_date: '', linked_book_id: '' });
-  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['Geral', 'Manga', 'SaaS', 'Música', 'Curso', 'Lazer', 'Social', 'Saúde', 'Casa'];
   const columns: { id: 'todo' | 'doing' | 'done', title: string, icon: any }[] = [
     { id: 'todo', title: 'A Fazer', icon: Circle },
     { id: 'doing', title: 'Fazendo', icon: Clock },
-    { id: 'done', title: 'Concluído', icon: CheckCircle2 }
+    { id: 'done', title: 'Concluído', icon: CheckCircle2 },
   ];
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchTasks(session.user.id);
-        fetchBooks();
-      }
+      if (session?.user) fetchInitialData(session.user.id);
     });
   }, []);
 
-  const fetchBooks = async () => {
-    const { data } = await supabase.from('books').select('*');
-    if (data) setBooks(data);
-  };
-
-  const fetchTasks = async (userId: string) => {
+  const fetchInitialData = async (userId: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+      const [tasksRes, booksRes] = await Promise.all([
+        supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+        supabase.from('books').select('*')
+      ]);
 
-      if (error) {
-        setTasks([
-          { id: '1', title: 'Terminar esboço do capítulo 5', description: 'Usar as novas artes como referência', status: 'todo', category: 'Manga', created_at: new Date().toISOString(), due_date: new Date().toISOString() },
-          { id: '2', title: 'Configurar Webhook do Telegram', description: 'Ajustar para novas hashtags', status: 'doing', category: 'SaaS', created_at: new Date().toISOString() },
-          { id: '3', title: 'Mixagem da faixa Suno #42', description: 'Ajustar graves e agudos', status: 'done', category: 'Música', created_at: new Date().toISOString() },
-        ]);
-      } else {
-        setTasks(data || []);
+      if (booksRes.data) setBooks(booksRes.data);
+      if (tasksRes.data) {
+        setTasks(tasksRes.data);
       }
     } catch (err) {
       console.error(err);
@@ -147,7 +149,9 @@ export default function KanbanPage() {
       category: newTask.category,
       status: newTask.status,
       due_date: newTask.due_date || null,
-      linked_book_id: newTask.linked_book_id || null
+      linked_book_id: newTask.linked_book_id || null,
+      is_recurring: newTask.is_recurring,
+      frequency: newTask.is_recurring ? newTask.frequency : null
     };
 
     const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
@@ -159,7 +163,16 @@ export default function KanbanPage() {
     }
     
     setIsModalOpen(false);
-    setNewTask({ title: '', description: '', category: 'Geral', status: 'todo', due_date: '', linked_book_id: '' });
+    setNewTask({ 
+      title: '', 
+      description: '', 
+      category: 'Geral', 
+      status: 'todo', 
+      due_date: '', 
+      linked_book_id: '',
+      is_recurring: false,
+      frequency: 'weekly'
+    });
   };
 
   const filteredTasks = tasks.filter(t => 
@@ -168,24 +181,19 @@ export default function KanbanPage() {
   );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground transition-colors duration-500">
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+      {/* HEADER TÁTICO */}
       <header className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-border-custom glass-panel shrink-0 z-50">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="p-2 hover:bg-surface-2 rounded-full transition-colors text-text-dim hover:text-gold">
-            <span className="text-sm font-semibold">Biblioteca</span>
+        <div className="flex items-center gap-6">
+          <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold">
+            <Home size={20} />
           </Link>
-          
-          <Link href="/agenda" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-            <Calendar size={18} />
-            <span className="text-sm font-semibold">Agenda Semanal</span>
-          </Link>
-
           <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold">
             <LayoutDashboard size={24} className="text-gold" />
             <span className="text-gradient">Project Kanban</span>
           </div>
           
-          <div className="hidden md:flex relative ml-6">
+          <div className="hidden lg:flex relative ml-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
             <input 
               type="text" 
@@ -208,8 +216,9 @@ export default function KanbanPage() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-x-auto p-6 md:p-10 custom-scrollbar">
-        <DndContext
+      {/* BOARD CONTENT */}
+      <main className="flex-1 overflow-x-auto p-6 md:p-10 no-scrollbar">
+        <DndContext 
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragStart={handleDragStart}
@@ -235,104 +244,143 @@ export default function KanbanPage() {
 
           <DragOverlay dropAnimation={{
             sideEffects: defaultDropAnimationSideEffects({
-              styles: {
-                active: {
-                  opacity: '0.5',
-                },
-              },
-            }),
+              styles: { active: { opacity: '0.5' } }
+            })
           }}>
             {activeTask ? (
-              <div className="w-[300px]">
-                <SortableTask task={activeTask} />
+              <div className="w-[280px]">
+                <SortableTask 
+                  task={activeTask} 
+                  linkedBook={books.find(b => b.id === activeTask.linked_book_id)}
+                  onPlay={playMedia}
+                />
               </div>
             ) : null}
           </DragOverlay>
         </DndContext>
       </main>
 
+      {/* MODAL NOVA TAREFA */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-md glass-panel p-8 rounded-3xl border-gold/20 shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-surface-1 border border-border-custom w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl"
             >
-              <h2 className="font-serif text-2xl text-text mb-6 flex items-center gap-2">
-                <Plus className="text-gold" /> Nova Tarefa
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Título</label>
+              <div className="p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-serif font-bold text-text">Nova Missão</h3>
+                  <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text"><X size={24} /></button>
+                </div>
+
+                <div className="space-y-4">
                   <input 
                     type="text" 
+                    placeholder="Título da tarefa..."
                     value={newTask.title}
                     onChange={e => setNewTask({...newTask, title: e.target.value})}
-                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all"
-                    placeholder="O que precisa ser feito?"
+                    className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 text-lg font-semibold focus:border-gold/50 outline-none transition-all"
                   />
-                </div>
-                <div>
-                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Descrição</label>
+                  
                   <textarea 
+                    placeholder="Descrição detalhada..."
                     value={newTask.description}
                     onChange={e => setNewTask({...newTask, description: e.target.value})}
-                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all h-24 resize-none"
-                    placeholder="Detalhes da tarefa..."
+                    className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 h-32 focus:border-gold/50 outline-none transition-all resize-none"
                   />
-                </div>
-                <div>
-                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Prazo de Entrega</label>
-                  <input 
-                    type="date" 
-                    value={newTask.due_date}
-                    onChange={e => setNewTask({...newTask, due_date: e.target.value})}
-                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all text-text"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Vincular Projeto / Mídia</label>
-                  <select 
-                    value={newTask.linked_book_id}
-                    onChange={e => setNewTask({...newTask, linked_book_id: e.target.value})}
-                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all text-text appearance-none"
-                  >
-                    <option value="">Nenhum vínculo</option>
-                    {books.map(book => (
-                      <option key={book.id} value={book.id}>{book.title}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Projeto / Categoria</label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map(cat => (
-                      <button 
-                        key={cat}
-                        onClick={() => setNewTask({...newTask, category: cat})}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${newTask.category === cat ? 'bg-gold text-bg border-gold' : 'border-border-custom text-text-dim hover:border-text'}`}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Categoria</label>
+                      <select 
+                        value={newTask.category}
+                        onChange={e => setNewTask({...newTask, category: e.target.value})}
+                        className="w-full bg-surface-2 border border-border-custom rounded-xl py-3 px-4 text-sm focus:border-gold/50 outline-none transition-all appearance-none"
                       >
-                        {cat}
+                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Prazo / Agenda</label>
+                      <input 
+                        type="date"
+                        value={newTask.due_date}
+                        onChange={e => setNewTask({...newTask, due_date: e.target.value})}
+                        className="w-full bg-surface-2 border border-border-custom rounded-xl py-3 px-4 text-sm focus:border-gold/50 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* RECORRÊNCIA UI */}
+                  <div className="p-4 rounded-2xl bg-surface-2 border border-border-custom space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg transition-all ${newTask.is_recurring ? 'bg-gold/20 text-gold' : 'bg-surface-3 text-text-dim'}`}>
+                          <Repeat size={18} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-text">Tarefa Recorrente</p>
+                          <p className="text-[10px] text-text-dim">Repetir automaticamente esta missão</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => setNewTask({...newTask, is_recurring: !newTask.is_recurring})}
+                        className={`w-12 h-6 rounded-full p-1 transition-all ${newTask.is_recurring ? 'bg-gold' : 'bg-surface-3'}`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full transition-all ${newTask.is_recurring ? 'translate-x-6' : 'translate-x-0'}`} />
                       </button>
-                    ))}
+                    </div>
+
+                    {newTask.is_recurring && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="flex gap-2 pt-2"
+                      >
+                        {['daily', 'weekly', 'monthly'].map((freq) => (
+                          <button
+                            key={freq}
+                            onClick={() => setNewTask({...newTask, frequency: freq as any})}
+                            className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${newTask.frequency === freq ? 'bg-gold/10 border-gold text-gold' : 'border-border-custom text-text-dim hover:text-text'}`}
+                          >
+                            {freq === 'daily' ? 'Diário' : freq === 'weekly' ? 'Semanal' : 'Mensal'}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Vincular a Mídia (Opcional)</label>
+                    <select 
+                      value={newTask.linked_book_id}
+                      onChange={e => setNewTask({...newTask, linked_book_id: e.target.value})}
+                      className="w-full bg-surface-2 border border-border-custom rounded-xl py-3 px-4 text-sm focus:border-gold/50 outline-none transition-all appearance-none"
+                    >
+                      <option value="">Nenhuma mídia vinculada</option>
+                      {books.map(book => <option key={book.id} value={book.id}>{book.title}</option>)}
+                    </select>
                   </div>
                 </div>
-              </div>
-              <div className="flex gap-3 mt-8">
-                <button 
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3 rounded-xl border border-border-custom text-text-dim font-bold hover:bg-surface-2 transition-all"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={addTask}
-                  className="flex-2 py-3 rounded-xl bg-gold text-bg font-bold hover:scale-105 transition-transform"
-                >
-                  Criar Tarefa
-                </button>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 py-4 rounded-2xl font-bold text-text-muted hover:bg-surface-2 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={addTask}
+                    className="flex-1 py-4 bg-gold text-bg rounded-2xl font-bold hover:bg-gold-bright transition-all shadow-xl shadow-gold/20"
+                  >
+                    Criar Missão
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

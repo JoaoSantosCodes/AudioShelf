@@ -15,7 +15,10 @@ import {
   Utensils,
   Dumbbell,
   Home,
-  Share2
+  Share2,
+  Repeat,
+  Trophy,
+  Star
 } from 'lucide-react';
 import { Book } from '@/data/books';
 
@@ -23,18 +26,18 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'doing' | 'done';
   category: string;
-  created_at: string;
+  status: 'todo' | 'doing' | 'done';
   due_date?: string;
   linked_book_id?: string;
+  is_recurring?: boolean;
+  frequency?: 'daily' | 'weekly' | 'monthly';
 }
 
 interface SortableTaskProps {
   task: Task;
   linkedBook?: Book;
   onPlay?: (book: Book) => void;
-  onMove?: (id: string, status: 'todo' | 'doing' | 'done') => void;
 }
 
 export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskProps) {
@@ -67,10 +70,10 @@ export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskP
   const isOverdue = task.due_date && new RegExp(/^(\d{4}-\d{2}-\d{2})/).exec(task.due_date) && new Date(task.due_date) < new Date() && task.status !== 'done';
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
-      {...attributes} 
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
       {...listeners}
       className={`glass-card p-4 group cursor-grab active:cursor-grabbing transition-colors ${isOverdue ? 'border-red-500/50 hover:border-red-500' : 'hover:border-gold/30'}`}
     >
@@ -80,6 +83,18 @@ export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskP
             {getCategoryIcon(task.category)}
             {task.category}
           </span>
+          {task.is_recurring && (
+            <div className="flex items-center gap-1 text-[9px] font-bold text-blue-400 bg-blue-400/5 px-1.5 py-0.5 rounded border border-blue-400/20">
+              <Repeat size={10} />
+              {task.frequency === 'daily' ? 'DIA' : task.frequency === 'weekly' ? 'SEM' : 'MES'}
+            </div>
+          )}
+          {task.category === 'Casa' && (
+            <div className="flex items-center gap-1 text-[9px] font-bold text-green-400 bg-green-400/5 px-1.5 py-0.5 rounded border border-green-400/20">
+              <Trophy size={10} />
+              RECOMPENSA
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button className="text-text-muted hover:text-gold p-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -92,45 +107,32 @@ export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskP
       </div>
       
       <h3 className="text-[14px] font-semibold text-text mb-1 group-hover:text-gold transition-colors">{task.title}</h3>
-      <p className="text-[12px] text-text-dim line-clamp-2 leading-relaxed mb-4">{task.description}</p>
-      
+      <p className="text-[12px] text-text-muted line-clamp-2 mb-4 leading-relaxed">{task.description}</p>
+
       {linkedBook && (
-        <div className="mb-4 p-2 rounded-lg bg-gold/5 border border-gold/10 flex items-center justify-between group/link">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-6 h-6 rounded bg-surface-3 flex items-center justify-center shrink-0">
-              {linkedBook.category === 'Manga' ? <ExternalLink size={12} className="text-gold" /> : <Play size={12} className="text-gold" />}
+        <div className="mt-4 p-3 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between group/media">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <img src={linkedBook.cover} alt="" className="w-8 h-8 rounded-md object-cover" />
+            <div className="truncate">
+              <p className="text-[10px] font-bold text-text truncate">{linkedBook.title}</p>
+              <p className="text-[8px] text-text-dim uppercase tracking-wider">{linkedBook.category}</p>
             </div>
-            <span className="text-[11px] text-text font-medium truncate">{linkedBook.title}</span>
           </div>
           <button 
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              onPlay?.(linkedBook);
-            }}
-            className="p-1.5 rounded-md bg-gold text-bg opacity-0 group-hover/link:opacity-100 transition-opacity"
+            onClick={() => onPlay?.(linkedBook)}
+            className="p-2 rounded-lg bg-gold/10 text-gold hover:bg-gold hover:text-bg transition-all"
           >
-            {linkedBook.category === 'Manga' ? <ExternalLink size={12} /> : <Play size={12} />}
+            {linkedBook.category === 'Manga' ? <ExternalLink size={14} /> : <Play size={14} fill="currentColor" />}
           </button>
         </div>
       )}
-      
-      <div className="flex items-center justify-between pt-3 border-t border-border-custom">
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            <div className="w-6 h-6 rounded-full border-2 border-bg bg-surface-3 flex items-center justify-center text-[10px] font-bold text-gold">JS</div>
-          </div>
-          {task.due_date && (
-            <div className={`flex items-center gap-1 text-[10px] font-bold ${isOverdue ? 'text-red-500' : 'text-text-muted'}`}>
-              <Clock size={10} />
-              {new Date(task.due_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-            </div>
-          )}
+
+      {task.due_date && (
+        <div className={`mt-4 flex items-center gap-2 text-[10px] font-bold ${isOverdue ? 'text-red-400' : 'text-text-dim'}`}>
+          <Clock size={12} />
+          <span>Vence em: {new Date(task.due_date).toLocaleDateString('pt-BR')}</span>
         </div>
-        <span className="text-[10px] text-text-muted font-medium">
-          {new Date(task.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-        </span>
-      </div>
+      )}
     </div>
   );
 }
