@@ -228,14 +228,14 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
             </div>
           </div>
         
-        {/* Mobile Play Button */}
-        <button 
-          onClick={togglePlay}
-          className="md:hidden w-10 h-10 rounded-full bg-gold text-bg flex items-center justify-center shadow-lg"
-        >
-          {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
-        </button>
-      </div>
+          {/* Mobile Play Button */}
+          <button 
+            onClick={togglePlay}
+            className="md:hidden w-10 h-10 rounded-full bg-gold text-bg flex items-center justify-center shadow-lg"
+          >
+            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+          </button>
+        </div>
 
       {/* CONTROLS & PROGRESS */}
       <div className="flex-1 flex flex-col items-center gap-2 md:gap-2.5 w-full">

@@ -12,10 +12,18 @@ export default function Home() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [user, setUser] = useState<User | null>(null);
+
+  const categories = ['Todos', 'Audiobook', 'Vídeo', 'Música', 'Curso'];
+
+  // ... (dentro de fetchBooks)
+  // const transformed = data.map((b: any) => ({
+  //   ...b,
+  //   category: b.category || 'Audiobook',
+  // ...
 
   useEffect(() => {
     // 1. Checar sessão inicial
@@ -64,28 +72,22 @@ export default function Home() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      if (data) {
-        const transformed: Book[] = data.map(b => ({
-          id: b.id,
-          title: b.title,
-          author: b.author,
-          cover: b.cover,
-          duration: b.duration,
-          purchase_url: b.purchase_url,
-          chapters: (b.chapters || [])
-            .sort((a: any, b: any) => a.chapter_order - b.chapter_order)
-            .map((c: any) => ({
-              id: c.id,
-              title: c.title,
-              telegram_file_id: c.telegram_file_id,
-              type: c.type || 'audio'
-            }))
-        }));
-        setDbBooks(transformed);
-      }
+      
+      const transformed = data.map((b: any) => ({
+        ...b,
+        category: b.category || 'Audiobook',
+        chapters: (b.chapters || [])
+          .sort((a: any, b: any) => a.chapter_order - b.chapter_order)
+          .map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            telegram_file_id: c.telegram_file_id,
+            type: c.type || 'audio'
+          }))
+      }));
+      setDbBooks(transformed);
     } catch (err) {
-      console.error("Erro ao buscar livros:", err);
+      console.error("Erro ao carregar livros:", err);
     } finally {
       setIsLoading(false);
     }
@@ -371,6 +373,13 @@ export default function Home() {
                       />
                       <input 
                         type="text"
+                        placeholder="Categoria (ex: Audiobook, Vídeo)"
+                        defaultValue={selectedBook.category}
+                        onBlur={(e) => updateBookData(selectedBook.id, { category: e.target.value })}
+                        className="bg-surface-3 border border-gold/30 rounded px-2 py-1 text-xs text-gold w-full outline-none focus:border-gold"
+                      />
+                      <input 
+                        type="text"
                         placeholder="Link da Capa (Imagem URL)"
                         defaultValue={selectedBook.cover}
                         onBlur={(e) => updateBookData(selectedBook.id, { cover: e.target.value })}
@@ -430,6 +439,23 @@ export default function Home() {
                 </div>
               </div>
             ) : null}
+
+            {/* CATEGORIES FILTER */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar mb-6 md:mb-8">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-1.5 rounded-full text-xs md:text-sm font-medium whitespace-nowrap transition-all border ${
+                    selectedCategory === cat 
+                    ? 'bg-gold/10 border-gold text-gold shadow-lg shadow-gold/10' 
+                    : 'border-border-custom text-text-dim hover:border-text-muted hover:text-text'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
             {/* LIBRARY GRID */}
             <section>

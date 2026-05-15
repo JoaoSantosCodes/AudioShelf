@@ -12,6 +12,7 @@ export interface Book {
   cover: string;
   duration: string;
   purchase_url?: string;
+  category?: string;
   chapters: Chapter[];
 }
 
