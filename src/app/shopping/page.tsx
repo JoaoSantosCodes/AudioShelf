@@ -151,6 +151,8 @@ export default function ShoppingListPage() {
     if (!error) {
       setItems(items.filter(item => !item.completed));
     }
+  };
+
   const handleSuggestionClick = async (suggestion: Suggestion) => {
     if (!user) return;
     const { error } = await supabase
