@@ -109,11 +109,8 @@ export default function Home() {
     // Load last played book from local storage
     const saved = localStorage.getItem('last_played_book');
     if (saved) {
-      try {
-        setLastPlayedBook(JSON.parse(saved));
-      } catch (e) {
-        console.error("Erro ao carregar último livro:", e);
-      }
+      // O MediaContext agora gerencia o estado global, 
+      // podemos implementar persistência global no futuro se necessário.
     }
   }, []);
 
