@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play } from 'lucide-react';
+import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
@@ -154,6 +154,11 @@ export default function Home() {
                 <Library size={18} />
                 <span className="text-sm font-semibold">Biblioteca</span>
               </button>
+              
+              <Link href="/agenda" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+                <Calendar size={18} />
+                <span className="text-sm font-semibold">Agenda Semanal</span>
+              </Link>
               
               <Link href="/kanban" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
                 <Database size={18} />

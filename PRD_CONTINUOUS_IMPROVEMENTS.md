@@ -33,6 +33,14 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [x] **PWA Full:** Garantir instalação 100% offline-ready com metadados e manifest premium.
 - [x] **Mobile Layout:** Refinar visualização mobile com Bottom Nav tátil e Player Global.
 
+### 5. 📅 Planejamento & Agenda
+- [x] **Agenda Semanal:** Criar uma visão tática de 7 dias para planejamento de estudos, músicas e leituras.
+
+### 6. 🤝 Social & Colaborativo
+- [ ] **Shared Boards:** Compartilhar colunas do Kanban ou projetos inteiros com outros usuários (Família/Equipe).
+- [ ] **Eventos Sociais:** Agendar e compartilhar eventos (Cinema, Pizza, Academia) na Agenda Semanal comum.
+- [ ] **Gamificação de Tarefas:** Sistema de ícones e "recompensas" para tarefas de casa (focado em crianças/engajamento).
+
 ---
 
 ## 📈 Critérios de Sucesso

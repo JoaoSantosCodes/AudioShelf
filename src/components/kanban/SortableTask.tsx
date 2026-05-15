@@ -4,7 +4,25 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
-import { MoreHorizontal, Clock, ArrowLeft, ChevronRight, Play, ExternalLink } from 'lucide-react';
+'use client';
+
+import React from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { motion } from 'framer-motion';
+import { 
+  MoreHorizontal, 
+  Clock, 
+  ArrowLeft, 
+  ChevronRight, 
+  Play, 
+  ExternalLink,
+  Film,
+  Utensils,
+  Dumbbell,
+  Home,
+  Share2
+} from 'lucide-react';
 import { Book } from '@/data/books';
 
 interface Task {
@@ -42,6 +60,16 @@ export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskP
     zIndex: isDragging ? 100 : 1,
   };
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Lazer': return <Film size={12} />;
+      case 'Social': return <Utensils size={12} />;
+      case 'Saúde': return <Dumbbell size={12} />;
+      case 'Casa': return <Home size={12} />;
+      default: return null;
+    }
+  };
+
   const isOverdue = task.due_date && new RegExp(/^(\d{4}-\d{2}-\d{2})/).exec(task.due_date) && new Date(task.due_date) < new Date() && task.status !== 'done';
 
   return (
@@ -53,12 +81,20 @@ export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskP
       className={`glass-card p-4 group cursor-grab active:cursor-grabbing transition-colors ${isOverdue ? 'border-red-500/50 hover:border-red-500' : 'hover:border-gold/30'}`}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/5 px-2 py-0.5 rounded border border-gold/10">
-          {task.category}
-        </span>
-        <button className="text-text-muted hover:text-text opacity-0 group-hover:opacity-100 transition-opacity">
-          <MoreHorizontal size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/5 px-2 py-0.5 rounded border border-gold/10 flex items-center gap-1.5">
+            {getCategoryIcon(task.category)}
+            {task.category}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button className="text-text-muted hover:text-gold p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Share2 size={14} />
+          </button>
+          <button className="text-text-muted hover:text-text p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <MoreHorizontal size={14} />
+          </button>
+        </div>
       </div>
       
       <h3 className="text-[14px] font-semibold text-text mb-1 group-hover:text-gold transition-colors">{task.title}</h3>

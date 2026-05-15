@@ -10,7 +10,8 @@ import {
   CheckCircle2, 
   Circle, 
   ArrowLeft,
-  Search
+  Search,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,7 +56,7 @@ export default function KanbanPage() {
   const [newTask, setNewTask] = useState({ title: '', description: '', category: 'Geral', status: 'todo' as 'todo' | 'doing' | 'done', due_date: '', linked_book_id: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories = ['Geral', 'Manga', 'SaaS', 'Música', 'Curso', 'Publishing'];
+  const categories = ['Geral', 'Manga', 'SaaS', 'Música', 'Curso', 'Lazer', 'Social', 'Saúde', 'Casa'];
   const columns: { id: 'todo' | 'doing' | 'done', title: string, icon: any }[] = [
     { id: 'todo', title: 'A Fazer', icon: Circle },
     { id: 'doing', title: 'Fazendo', icon: Clock },
@@ -171,8 +172,14 @@ export default function KanbanPage() {
       <header className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-border-custom glass-panel shrink-0 z-50">
         <div className="flex items-center gap-4">
           <Link href="/" className="p-2 hover:bg-surface-2 rounded-full transition-colors text-text-dim hover:text-gold">
-            <ArrowLeft size={20} />
+            <span className="text-sm font-semibold">Biblioteca</span>
           </Link>
+          
+          <Link href="/agenda" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+            <Calendar size={18} />
+            <span className="text-sm font-semibold">Agenda Semanal</span>
+          </Link>
+
           <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold">
             <LayoutDashboard size={24} className="text-gold" />
             <span className="text-gradient">Project Kanban</span>
