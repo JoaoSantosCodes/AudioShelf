@@ -12,6 +12,7 @@ export default function Home() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
