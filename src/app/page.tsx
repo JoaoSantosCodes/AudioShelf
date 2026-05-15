@@ -16,6 +16,7 @@ import {
   Play, 
   Calendar, 
   Activity, 
+  TrendingUp,
   BarChart3, 
   Wallet, 
   ShoppingCart,
