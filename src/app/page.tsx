@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import AudioPlayer from '@/components/AudioPlayer';
+import MangaReader from '@/components/MangaReader';
 import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -624,13 +625,22 @@ export default function Home() {
         </main>
       </div>
 
-      {/* PLAYER BAR (Visible when book selected) */}
-      {selectedBook && user && (
-        <AudioPlayer 
-          book={selectedBook} 
-          userId={user.id}
-        />
-      )}
+      {/* MEDIA PLAYER OR MANGA READER */}
+      <AnimatePresence>
+        {selectedBook && user && (
+          selectedBook.category === 'Manga' ? (
+            <MangaReader 
+              book={selectedBook} 
+              onClose={() => setSelectedBook(null)} 
+            />
+          ) : (
+            <AudioPlayer 
+              book={selectedBook} 
+              userId={user.id}
+            />
+          )
+        )}
+      </AnimatePresence>
     </div>
   );
 }
