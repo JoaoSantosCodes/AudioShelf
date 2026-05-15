@@ -1,4 +1,5 @@
 'use client';
+// MediaShelf v1.5.0-stable | Tactical Performance Hub
 
 import React, { useState, useEffect, useRef } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
