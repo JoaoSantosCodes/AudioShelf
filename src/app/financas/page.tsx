@@ -24,7 +24,8 @@ import {
   Sparkles,
   Loader2,
   Mic,
-  Volume2
+  Volume2,
+  BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
