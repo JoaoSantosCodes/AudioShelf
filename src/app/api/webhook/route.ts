@@ -93,6 +93,15 @@ export async function POST(req: NextRequest) {
 
     if (!book) {
       console.log(`Creating new book: ${bookTitle}`);
+      
+      // Determinar capa padrão premium baseada na categoria
+      let defaultCover = '/assets/covers/course.png'; // Fallback
+      const catLower = category.toLowerCase();
+      if (catLower === 'manga') defaultCover = '/assets/covers/manga.png';
+      else if (catLower === 'música') defaultCover = '/assets/covers/music.png';
+      else if (catLower === 'saas') defaultCover = '/assets/covers/saas.png';
+      else if (catLower === 'audiobook') defaultCover = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=400';
+
       const { data: newBook, error: createError } = await supabase
         .from('books')
         .insert({
@@ -100,7 +109,7 @@ export async function POST(req: NextRequest) {
           author: author,
           duration: duration,
           category: category,
-          cover: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=400' // Placeholder
+          cover: defaultCover
         })
         .select()
         .single();
