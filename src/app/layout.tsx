@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
+import ClientLayout from "@/components/ClientLayout";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -13,65 +14,35 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "AudioShelf | Seu Player de Audiobooks",
-  description: "Ouca seus audiobooks com qualidade premium usando storage do Telegram.",
+  title: "MediaShelf | Seu Player de Audiobooks Premium",
+  description: "Ouça seus audiobooks e gerencie projetos com qualidade premium.",
   manifest: "/manifest.json",
-  themeColor: "#0e0c0a",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "AudioShelf",
+    title: "MediaShelf",
   }
 };
 
-import { ThemeProvider } from "@/context/ThemeContext";
-import { MediaProvider } from "@/context/MediaContext";
-import GlobalMediaContainer from "@/components/GlobalMediaContainer";
-import { useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+export const viewport: Viewport = {
+  themeColor: "#0a0908",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useEffect(() => {
-    // Solicitar permissão de notificação
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
-
-    // Ouvinte Real-time para novos livros
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'books' },
-        (payload) => {
-          if (Notification.permission === "granted") {
-            new Notification("MediaShelf: Novo Projeto!", {
-              body: `O projeto "${payload.new.title}" foi processado e já está disponível na sua biblioteca.`,
-              icon: "/favicon.ico"
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   return (
     <html lang="pt-BR" className={`${playfair.variable} ${dmSans.variable}`}>
-      <body className="font-sans antialiased">
-        <ThemeProvider>
-          <MediaProvider>
-            {children}
-            <GlobalMediaContainer />
-          </MediaProvider>
-        </ThemeProvider>
+      <body className="font-sans antialiased bg-background">
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

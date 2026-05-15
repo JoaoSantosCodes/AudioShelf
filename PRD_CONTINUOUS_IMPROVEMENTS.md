@@ -1,16 +1,13 @@
-# 📄 PRD: MediaShelf - Melhorias Contínuas & Roadmap
+# PRD: Melhorias Contínuas MediaShelf Premium Hub
 
-**Visão:** Transformar o MediaShelf no hub definitivo de consumo de mídia e gestão de projetos criativos (Manga, SaaS, Música, Cursos) com uma experiência premium e automatizada via Telegram.
+Este documento serve como o roadmap oficial para a evolução da plataforma MediaShelf, elevando-a de um hobby hub para um centro de comando criativo de alta fidelidade.
 
 ---
 
-## 🎯 Status Atual (Concluído)
-- [x] **Interface Premium:** Glassmorphism, paleta Ouro/Obsidiana e tipografia editorial.
-- [x] **Hub Multi-Hobby:** Categorização automática via hashtags (#manga, #saas, etc.).
-- [x] **Smart Intake:** Webhook universal (Canais, Grupos, DMs) com reconhecimento flexível de artes.
-- [x] **Media Player Híbrido:** Suporte otimizado para Áudio e Vídeo (MP4, MKV, MP3).
-- [x] **Centro de Comando:** Integração de Kanban de projetos integrado à biblioteca.
-- [x] **User Experience:** Seção "Continuar de onde parou" e sincronização com Supabase.
+## 🎯 Objetivos Estratégicos
+- **Aesthetics First:** Criar uma interface que "uau" o usuário no primeiro olhar.
+- **Seamless Flow:** Garantir que a transição entre dispositivos e hobbies seja invisível.
+- **IA Assistance:** Automatizar tarefas chatas (transcrição/resumo) para focar na criação.
 
 ---
 
@@ -33,17 +30,16 @@
 - [x] **Anexos de Mídia:** Permitir abrir o áudio/vídeo do projeto diretamente de um card do Kanban.
 
 ### 4. 📱 Mobile & PWA
-- [ ] **PWA Full:** Garantir instalação 100% offline-ready com Service Workers.
-- [ ] **Controles de Lockscreen:** Integrar com a Media Session API para controlar o player pela tela de bloqueio do celular.
+- [x] **PWA Full:** Garantir instalação 100% offline-ready com metadados e manifest premium.
+- [x] **Mobile Layout:** Refinar visualização mobile com Bottom Nav tátil e Player Global.
 
 ---
 
-## 📈 Checklist de Manutenção Técnica
-- [ ] **Refatoração de State:** Mover estados globais para Context API ou Zustand se o app crescer muito.
-- [ ] **Otimização de Imagens:** Usar `next/image` para carregar as artes de capa com prioridade.
-- [ ] **Segurança:** Implementar Row Level Security (RLS) no Supabase para isolar dados de múltiplos usuários.
+## 📈 Critérios de Sucesso
+1. **Instabilidade Zero:** Build estável no Vercel com 100% de lighthouse score.
+2. **Engajamento:** Sensação de "app nativo" ao usar no smartphone.
+3. **Produtividade:** Redução do tempo gasto organizando artes e músicas manualmente.
 
 ---
 
-## 📌 Notas de Evolução
-> O MediaShelf deve sempre priorizar a **estética** e a **velocidade**. Cada nova funcionalidade deve parecer parte de um ecossistema editorial premium.
+*Documento atualizado em: 15 de Maio de 2026*
