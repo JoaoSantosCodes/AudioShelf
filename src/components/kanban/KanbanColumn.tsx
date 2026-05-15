@@ -5,6 +5,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { MoreHorizontal, Plus } from 'lucide-react';
 import SortableTask from './SortableTask';
+import { Book } from '@/data/books';
 
 interface Task {
   id: string;
@@ -13,6 +14,8 @@ interface Task {
   status: 'todo' | 'doing' | 'done';
   category: string;
   created_at: string;
+  linked_book_id?: string;
+  due_date?: string;
 }
 
 interface KanbanColumnProps {
@@ -20,10 +23,12 @@ interface KanbanColumnProps {
   title: string;
   icon: any;
   tasks: Task[];
+  books: Book[];
+  onPlay: (book: Book) => void;
   onAddTask: (status: 'todo' | 'doing' | 'done') => void;
 }
 
-export default function KanbanColumn({ id, title, icon: Icon, tasks, onAddTask }: KanbanColumnProps) {
+export default function KanbanColumn({ id, title, icon: Icon, tasks, books, onPlay, onAddTask }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
@@ -46,9 +51,17 @@ export default function KanbanColumn({ id, title, icon: Icon, tasks, onAddTask }
         className="flex-1 space-y-4 overflow-y-auto no-scrollbar pb-10 min-h-[200px]"
       >
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map(task => (
-            <SortableTask key={task.id} task={task} />
-          ))}
+          {tasks.map(task => {
+            const linkedBook = books.find(b => b.id === task.linked_book_id);
+            return (
+              <SortableTask 
+                key={task.id} 
+                task={task} 
+                linkedBook={linkedBook}
+                onPlay={onPlay}
+              />
+            );
+          })}
         </SortableContext>
         
         <button 

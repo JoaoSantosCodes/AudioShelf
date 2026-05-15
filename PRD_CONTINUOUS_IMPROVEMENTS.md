@@ -25,12 +25,12 @@
 ### 2. 🧠 Inteligência & Automação
 - [ ] **AI Transcriber:** Usar OpenAI Whisper para transcrever áudios de cursos automaticamente.
 - [ ] **Resumo de Insights:** Gerar resumos automáticos de capítulos de livros usando IA.
-- [ ] **Notificações Push:** Avisar no navegador quando um novo projeto for processado via Telegram.
+- [x] **Notificações Push:** Avisar no navegador quando um novo projeto for processado via Telegram.
 
 ### 3. 🛠️ Gestão & Kanban
 - [x] **Drag & Drop Real:** Implementar `dnd-kit` para arrastar cards entre colunas no Kanban.
 - [x] **Deadline Tracking:** Adicionar datas de entrega e alertas visuais para tarefas atrasadas.
-- [ ] **Anexos de Mídia:** Permitir abrir o áudio/vídeo do projeto diretamente de um card do Kanban.
+- [x] **Anexos de Mídia:** Permitir abrir o áudio/vídeo do projeto diretamente de um card do Kanban.
 
 ### 4. 📱 Mobile & PWA
 - [ ] **PWA Full:** Garantir instalação 100% offline-ready com Service Workers.

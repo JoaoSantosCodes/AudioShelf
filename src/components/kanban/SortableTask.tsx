@@ -4,7 +4,8 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
-import { MoreHorizontal, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
+import { MoreHorizontal, Clock, ArrowLeft, ChevronRight, Play, ExternalLink } from 'lucide-react';
+import { Book } from '@/data/books';
 
 interface Task {
   id: string;
@@ -14,14 +15,17 @@ interface Task {
   category: string;
   created_at: string;
   due_date?: string;
+  linked_book_id?: string;
 }
 
 interface SortableTaskProps {
   task: Task;
+  linkedBook?: Book;
+  onPlay?: (book: Book) => void;
   onMove?: (id: string, status: 'todo' | 'doing' | 'done') => void;
 }
 
-export default function SortableTask({ task, onMove }: SortableTaskProps) {
+export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskProps) {
   const {
     attributes,
     listeners,
@@ -59,6 +63,27 @@ export default function SortableTask({ task, onMove }: SortableTaskProps) {
       
       <h3 className="text-[14px] font-semibold text-text mb-1 group-hover:text-gold transition-colors">{task.title}</h3>
       <p className="text-[12px] text-text-dim line-clamp-2 leading-relaxed mb-4">{task.description}</p>
+      
+      {linkedBook && (
+        <div className="mb-4 p-2 rounded-lg bg-gold/5 border border-gold/10 flex items-center justify-between group/link">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <div className="w-6 h-6 rounded bg-surface-3 flex items-center justify-center shrink-0">
+              {linkedBook.category === 'Manga' ? <ExternalLink size={12} className="text-gold" /> : <Play size={12} className="text-gold" />}
+            </div>
+            <span className="text-[11px] text-text font-medium truncate">{linkedBook.title}</span>
+          </div>
+          <button 
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPlay?.(linkedBook);
+            }}
+            className="p-1.5 rounded-md bg-gold text-bg opacity-0 group-hover/link:opacity-100 transition-opacity"
+          >
+            {linkedBook.category === 'Manga' ? <ExternalLink size={12} /> : <Play size={12} />}
+          </button>
+        </div>
+      )}
       
       <div className="flex items-center justify-between pt-3 border-t border-border-custom">
         <div className="flex items-center gap-3">

@@ -11,10 +11,11 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMedia } from '@/context/MediaContext';
 
 export default function Home() {
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [lastPlayedBook, setLastPlayedBook] = useState<Book | null>(null);
+  const { playMedia, activeMedia } = useMedia();
+  const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -291,8 +292,8 @@ export default function Home() {
           
           <nav className="hidden md:flex gap-1 ml-8 bg-surface-2 p-1 rounded-full border border-border-custom">
             <button 
-              onClick={() => { setSelectedBook(null); setIsSidebarOpen(false); }}
-              className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all ${!selectedBook ? 'bg-gold text-bg shadow-lg shadow-gold/20' : 'text-text-dim hover:text-text'}`}
+              onClick={() => { setIsSidebarOpen(false); }}
+              className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all ${!activeMedia ? 'bg-gold text-bg shadow-lg shadow-gold/20' : 'text-text-dim hover:text-text'}`}
             >
               Biblioteca
             </button>
@@ -598,7 +599,7 @@ export default function Home() {
                         )}
                         <BookCard 
                           book={book} 
-                          onSelect={setSelectedBook} 
+                          onSelect={playMedia} 
                         />
                       </motion.div>
                     ))}
@@ -627,22 +628,7 @@ export default function Home() {
         </main>
       </div>
 
-      {/* MEDIA PLAYER OR MANGA READER */}
-      <AnimatePresence>
-        {selectedBook && user && (
-          selectedBook.category === 'Manga' ? (
-            <MangaReader 
-              book={selectedBook} 
-              onClose={() => setSelectedBook(null)} 
-            />
-          ) : (
-            <AudioPlayer 
-              book={selectedBook} 
-              userId={user.id}
-            />
-          )
-        )}
-      </AnimatePresence>
+      {/* O Player e o Reader agora são renderizados pelo GlobalMediaContainer no layout.tsx */}
     </div>
   );
 }

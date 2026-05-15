@@ -15,6 +15,8 @@ import {
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ThemeToggle';
+import { useMedia } from '@/context/MediaContext';
+import { Book } from '@/data/books';
 import {
   DndContext,
   DragOverlay,
@@ -38,15 +40,19 @@ interface Task {
   category: string;
   created_at: string;
   due_date?: string;
+  linked_book_id?: string;
+  book?: Book; // Para exibir informações do livro vinculado
 }
 
 export default function KanbanPage() {
+  const { playMedia } = useMedia();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', category: 'Geral', status: 'todo' as 'todo' | 'doing' | 'done', due_date: '' });
+  const [newTask, setNewTask] = useState({ title: '', description: '', category: 'Geral', status: 'todo' as 'todo' | 'doing' | 'done', due_date: '', linked_book_id: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['Geral', 'Manga', 'SaaS', 'Música', 'Curso', 'Publishing'];
@@ -64,9 +70,17 @@ export default function KanbanPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchTasks(session.user.id);
+      if (session?.user) {
+        fetchTasks(session.user.id);
+        fetchBooks();
+      }
     });
   }, []);
+
+  const fetchBooks = async () => {
+    const { data } = await supabase.from('books').select('*');
+    if (data) setBooks(data);
+  };
 
   const fetchTasks = async (userId: string) => {
     setIsLoading(true);
@@ -131,7 +145,8 @@ export default function KanbanPage() {
       description: newTask.description,
       category: newTask.category,
       status: newTask.status,
-      due_date: newTask.due_date || null
+      due_date: newTask.due_date || null,
+      linked_book_id: newTask.linked_book_id || null
     };
 
     const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
@@ -267,6 +282,19 @@ export default function KanbanPage() {
                     onChange={e => setNewTask({...newTask, due_date: e.target.value})}
                     className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all text-text"
                   />
+                </div>
+                <div>
+                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Vincular Projeto / Mídia</label>
+                  <select 
+                    value={newTask.linked_book_id}
+                    onChange={e => setNewTask({...newTask, linked_book_id: e.target.value})}
+                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all text-text appearance-none"
+                  >
+                    <option value="">Nenhum vínculo</option>
+                    {books.map(book => (
+                      <option key={book.id} value={book.id}>{book.title}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Projeto / Categoria</label>
