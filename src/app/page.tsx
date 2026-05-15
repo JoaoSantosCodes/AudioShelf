@@ -131,7 +131,7 @@ export default function Home() {
             initial={{ x: -300 }}
             animate={{ x: 0 }}
             exit={{ x: -300 }}
-            className="fixed md:relative z-50 w-72 h-full bg-surface-1 border-r border-border-custom flex flex-col shrink-0"
+            className="fixed md:relative z-50 w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar"
           >
             <div className="p-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
