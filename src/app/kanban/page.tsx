@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Headphones, 
   Library, 
@@ -59,6 +59,7 @@ interface Task {
   linked_book_id?: string;
   is_recurring?: boolean;
   frequency?: 'daily' | 'weekly' | 'monthly';
+  priority?: 'low' | 'medium' | 'high';
 }
 
 export default function KanbanPage() {
@@ -68,6 +69,8 @@ export default function KanbanPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [newTask, setNewTask] = useState({ 
     title: '', 
@@ -201,13 +204,54 @@ export default function KanbanPage() {
     setActiveTask(null);
   };
 
-  const handleVoiceInput = () => {
-    setIsListening(true);
-    // Simulação de IA Whisper
-    setTimeout(() => {
-      setNewTask({ ...newTask, title: 'Terminar relatório de arquitetura' });
-      setIsListening(false);
-    }, 3000);
+  const handleVoiceInput = async () => {
+    if (!user) return;
+
+    if (isListening) {
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+        setIsListening(false);
+      }
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        console.log("Kanban mission audio captured:", audioBlob);
+        
+        // Simulação de processamento Whisper
+        alert("Ordem de Missão capturada! Processando via Whisper (Simulado)...");
+        const simulatedCommand = "Adicionar tarefa urgente: Finalizar UI do Kanban";
+        
+        setNewTask({
+          ...newTask,
+          title: 'Finalizar UI do Kanban',
+          description: 'Urgente: Adicionar efeitos neon e pulso de prioridade.',
+          category: 'SaaS',
+          priority: 'high'
+        });
+
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsListening(true);
+    } catch (err) {
+      console.error("Erro ao acessar microfone:", err);
+      alert("Não foi possível acessar o microfone.");
+    }
   };
 
   const addTask = async () => {
@@ -404,9 +448,10 @@ export default function KanbanPage() {
                     <motion.div 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-center py-2"
+                      className="text-center py-3 bg-gold/5 rounded-2xl border border-gold/20 flex items-center justify-center gap-3"
                     >
-                      <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] animate-pulse">Ouvindo sua voz...</span>
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                      <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] animate-pulse">Gravando Áudio Real...</span>
                     </motion.div>
                   )}
                   
@@ -417,7 +462,23 @@ export default function KanbanPage() {
                     className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 h-32 focus:border-gold/50 outline-none transition-all resize-none"
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* PRIORITY SELECTOR */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim">Prioridade da Missão</label>
+                  <div className="flex gap-3">
+                    {['low', 'medium', 'high'].map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setNewTask({...newTask, priority: p as any})}
+                        className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${newTask.priority === p ? (p === 'high' ? 'bg-red-500/10 border-red-500 text-red-400' : p === 'medium' ? 'bg-gold/10 border-gold text-gold' : 'bg-emerald-500/10 border-emerald-500 text-emerald-400') : 'bg-surface-2 border-border-custom text-text-dim hover:text-text'}`}
+                      >
+                        {p === 'low' ? 'Baixa' : p === 'medium' ? 'Média' : 'Alta'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Categoria</label>
                       <select 

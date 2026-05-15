@@ -32,6 +32,7 @@ interface Task {
   linked_book_id?: string;
   is_recurring?: boolean;
   frequency?: 'daily' | 'weekly' | 'monthly';
+  priority?: 'low' | 'medium' | 'high';
 }
 
 interface SortableTaskProps {
@@ -75,14 +76,22 @@ export default function SortableTask({ task, linkedBook, onPlay }: SortableTaskP
       style={style}
       {...attributes}
       {...listeners}
-      className={`glass-card p-4 group cursor-grab active:cursor-grabbing transition-colors ${isOverdue ? 'border-red-500/50 hover:border-red-500' : 'hover:border-gold/30'}`}
+      className={`glass-card p-4 group cursor-grab active:cursor-grabbing transition-all ${isOverdue ? 'border-red-500/50 hover:border-red-500' : 'hover:border-gold/30'} ${task.priority === 'high' ? 'border-gold/40 shadow-[0_0_20px_rgba(212,175,55,0.1)]' : ''}`}
     >
+      {task.priority === 'high' && (
+        <div className="absolute inset-0 bg-gold/[0.02] animate-pulse pointer-events-none rounded-[2rem]" />
+      )}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/5 px-2 py-0.5 rounded border border-gold/10 flex items-center gap-1.5">
             {getCategoryIcon(task.category)}
             {task.category}
           </span>
+          {task.priority === 'high' && (
+            <span className="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-400/5 px-2 py-0.5 rounded border border-red-400/20 flex items-center gap-1">
+              <Star size={10} fill="currentColor" /> ALTA PRIORIDADE
+            </span>
+          )}
           {task.is_recurring && (
             <div className="flex items-center gap-1 text-[9px] font-bold text-blue-400 bg-blue-400/5 px-1.5 py-0.5 rounded border border-blue-400/20">
               <Repeat size={10} />
