@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const update = await req.json();
     console.log('Receiving Telegram Update:', JSON.stringify(update));
 
-    const post = update.channel_post;
+    const post = update.channel_post || update.message;
     if (!post) return NextResponse.json({ ok: true });
 
     // --- LÓGICA DE FOTO (CAPA) ---
