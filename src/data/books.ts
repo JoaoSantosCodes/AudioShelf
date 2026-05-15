@@ -15,6 +15,8 @@ export interface Book {
   purchase_url?: string;
   category?: string;
   summary?: string;
+  description?: string;
+  progress?: number;
   chapters: Chapter[];
 }
 

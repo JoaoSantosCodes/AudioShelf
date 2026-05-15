@@ -91,7 +91,7 @@ export default function MediaExpandedView({ onUpdateProgress }: MediaExpandedVie
                 <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mb-1 flex items-center gap-2">
                   <TrendingUp size={12} /> Progresso
                 </p>
-                <p className="text-sm font-bold text-text">{activeMedia.progress}% concluído</p>
+                <p className="text-sm font-bold text-text">{activeMedia.progress || 0}% concluído</p>
               </div>
               <div className="p-4 rounded-2xl bg-surface-2 border border-border-custom col-span-2 md:col-span-1">
                 <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mb-1 flex items-center gap-2">
