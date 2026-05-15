@@ -216,6 +216,8 @@ export default function KanbanPage() {
                 title={column.title}
                 icon={column.icon}
                 tasks={filteredTasks.filter(t => t.status === column.id)}
+                books={books}
+                onPlay={playMedia}
                 onAddTask={(status) => {
                   setNewTask(prev => ({ ...prev, status }));
                   setIsModalOpen(true);
