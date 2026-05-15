@@ -51,18 +51,18 @@ async function sync() {
       continue;
     }
 
-    // --- LOGICA DE AUDIO ---
-    const audio = post.audio || 
-                  (post.document && post.document.mime_type?.startsWith('audio/') ? post.document : null) ||
-                  (post.reply_to_message?.audio) ||
-                  (post.reply_to_message?.document && post.reply_to_message.document.mime_type?.startsWith('audio/') ? post.reply_to_message.document : null);
+    // --- LOGICA DE AUDIO OU VÍDEO ---
+    const audio = post.audio || (post.document && post.document.mime_type?.startsWith('audio/') ? post.document : null);
+    const video = post.video || (post.document && post.document.mime_type?.startsWith('video/') ? post.document : null);
     
-    if (!audio) continue;
+    const media = audio || video;
+    if (!media) continue;
 
-    const file_id = audio.file_id;
-    const rawTitle = audio.title || audio.file_name || "Sem Título";
-    const author = audio.performer || "Autor Desconhecido";
-    const duration = audio.duration ? `${Math.floor(audio.duration / 60)} min` : "??";
+    const type = video ? 'video' : 'audio';
+    const file_id = media.file_id;
+    const rawTitle = media.title || media.file_name || "Sem Título";
+    const author = media.performer || "Autor Desconhecido";
+    const duration = media.duration ? `${Math.floor(media.duration / 60)} min` : "??";
 
     let bookTitle = rawTitle;
     let chapterTitle = rawTitle;
@@ -116,7 +116,8 @@ async function sync() {
           book_id: book.id,
           title: chapterTitle,
           telegram_file_id: file_id,
-          chapter_order: chapterOrder
+          chapter_order: chapterOrder,
+          type: type
         });
         console.log(`✅ Capítulo "${chapterTitle}" adicionado na posição ${chapterOrder}!`);
       }
