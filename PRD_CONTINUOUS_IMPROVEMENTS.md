@@ -110,8 +110,8 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [x] **Visualização Compacta:** Controles essenciais com design minimalista.
 
 ### 14. 🤖 Próximos Passos & Refinamentos
-- [ ] **Global Voice Assistant:** Mover o microfone de captura real para o Header Global.
-- [ ] **Deep Linking AI:** Sugestões da IA vinculadas a ações diretas no sistema.
+- [x] **Global Voice Assistant:** Onipresença de voz via captura real no Header Global.
+- [/] **Deep Linking AI:** Sugestões da IA vinculadas a botões de ação direta (In progress).
 - [ ] **Smart Quiet Mode:** Filtro de notificações noturnas e foco tático.
 - [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações.
 

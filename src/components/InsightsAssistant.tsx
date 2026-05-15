@@ -2,13 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Send, X, MessageSquare, Bot, User, Loader2, Wallet, Calendar, ShoppingCart } from 'lucide-react';
+import { Sparkles, Send, X, MessageSquare, Bot, User, Loader2, Wallet, Calendar, ShoppingCart, ExternalLink, LayoutDashboard, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   type?: 'text' | 'finance' | 'task' | 'shopping';
+  actions?: { label: string; href: string; icon: any }[];
 }
 
 export default function InsightsAssistant() {
@@ -39,6 +41,7 @@ export default function InsightsAssistant() {
     // Lógica de Processamento de Contexto
     setTimeout(async () => {
       let response = "Desculpe, ainda estou aprendendo a processar esse tipo de informação.";
+      let actions: any[] = [];
       
       const lowerInput = userMessage.toLowerCase();
       
@@ -46,17 +49,24 @@ export default function InsightsAssistant() {
         const { data: tx } = await supabase.from('transactions').select('amount').eq('type', 'expense');
         const total = tx?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
         response = `Você gastou um total de R$ ${total.toLocaleString('pt-BR')} este mês. Quer que eu detalhe por categoria?`;
+        actions = [{ label: 'Ver Finanças', href: '/financas', icon: Wallet }];
       } else if (lowerInput.includes('tarefa') || lowerInput.includes('fazer') || lowerInput.includes('kanban')) {
         const { count } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).neq('status', 'done');
         response = `Você tem ${count || 0} missões pendentes no seu Kanban. Algumas estão vencendo em breve!`;
+        actions = [{ label: 'Ir para Kanban', href: '/kanban', icon: LayoutDashboard }];
       } else if (lowerInput.includes('mercado') || lowerInput.includes('comprar') || lowerInput.includes('lista')) {
         const { count } = await supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('completed', false);
         response = `Sua lista de mercado tem ${count || 0} itens aguardando. Precisa que eu adicione algo novo?`;
+        actions = [{ label: 'Ver Mercado', href: '/shopping', icon: ShoppingCart }];
       } else {
         response = "Entendido! Estou monitorando seu ecossistema. Posso te ajudar com resumos de finanças, tarefas ou sua lista de compras.";
+        actions = [
+          { label: 'Finanças', href: '/financas', icon: Wallet },
+          { label: 'Kanban', href: '/kanban', icon: LayoutDashboard }
+        ];
       }
 
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: response, actions }]);
       setIsLoading(false);
     }, 1500);
   };
@@ -114,8 +124,26 @@ export default function InsightsAssistant() {
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-white/5 ${msg.role === 'user' ? 'bg-gold/10' : 'bg-surface-3 shadow-lg'}`}>
                     {msg.role === 'user' ? <User size={14} className="text-gold" /> : <Bot size={14} className="text-gold" />}
                   </div>
-                  <div className={`max-w-[80%] p-4 rounded-2xl text-xs leading-relaxed ${msg.role === 'user' ? 'bg-gold text-bg font-bold rounded-tr-none' : 'bg-surface-2 border border-border-custom text-text-muted rounded-tl-none'}`}>
-                    {msg.content}
+                  <div className={`max-w-[80%] space-y-3 ${msg.role === 'user' ? 'flex flex-col items-end' : ''}`}>
+                    <div className={`p-4 rounded-2xl text-xs leading-relaxed ${msg.role === 'user' ? 'bg-gold text-bg font-bold rounded-tr-none' : 'bg-surface-2 border border-border-custom text-text-muted rounded-tl-none'}`}>
+                      {msg.content}
+                    </div>
+                    {msg.actions && (
+                      <div className="flex flex-wrap gap-2">
+                        {msg.actions.map((action, ai) => (
+                          <Link 
+                            key={ai} 
+                            href={action.href}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 bg-surface-3 hover:bg-gold/10 border border-border-custom hover:border-gold/30 rounded-xl text-[10px] font-bold text-text transition-all group"
+                          >
+                            <action.icon size={12} className="text-gold" />
+                            {action.label}
+                            <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" />
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
