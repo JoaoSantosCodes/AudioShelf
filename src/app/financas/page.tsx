@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ThemeToggle from '@/components/ThemeToggle';
 import { User } from '@supabase/supabase-js';
+import { processVoiceCommand, CommandResponse } from '@/lib/commandProcessor';
 
 interface Transaction {
   id: string;
@@ -140,16 +141,23 @@ export default function FinancePage() {
     setScanMessage('');
   };
 
-  const handleVoiceInput = () => {
+  const handleVoiceInput = async () => {
+    if (!user) return;
     setIsListening(true);
-    // Simulação de IA Whisper extraindo Valor e Descrição
-    setTimeout(() => {
-      setNewTx({
-        ...newTx,
-        amount: '15.00',
-        description: 'Estacionamento Shopping',
-        category: 'Transporte'
-      });
+    
+    // Simulação de IA Whisper extraindo comando
+    setTimeout(async () => {
+      const simulatedCommand = "Gastei 15 reais com estacionamento";
+      const result = await processVoiceCommand(simulatedCommand, user.id);
+      
+      if (result.success) {
+        if (result.module === 'finance') {
+          fetchTransactions(user.id);
+          setIsModalOpen(false);
+        }
+        // Feedback visual poderia ser um toast aqui
+      }
+      
       setIsListening(false);
     }, 3000);
   };
@@ -245,18 +253,68 @@ export default function FinancePage() {
             </motion.div>
           </div>
 
-          {/* BUDGET PROGRESS */}
-          <div className="bg-surface-2 border border-border-custom p-8 rounded-3xl shadow-xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest">Acompanhamento de Gastos vs Meta</h3>
-              <span className="text-xs font-bold text-gold">Meta: R$ {budgetGoal}</span>
+          {/* CASH FLOW ANALYSIS & HEALTH CHECK */}
+          <div className="bg-surface-2 border border-border-custom p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <BarChart3 size={120} />
             </div>
-            <div className="w-full h-4 bg-surface-3 rounded-full overflow-hidden border border-white/5">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((totalExpense / budgetGoal) * 100, 100)}%` }}
-                className={`h-full rounded-full ${totalExpense > budgetGoal ? 'bg-red-500' : 'bg-gold'}`}
-              />
+            
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 relative z-10">
+              <div>
+                <h3 className="text-xl font-bold text-text">Análise de Fluxo</h3>
+                <p className="text-xs text-text-dim">Comparativo real de entradas vs. saídas</p>
+              </div>
+              <div className="px-4 py-2 bg-background/50 backdrop-blur-md rounded-2xl border border-border-custom text-right">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-dim block mb-1">Eficiência de Gastos</span>
+                <span className={`text-lg font-black ${totalExpense <= totalIncome ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {totalIncome > 0 ? ((totalExpense / totalIncome) * 100).toFixed(1) : '0'}% consumido
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-8 relative z-10">
+              {/* ENTRADAS BAR */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                  <span className="text-emerald-400 flex items-center gap-2"><ArrowUpCircle size={12} /> Total de Entradas</span>
+                  <span className="text-text">R$ {totalIncome.toLocaleString('pt-BR')}</span>
+                </div>
+                <div className="w-full h-3 bg-surface-3 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)]"
+                  />
+                </div>
+              </div>
+
+              {/* SAÍDAS BAR */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                  <span className="text-red-400 flex items-center gap-2"><ArrowDownCircle size={12} /> Total de Saídas</span>
+                  <span className="text-text">R$ {totalExpense.toLocaleString('pt-BR')}</span>
+                </div>
+                <div className="w-full h-3 bg-surface-3 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((totalExpense / (totalIncome || 1)) * 100, 100)}%` }}
+                    className={`h-full bg-gradient-to-r ${totalExpense <= totalIncome ? 'from-red-600 to-red-400' : 'from-red-800 to-red-600'} shadow-[0_0_15px_rgba(248,113,113,0.3)]`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-border-custom flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${balance >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                  <Sparkles size={16} />
+                </div>
+                <p className="text-xs font-bold text-text">
+                  {balance >= 0 
+                    ? `Saúde Financeira: Você economizou R$ ${balance.toLocaleString('pt-BR')} este mês.` 
+                    : `Alerta: Déficit de R$ ${Math.abs(balance).toLocaleString('pt-BR')} detectado.`}
+                </p>
+              </div>
             </div>
           </div>
 

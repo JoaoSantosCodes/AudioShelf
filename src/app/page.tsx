@@ -30,14 +30,34 @@ import MobileNav from '@/components/MobileNav';
 import MediaExpandedView from '@/components/MediaExpandedView';
 import GlobalSearch from '@/components/GlobalSearch';
 import { useMedia } from '@/context/MediaContext';
+import { processVoiceCommand } from '@/lib/commandProcessor';
 
 export default function Home() {
-  const { activeMedia, playMedia, closeMedia } = useMedia();
-  const [dbBooks, setDbBooks] = useState<Book[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [user, setUser] = useState<User | null>(null);
+  const [isListening, setIsListening] = useState(false);
+
+  const handleVoiceInput = async () => {
+    if (!user) return;
+    setIsListening(true);
+    
+    // Simulação de IA Whisper extraindo comando
+    setTimeout(async () => {
+      const simulatedCommand = "Adicionar leite na lista de compras";
+      const result = await processVoiceCommand(simulatedCommand, user.id);
+      
+      if (result.success) {
+        // Atualiza os stats do dashboard
+        const { count: shoppingCount } = await supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('completed', false);
+        const { count: pendingTasks } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'todo');
+        
+        setDashboardStats(prev => ({
+          ...prev,
+          shoppingCount: shoppingCount || 0,
+          pendingTasks: pendingTasks || 0
+        }));
+      }
+      setIsListening(false);
+    }, 3000);
+  };
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState({
@@ -264,6 +284,19 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <GlobalSearch />
             <ThemeToggle />
+            
+            {/* VOICE ASSISTANT */}
+            <button 
+              onClick={handleVoiceInput}
+              className={`w-10 h-10 rounded-full transition-all relative group flex items-center justify-center ${isListening ? 'bg-gold text-bg shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-pulse' : 'bg-surface-2 text-text-muted hover:text-gold border border-border-custom hover:border-gold/30'}`}
+            >
+              {isListening ? <Volume2 size={18} className="animate-bounce" /> : <Mic size={18} />}
+              {isListening && (
+                <span className="absolute top-14 right-0 whitespace-nowrap text-[10px] font-bold text-gold uppercase tracking-widest bg-bg/80 backdrop-blur-md px-3 py-1 rounded-full border border-gold/20 z-50 shadow-xl">
+                  Ouvindo Intenção...
+                </span>
+              )}
+            </button>
             
             {/* NOTIFICATION CENTER */}
             <div className="relative">

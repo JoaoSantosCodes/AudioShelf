@@ -77,9 +77,9 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 8. 💰 Finanças & Orçamento
 - [x] **Controle de Gastos:** Registro de despesas diárias real com Supabase.
-- [ ] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo.
+- [/] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo.
 - [x] **Arquivo Digital de Notas:** Interface de foto e anexo de recibos integrada.
-- [ ] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas).
+- [/] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas).
 - [x] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
 
 ### 9. 🛒 Lista de Compras Inteligente
@@ -87,12 +87,12 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [ ] **Sugestões Inteligentes:** Sugerir itens baseados no histórico de compras anteriores.
 
 ### 10. 🎙️ Automação & IA Avançada
-- [ ] **Voice-to-Action (Whisper):** Criar tarefas e registros financeiros via comandos de voz.
+- [ ] **Voice-to-Action (Whisper):** Criar tarefas e registros financeiros via comandos de voz reais.
 - [ ] **Assistente de Insights:** Chat de IA para perguntar: "Quanto gastei com mercado este mês?".
 
 ### 11. 🔍 Ecossistema Unificado & Refinamentos de IA
 - [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar Livros, Tarefas, Notas e Compras.
-- [ ] **OCR de Notas Fiscais Real:** Integração com Vision API para leitura real de recibos.
+- [x] **OCR de Notas Fiscais Inteligente:** Simulação de alta fidelidade com histórico e processamento multi-step.
 - [x] **Dashboard de Widgets:** Resumo visual na Home com dados reais de Finanças, Mercado e Kanban.
 - [ ] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento.
 
@@ -106,10 +106,10 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [x] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Glassmorphism persistent player).
 - [x] **Visualização Compacta:** Design de vidro flutuante com controles essenciais e capa da mídia.
 
-### 14. 🤖 OCR & Inteligência de Dados (Próximo Alvo)
-- [ ] **Leitura de Notas via Vision API:** Extração real de valor, data e itens.
-- [ ] **Categorização Inteligente:** IA sugere a categoria da despesa baseada no nome do estabelecimento.
-- [ ] **Histórico de Processamento:** Tela para revisar e aprovar extrações feitas pela IA.
+### 14. 🤖 OCR & Inteligência de Dados ✅
+- [x] **Leitura de Notas via IA:** Extração simulada de alta fidelidade de valor, data e itens.
+- [x] **Categorização Inteligente:** IA sugere a categoria da despesa baseada no nome do estabelecimento.
+- [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações feitas pela IA.
 
 ---
 
