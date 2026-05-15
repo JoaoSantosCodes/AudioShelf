@@ -18,9 +18,9 @@
 
 ### 1. 🎨 UI/UX & Aesthetics
 - [x] **Waveform Visualizer:** Adicionar visualizador de ondas sonoras dinâmico para projetos do Suno.AI.
-- [ ] **Modo Leitura Manga:** Implementar um visualizador de imagens otimizado para rascunhos de Manga.
+- [x] **Modo Leitura Manga:** Implementar um visualizador de imagens otimizado para rascunhos de Manga.
 - [x] **Micro-interações:** Adicionar animações Framer Motion ao abrir cards e trocar de colunas no Kanban.
-- [ ] **Temas Dinâmicos:** Permitir troca sutil entre "Obsidian Gold" (atual) e "Cyber Tactical" (neon).
+- [x] **Temas Dinâmicos:** Permitir troca sutil entre "Obsidian Gold" (atual) e "Cyber Tactical" (neon).
 
 ### 2. 🧠 Inteligência & Automação
 - [ ] **AI Transcriber:** Usar OpenAI Whisper para transcrever áudios de cursos automaticamente.
@@ -28,7 +28,7 @@
 - [ ] **Notificações Push:** Avisar no navegador quando um novo projeto for processado via Telegram.
 
 ### 3. 🛠️ Gestão & Kanban
-- [ ] **Drag & Drop Real:** Implementar `dnd-kit` para arrastar cards entre colunas no Kanban.
+- [x] **Drag & Drop Real:** Implementar `dnd-kit` para arrastar cards entre colunas no Kanban.
 - [ ] **Deadline Tracking:** Adicionar datas de entrega e alertas visuais para tarefas atrasadas.
 - [ ] **Anexos de Mídia:** Permitir abrir o áudio/vídeo do projeto diretamente de um card do Kanban.
 

@@ -17,6 +17,22 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 
+.theme-cyber {
+  --bg: #020609;
+  --surface: rgba(10, 16, 22, 0.7);
+  --surface2: rgba(18, 27, 37, 0.8);
+  --surface3: #1a2734;
+  --gold: #00f2ff; /* Neon Cyan */
+  --gold-dim: #008c99;
+  --gold-bright: #b3f9ff;
+  --amber: #00d2ff;
+  --text: #e1e9f0;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+  --border: rgba(0, 242, 255, 0.1);
+  --glass: rgba(0, 242, 255, 0.05);
+}
+
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);

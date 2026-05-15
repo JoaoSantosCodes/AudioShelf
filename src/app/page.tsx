@@ -5,6 +5,7 @@ import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import AudioPlayer from '@/components/AudioPlayer';
 import MangaReader from '@/components/MangaReader';
+import ThemeToggle from '@/components/ThemeToggle';
 import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -311,6 +312,7 @@ export default function Home() {
         </div>
         
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <div className="hidden sm:flex flex-col items-end mr-2">
             <span className="text-[11px] text-text-muted font-bold uppercase tracking-widest">Bem-vindo</span>
             <span className="text-[13px] text-text font-semibold">
