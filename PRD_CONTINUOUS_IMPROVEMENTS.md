@@ -63,6 +63,12 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [ ] **Voice-to-Action (Whisper):** Criar tarefas e registros financeiros via comandos de voz.
 - [ ] **Assistente de Insights:** Chat de IA para perguntar: "Quanto gastei com mercado este mês?".
 
+### 11. 🔍 Ecossistema Unificado & Refinamentos de IA
+- [ ] **Busca Global (Omni-Search):** Barra de busca única para encontrar Livros, Tarefas, Notas e Compras.
+- [ ] **OCR de Notas Fiscais:** Leitura automática de fotos de recibos para preenchimento financeiro via IA.
+- [ ] **Dashboard de Widgets:** Resumo visual na Home com dados de todos os módulos (Mercado, Finanças, Agenda).
+- [ ] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento.
+
 ---
 
 ## 📈 Critérios de Sucesso
