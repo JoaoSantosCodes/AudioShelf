@@ -24,7 +24,8 @@ import {
   CheckCircle2,
   Mic,
   Volume2,
-  Send
+  Send,
+  Sparkles
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
