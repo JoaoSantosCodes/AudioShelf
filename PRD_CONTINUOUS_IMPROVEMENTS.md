@@ -88,29 +88,30 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 10. 🎙️ Automação & IA Avançada
 - [x] **Voice-to-Action (Whisper):** Processador central que interpreta comandos de voz para Finanças, Mercado e Kanban.
-- [ ] **Assistente de Insights:** Chat de IA para perguntar: "Quanto gastei com mercado este mês?".
+- [/] **Assistente de Insights:** Chat de IA interativo para consultar dados: "Quanto gastei com mercado este mês?".
+- [ ] **Sugestões Inteligentes:** Sugerir itens de mercado baseados no histórico de compras anteriores.
 
-### 11. 🔍 Ecossistema Unificado & Refinamentos de IA
-- [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar Livros, Tarefas, Notas e Compras.
-- [x] **OCR de Notas Fiscais Inteligente:** Simulação de alta fidelidade com histórico e processamento multi-step.
-- [x] **Dashboard de Widgets:** Resumo visual na Home com dados reais de Finanças, Mercado e Kanban.
-- [x] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento (Avatares Live).
+### 11. 🔍 Ecossistema Unificado
+- [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar tudo em um só lugar.
+- [x] **OCR de Notas Fiscais:** Simulação multi-step com histórico e extração de dados reais.
+- [x] **Dashboard de Widgets:** Resumo visual na Home com dados reais sincronizados.
+- [x] **Realtime Presence:** Indicadores visuais de quem está online (Avatares Live).
 
-### 12. 🔔 Notificações & Alertas Inteligentes
-- [x] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais sincronizado.
-- [/] **Lembretes de Tarefas:** Notificações automáticas para missões com prazo curto (Vencendo em 24h).
-- [/] **Alertas Financeiros:** Avisos proativos ao atingir 80% e 100% dos limites de orçamento definidos.
-- [x] **Telegram Push (Interface):** Canal de conexão e modal de vinculação de conta implementados.
-- [ ] **Motor de Resumo Diário:** Envio programado de "Briefing Matinal" via Telegram e Dashboard.
+### 12. 🔔 Notificações & Alertas Proativos
+- [x] **In-App Notification Center:** Central de alertas táticos com histórico.
+- [x] **Lembretes de Tarefas:** Notificações automáticas para missões vencendo em 24h.
+- [x] **Alertas Financeiros:** Avisos ao atingir 80% e 100% do orçamento.
+- [x] **Motor de Resumo Diário:** Briefing matinal dinâmico no Dashboard.
+- [x] **Telegram Push (Interface):** Modal de conexão e infraestrutura de chat vinculada.
 
 ### 13. 🔊 Mini-Player Flutuante Universal
-- [x] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Glassmorphism persistent player).
-- [x] **Visualização Compacta:** Design de vidro fluantte com controles essenciais e capa da mídia.
+- [x] **Persistent Playback:** Player de vidro que acompanha o usuário em todas as páginas.
+- [x] **Visualização Compacta:** Controles essenciais com design minimalista.
 
 ### 14. 🤖 OCR & Inteligência de Dados ✅
-- [x] **Leitura de Notas via IA:** Extração simulada de alta fidelidade de valor, data e itens.
-- [x] **Categorização Inteligente:** IA sugere a categoria da despesa baseada no nome do estabelecimento.
-- [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações feitas pela IA.
+- [x] **Leitura de Notas via IA:** Extração de valor, data e itens.
+- [x] **Categorização Inteligente:** IA sugere a categoria da despesa automaticamente.
+- [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações.
 
 ---
 

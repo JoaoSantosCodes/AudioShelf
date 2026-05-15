@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
+import InsightsAssistant from "@/components/InsightsAssistant";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -42,6 +43,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background">
         <ClientLayout>
           {children}
+          <InsightsAssistant />
         </ClientLayout>
       </body>
     </html>
