@@ -299,13 +299,14 @@ export default function Home() {
         <div className="p-8 space-y-10">
           {/* SMART WIDGETS SECTION */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* GASTOS WIDGET */}
             <Link href="/financas" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-red-500/30 transition-all shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Wallet size={60} />
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Gastos do Mês</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-text">R$ 1.250</span>
+                <span className="text-2xl font-black text-text">R$ {dashboardStats.expenses.toLocaleString('pt-BR')}</span>
                 <span className="text-[10px] font-bold text-red-400">-15% do limite</span>
               </div>
               <div className="mt-4 w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
@@ -313,53 +314,39 @@ export default function Home() {
               </div>
             </Link>
 
+            {/* MERCADO WIDGET */}
             <Link href="/shopping" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-gold/30 transition-all shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-            </div>
-            <div className="mt-4 w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
-              <div className="h-full bg-red-400/60 w-[45%]" />
-            </div>
-            <Wallet className="absolute top-6 right-6 text-text-dim/10 group-hover:text-gold/10 transition-colors" size={48} />
-          </motion.div>
-
-          {/* MERCADO WIDGET */}
-          <motion.div 
-            whileHover={{ y: -5 }}
-            className="bg-surface-1 border border-border-custom p-6 rounded-[2rem] shadow-xl relative overflow-hidden group"
-          >
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-text-dim uppercase tracking-[0.2em]">Lista de Mercado</span>
-              <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-black text-text group-hover:text-gold transition-colors">{dashboardStats.shoppingCount} Itens</h3>
-                <span className="text-[10px] font-bold text-blue-400">Faltam comprar</span>
+                <ShoppingCart size={60} />
               </div>
-            </div>
-            <div className="flex gap-1 mt-4">
-              {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-2 border border-border-custom flex items-center justify-center text-[9px] font-bold text-text-dim">{i}</div>)}
-            </div>
-            <ShoppingCart className="absolute top-6 right-6 text-text-dim/10 group-hover:text-gold/10 transition-colors" size={48} />
-          </motion.div>
-
-          {/* MISSÕES WIDGET */}
-          <motion.div 
-            whileHover={{ y: -5 }}
-            className="bg-surface-1 border border-border-custom p-6 rounded-[2rem] shadow-xl relative overflow-hidden group"
-          >
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-text-dim uppercase tracking-[0.2em]">Missões de Hoje</span>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Lista de Mercado</p>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-black text-text group-hover:text-gold transition-colors">{dashboardStats.pendingTasks} Pendentes</h3>
+                <span className="text-2xl font-black text-text">{dashboardStats.shoppingCount} Itens</span>
+                <span className="text-[10px] font-bold text-gold">Faltam comprar</span>
+              </div>
+              <div className="mt-4 flex -space-x-2">
+                {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-[8px] font-bold text-gold">{i}</div>)}
+              </div>
+            </Link>
+
+            {/* MISSÕES WIDGET */}
+            <Link href="/kanban" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-emerald-500/30 transition-all shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Calendar size={60} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Missões de Hoje</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-text">{dashboardStats.pendingTasks} Pendentes</span>
                 <span className="text-[10px] font-bold text-emerald-400">Foco total</span>
               </div>
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="text-[10px] font-bold text-text-muted truncate">
-                {recentActivities.length > 0 ? `Próxima: ${recentActivities[0].title}` : 'Sem missões pendentes'}
-              </span>
-            </div>
-            <Calendar className="absolute top-6 right-6 text-text-dim/10 group-hover:text-gold/10 transition-colors" size={48} />
-          </motion.div>
+              <div className="mt-4 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-text-muted truncate">
+                  {recentActivities.length > 0 ? `Próxima: ${recentActivities[0].title}` : 'Sem pendências'}
+                </span>
+              </div>
+            </Link>
+          </section>
         </div>
           </section>
 
