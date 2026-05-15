@@ -45,9 +45,14 @@ export default function Home() {
     pendingTasks: 0
   });
 
-  const notifications = [
-    { id: 3, type: 'shopping', title: 'Lista Atualizada', text: 'Sua esposa adicionou 3 itens', time: 'Ontem', icon: ShoppingCart, color: 'text-blue-400' },
+  const notifications = dashboardStats.pendingTasks > 0 ? [
+    { id: 1, type: 'task', title: 'Missões Pendentes', text: `Você tem ${dashboardStats.pendingTasks} tarefas para hoje`, time: 'Agora', icon: Calendar, color: 'text-gold' },
+  ] : [
+    { id: 0, type: 'system', title: 'Sistema Pronto', text: 'Tudo sincronizado e atualizado.', time: 'Agora', icon: CheckCircle2, color: 'text-emerald-400' }
   ];
+
+  const budget = 5000;
+  const expensePercentage = Math.min(100, (dashboardStats.expenses / budget) * 100);
 
   const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
 
@@ -321,7 +326,11 @@ export default function Home() {
                 <span className="text-[10px] font-bold text-red-400">-15% do limite</span>
               </div>
               <div className="mt-4 w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                <div className="h-full bg-red-400/50 rounded-full" style={{ width: '45%' }} />
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${expensePercentage}%` }}
+                  className="h-full bg-red-400/50 rounded-full"
+                />
               </div>
             </Link>
 
@@ -333,10 +342,16 @@ export default function Home() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Lista de Mercado</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-text">{dashboardStats.shoppingCount} Itens</span>
-                <span className="text-[10px] font-bold text-gold">Faltam comprar</span>
+                <span className="text-[10px] font-bold text-gold">{dashboardStats.shoppingCount > 0 ? 'Faltam comprar' : 'Estoque em dia'}</span>
               </div>
               <div className="mt-4 flex -space-x-2">
-                {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-[8px] font-bold text-gold">{i}</div>)}
+                {dashboardStats.shoppingCount > 0 ? (
+                  [1, 2, 3].slice(0, dashboardStats.shoppingCount).map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-[8px] font-bold text-gold">{i}</div>)
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-surface-2 border border-border-custom flex items-center justify-center">
+                    <CheckCircle2 size={10} className="text-emerald-400" />
+                  </div>
+                )}
               </div>
             </Link>
 
