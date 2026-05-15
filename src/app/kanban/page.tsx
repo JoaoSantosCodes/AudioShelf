@@ -344,7 +344,7 @@ export default function KanbanPage() {
             <Home size={18} />
           </Link>
           
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden xl:flex items-center gap-6">
             <Link href="/agenda" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
               <Calendar size={18} />
               <span className="text-sm font-semibold">Agenda Semanal</span>
