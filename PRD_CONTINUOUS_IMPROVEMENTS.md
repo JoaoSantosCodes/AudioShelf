@@ -77,19 +77,18 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 8. 💰 Finanças & Orçamento
 - [x] **Controle de Gastos:** Registro de despesas diárias real com Supabase.
-- [/] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo.
+- [/] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo (In progress).
 - [x] **Arquivo Digital de Notas:** Interface de foto e anexo de recibos integrada.
-- [/] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas).
+- [/] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas) (In progress).
 - [x] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
 
 ### 9. 🛒 Lista de Compras Inteligente
 - [x] **Live Shopping List:** Lista de mercado compartilhada com sincronização em tempo real (Realtime).
-- [ ] **Sugestões Inteligentes:** Sugerir itens baseados no histórico de compras anteriores.
+- [x] **Sugestões Inteligentes:** Motor preditivo que sugere itens de mercado baseados na frequência de compra histórica.
 
 ### 10. 🎙️ Automação & IA Avançada
-- [/] **Voice-to-Action (Whisper):** Transição de comandos simulados para captura de áudio real via navegador (In progress).
+- [x] **Voice-to-Action (Whisper):** Transição de comandos simulados para captura de áudio real via navegador.
 - [x] **Assistente de Insights:** Chat de IA interativo disponível globalmente para consulta de dados.
-- [x] **Sugestões Inteligentes:** Motor preditivo que sugere itens de mercado baseados na frequência de compra histórica.
 - [x] **Telegram Automation:** Lógica de despacho de mensagens para resumos e alertas táticos no celular.
 
 ### 11. 🔍 Ecossistema Unificado

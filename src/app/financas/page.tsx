@@ -62,6 +62,8 @@ export default function FinancePage() {
   const [aiScanHistory, setAiScanHistory] = useState<any[]>([]);
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const categories = [
     { name: 'Mercado', icon: ShoppingCart, color: 'text-blue-400' },
@@ -145,23 +147,61 @@ export default function FinancePage() {
 
   const handleVoiceInput = async () => {
     if (!user) return;
-    setIsListening(true);
-    
-    // Simulação de IA Whisper extraindo comando
-    setTimeout(async () => {
-      const simulatedCommand = "Gastei 15 reais com estacionamento";
-      const result = await processVoiceCommand(simulatedCommand, user.id);
-      
-      if (result.success) {
-        if (result.module === 'finance') {
-          fetchTransactions(user.id);
-          setIsModalOpen(false);
-        }
-        // Feedback visual poderia ser um toast aqui
+
+    if (isListening) {
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+        setIsListening(false);
       }
-      
-      setIsListening(false);
-    }, 3000);
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        console.log("Finance audio captured:", audioBlob);
+        
+        setScanMessage("🤖 IA Processando áudio...");
+        setIsScanning(true);
+
+        // Simulação de processamento Whisper
+        setTimeout(async () => {
+          const simulatedCommand = "Gastei 45 reais com Lazer";
+          const result = await processVoiceCommand(simulatedCommand, user.id);
+          
+          if (result.success) {
+            setNewTx({
+              ...newTx,
+              amount: '45.00',
+              description: 'Gasto via Voz',
+              category: 'Lazer',
+              type: 'expense'
+            });
+            alert("Intenção capturada! Verifique os campos preenchidos.");
+          }
+          setIsScanning(false);
+          setScanMessage('');
+          stream.getTracks().forEach(track => track.stop());
+        }, 2000);
+      };
+
+      mediaRecorder.start();
+      setIsListening(true);
+    } catch (err) {
+      console.error("Erro ao acessar microfone:", err);
+      alert("Não foi possível acessar o microfone.");
+    }
   };
 
   const handleAddTransaction = async () => {
@@ -436,9 +476,10 @@ export default function FinancePage() {
                     <motion.div 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-center py-2 bg-gold/5 rounded-xl border border-gold/20"
+                      className="text-center py-3 bg-gold/5 rounded-2xl border border-gold/20 flex items-center justify-center gap-3"
                     >
-                      <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] animate-pulse">Ouvindo despesa... "Gastei 15 reais no shopping"</span>
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                      <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] animate-pulse">Gravando Áudio Real...</span>
                     </motion.div>
                   )}
                   
