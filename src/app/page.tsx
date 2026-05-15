@@ -242,9 +242,6 @@ export default function Home() {
                   <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">Ativo</span>
                 </div>
               </button>
-                <BarChart3 size={18} />
-                <span className="text-xs font-bold uppercase tracking-widest">Insights</span>
-              </Link>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>
               <div className="px-4 space-y-4">
