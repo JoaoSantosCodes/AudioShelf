@@ -76,14 +76,14 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [x] **Category Breakdown:** Gráfico visual de distribuição de esforço entre estudos, lazer e casa.
 
 ### 8. 💰 Finanças & Orçamento
-- [/] **Controle de Gastos:** Registro de despesas diárias implementado; Pendente upload de fotos.
+- [x] **Controle de Gastos:** Registro de despesas diárias real com Supabase.
 - [ ] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo.
 - [x] **Arquivo Digital de Notas:** Interface de foto e anexo de recibos integrada.
 - [ ] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas).
 - [x] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
 
 ### 9. 🛒 Lista de Compras Inteligente
-- [ ] **Live Shopping List:** Lista de mercado compartilhada com sincronização em tempo real.
+- [x] **Live Shopping List:** Lista de mercado compartilhada com sincronização em tempo real (Realtime).
 - [ ] **Sugestões Inteligentes:** Sugerir itens baseados no histórico de compras anteriores.
 
 ### 10. 🎙️ Automação & IA Avançada
@@ -91,24 +91,25 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [ ] **Assistente de Insights:** Chat de IA para perguntar: "Quanto gastei com mercado este mês?".
 
 ### 11. 🔍 Ecossistema Unificado & Refinamentos de IA
-- [ ] **Busca Global (Omni-Search):** Barra de busca única para encontrar Livros, Tarefas, Notas e Compras.
-- [ ] **OCR de Notas Fiscais:** Leitura automática de fotos de recibos para preenchimento financeiro via IA.
-- [ ] **Dashboard de Widgets:** Resumo visual na Home com dados de todos os módulos (Mercado, Finanças, Agenda).
+- [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar Livros, Tarefas, Notas e Compras.
+- [ ] **OCR de Notas Fiscais Real:** Integração com Vision API para leitura real de recibos.
+- [x] **Dashboard de Widgets:** Resumo visual na Home com dados reais de Finanças, Mercado e Kanban.
 - [ ] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento.
 
 ### 12. 🔔 Notificações & Alertas Inteligentes
-- [ ] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais.
+- [x] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais sincronizado.
 - [ ] **Lembretes de Tarefas:** Notificações programadas para missões que estão para vencer.
 - [ ] **Alertas Financeiros:** Avisos automáticos ao atingir limites de orçamento.
 - [ ] **Telegram Push:** Envio de resumos diários e alertas críticos via Bot de Telegram.
 
 ### 13. 🔊 Mini-Player Flutuante Universal
-- [ ] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Finanças, Mercado, Kanban).
-- [ ] **Visualização Compacta:** Design de vidro flutuante com controles essenciais e capa da mídia.
+- [x] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Glassmorphism persistent player).
+- [x] **Visualização Compacta:** Design de vidro flutuante com controles essenciais e capa da mídia.
 
-### 14. 🤖 OCR & Inteligência de Dados
-- [ ] **Leitura de Notas via IA:** Extração automática de valor, data e itens de fotos de notas fiscais.
+### 14. 🤖 OCR & Inteligência de Dados (Próximo Alvo)
+- [ ] **Leitura de Notas via Vision API:** Extração real de valor, data e itens.
 - [ ] **Categorização Inteligente:** IA sugere a categoria da despesa baseada no nome do estabelecimento.
+- [ ] **Histórico de Processamento:** Tela para revisar e aprovar extrações feitas pela IA.
 
 ---
 

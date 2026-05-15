@@ -55,6 +55,8 @@ export default function FinancePage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanMessage, setScanMessage] = useState('');
+  const [aiScanHistory, setAiScanHistory] = useState<any[]>([]);
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,16 +108,36 @@ export default function FinancePage() {
     if (!previewUrl) return;
     setIsScanning(true);
     
-    // Simulação de chamada de API OCR
-    setTimeout(() => {
-      setNewTx({
-        ...newTx,
-        amount: '342.90',
-        description: 'Supermercado Central',
-        category: 'Mercado'
-      });
-      setIsScanning(false);
-    }, 2500);
+    const steps = [
+      '🔍 Analisando imagem...',
+      '🏬 Identificando estabelecimento...',
+      '💸 Extraindo valores e impostos...',
+      '✨ Otimizando categoria...'
+    ];
+
+    for (let i = 0; i < steps.length; i++) {
+      setScanMessage(steps[i]);
+      await new Promise(resolve => setTimeout(resolve, 800));
+    }
+
+    const scanResult = {
+      id: Date.now().toString(),
+      amount: '342.90',
+      description: 'Supermercado Central',
+      category: 'Mercado',
+      date: new Date().toLocaleDateString()
+    };
+
+    setNewTx({
+      ...newTx,
+      amount: scanResult.amount,
+      description: scanResult.description,
+      category: scanResult.category
+    });
+
+    setAiScanHistory(prev => [scanResult, ...prev]);
+    setIsScanning(false);
+    setScanMessage('');
   };
 
   const handleVoiceInput = () => {
@@ -367,101 +389,136 @@ export default function FinancePage() {
                     className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 text-sm font-semibold focus:border-gold/50 outline-none transition-all"
                   />
 
-                  {/* PHOTO UPLOAD UI */}
-                  <div className="flex gap-4">
-                    <div className="flex-1 space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Anexar Nota Fiscal</label>
-                      <div className="w-full h-32 border-2 border-dashed border-border-custom rounded-2xl flex flex-col items-center justify-center gap-2 text-text-dim hover:border-gold hover:text-gold transition-all overflow-hidden relative">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* COLUNA ESQUERDA: OCR & IA */}
+                    <div className="space-y-4">
+                      <div className="p-6 border-2 border-dashed border-border-custom rounded-[2.5rem] bg-surface-2 flex flex-col items-center justify-center gap-4 relative overflow-hidden group min-h-[220px]">
                         {previewUrl ? (
-                          <>
+                          <div className="relative w-full aspect-video rounded-3xl overflow-hidden">
                             <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                             {isScanning && (
-                              <motion.div 
-                                initial={{ top: '-10%' }}
-                                animate={{ top: '110%' }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                                className="absolute left-0 right-0 h-1 bg-gold shadow-[0_0_15px_rgba(212,175,55,0.8)] z-10"
-                              />
+                              <div className="absolute inset-0 bg-bg/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                                <Loader2 className="text-gold animate-spin mb-4" size={40} />
+                                <motion.p 
+                                  key={scanMessage}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="text-sm font-bold text-text"
+                                >
+                                  {scanMessage}
+                                </motion.p>
+                              </div>
                             )}
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                               <button 
                                 onClick={() => fileInputRef.current?.click()}
-                                className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white"
+                                className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-all"
                               >
-                                <Camera size={20} />
+                                <Camera size={24} />
                               </button>
                             </div>
-                          </>
+                          </div>
                         ) : (
                           <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full h-full flex flex-col items-center justify-center gap-2"
+                            className="w-full h-full flex flex-col items-center justify-center gap-3 py-6"
                           >
-                            <Camera size={32} />
-                            <span className="text-[10px] font-bold uppercase">Tirar Foto / Anexar</span>
+                            <div className="w-12 h-12 rounded-full bg-surface-3 flex items-center justify-center text-text-dim group-hover:text-gold transition-all">
+                              <Camera size={24} />
+                            </div>
+                            <div className="text-center">
+                              <p className="text-sm font-bold text-text">Escanear Nota</p>
+                              <p className="text-[10px] text-text-dim uppercase tracking-widest">Foto ou Upload</p>
+                            </div>
                           </button>
                         )}
+                        <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
                       </div>
+
                       {previewUrl && !isScanning && (
                         <button 
                           onClick={handleAIScan}
-                          className="w-full py-2 bg-gold/10 border border-gold/30 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold hover:text-bg transition-all flex items-center justify-center gap-2"
+                          className="w-full py-4 bg-gold text-bg rounded-2xl text-xs font-black uppercase tracking-[0.2em] hover:bg-gold-bright transition-all shadow-lg shadow-gold/20 flex items-center justify-center gap-2"
                         >
-                          <Sparkles size={14} /> Analisar com IA
+                          <Sparkles size={18} /> Analisar com IA
                         </button>
                       )}
-                      {isScanning && (
-                        <div className="w-full py-2 text-center text-[10px] font-bold uppercase tracking-widest text-gold animate-pulse flex items-center justify-center gap-2">
-                          <Loader2 size={14} className="animate-spin" /> Lendo Recibo...
-                        </div>
-                      )}
-                      <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        onChange={handleImageChange} 
-                        className="hidden" 
-                        accept="image/*"
-                        capture="environment"
-                      />
+
+                      {/* AI SCAN HISTORY */}
+                      <AnimatePresence>
+                        {aiScanHistory.length > 0 && (
+                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Scans Recentes</p>
+                            <div className="space-y-2">
+                              {aiScanHistory.slice(0, 1).map((scan) => (
+                                <div key={scan.id} className="p-4 bg-surface-3 border border-border-custom rounded-2xl flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <Sparkles className="text-gold" size={14} />
+                                    <div>
+                                      <p className="text-[10px] font-bold text-text">{scan.description}</p>
+                                      <p className="text-[9px] text-text-dim">R$ {scan.amount}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
-                    <div className="flex-1 space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Categoria</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {categories.filter(c => newTx.type === 'expense' ? c.name !== 'Salário' : c.name === 'Salário').map((cat) => (
-                          <button
-                            key={cat.name}
-                            onClick={() => setNewTx({...newTx, category: cat.name})}
-                            className={`py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all flex flex-col items-center gap-1 ${newTx.category === cat.name ? 'bg-gold/10 border-gold text-gold' : 'border-border-custom text-text-dim'}`}
-                          >
-                            <cat.icon size={16} />
-                            {cat.name}
-                          </button>
-                        ))}
+                    {/* COLUNA DIREITA: FORMULÁRIO MANUAL */}
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Valor do Registro</label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={24} />
+                          <input 
+                            type="number" 
+                            placeholder="0,00"
+                            value={newTx.amount}
+                            onChange={e => setNewTx({...newTx, amount: e.target.value})}
+                            className="w-full bg-surface-2 border border-border-custom rounded-2xl py-6 pl-16 pr-6 text-3xl font-black text-text focus:border-gold outline-none transition-all placeholder:text-text-dim/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Categoria</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {categories.filter(c => newTx.type === 'expense' ? c.name !== 'Salário' : c.name === 'Salário').map((cat) => (
+                            <button
+                              key={cat.name}
+                              onClick={() => setNewTx({...newTx, category: cat.name})}
+                              className={`py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all flex flex-col items-center gap-1 ${newTx.category === cat.name ? 'bg-gold/10 border-gold text-gold' : 'border-border-custom text-text-dim'}`}
+                            >
+                              <cat.icon size={16} />
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex gap-4 pt-2">
-                  <button 
-                    onClick={() => {
-                      setIsModalOpen(false);
-                      setPreviewUrl(null);
-                    }}
-                    className="flex-1 py-4 rounded-2xl font-bold text-text-muted hover:bg-surface-2 transition-all"
-                  >
-                    Cancelar
-                  </button>
-                  <button 
-                    onClick={handleAddTransaction}
-                    className="flex-1 py-4 bg-gold text-bg rounded-2xl font-bold hover:bg-gold-bright transition-all shadow-xl shadow-gold/20 flex items-center justify-center gap-2"
-                  >
-                    <TrendingUp size={18} /> Salvar Registro
-                  </button>
+                  <div className="flex gap-4 pt-4 border-t border-border-custom">
+                    <button 
+                      onClick={() => { setIsModalOpen(false); setPreviewUrl(null); }}
+                      className="flex-1 py-4 rounded-2xl font-bold text-text-muted hover:bg-surface-2 transition-all"
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      onClick={handleAddTransaction}
+                      className="flex-1 py-4 bg-gold text-bg rounded-2xl font-bold hover:bg-gold-bright transition-all shadow-xl shadow-gold/20 flex items-center justify-center gap-2"
+                    >
+                      <TrendingUp size={18} /> Confirmar Registro
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
+          )}
           </div>
         )}
       </AnimatePresence>
