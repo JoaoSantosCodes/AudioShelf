@@ -346,6 +346,7 @@ export default function Home() {
               </div>
             </div>
         </motion.aside>
+      </AnimatePresence>
 
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-32 md:pb-0">
@@ -625,6 +626,7 @@ export default function Home() {
           </div>
         )}
       </AnimatePresence>
+      </main>
     </div>
   );
 }
