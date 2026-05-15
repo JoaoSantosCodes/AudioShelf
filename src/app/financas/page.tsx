@@ -514,12 +514,13 @@ export default function FinancePage() {
                     >
                       <TrendingUp size={18} /> Confirmar Registro
                     </button>
-                  </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
-          )}
-        </AnimatePresence>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
