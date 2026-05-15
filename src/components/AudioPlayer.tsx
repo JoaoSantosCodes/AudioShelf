@@ -167,14 +167,43 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border-custom z-50 animate-in slide-in-from-bottom duration-500">
-      {/* VÍDEO VIEWPORT (Aparece apenas para vídeos) */}
-      {isVideo && (
-        <div className="max-w-4xl mx-auto mt-4 px-4">
-          <div className="aspect-video bg-black rounded-t-xl overflow-hidden shadow-2xl border-x border-t border-gold/10 relative group">
-            <video 
+      <div className="max-w-7xl mx-auto flex flex-col">
+        {/* VÍDEO VIEWPORT (Aparece apenas para vídeos) */}
+        {isVideo && (
+          <div className="w-full max-w-4xl mx-auto mt-4 px-4">
+            <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gold/10 relative group">
+              <video 
+                ref={audioRef as any}
+                src={streamUrl}
+                className="w-full h-full"
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleMetadataLoaded}
+                onEnded={() => {
+                  if (currentChapterIndex < book.chapters.length - 1) {
+                    setCurrentChapterIndex(prev => prev + 1);
+                  } else {
+                    setIsPlaying(false);
+                  }
+                }}
+                onClick={togglePlay}
+              />
+              {!isPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none transition-all group-hover:bg-black/20">
+                  <div className="w-16 h-16 rounded-full bg-gold/20 backdrop-blur-md flex items-center justify-center border border-gold/30 shadow-2xl">
+                    <Play size={32} className="text-gold fill-gold ml-1" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* CONTROLS BAR */}
+        <div className="px-4 md:px-8 py-3 md:py-4 flex flex-col md:flex-row items-center gap-4 md:gap-6">
+          {!isVideo && (
+            <audio 
               ref={audioRef as any}
               src={streamUrl}
-              className="w-full h-full"
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleMetadataLoaded}
               onEnded={() => {
@@ -184,170 +213,134 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
                   setIsPlaying(false);
                 }
               }}
-              onClick={togglePlay}
             />
-            {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none transition-all group-hover:bg-black/20">
-                <div className="w-16 h-16 rounded-full bg-gold/20 backdrop-blur-md flex items-center justify-center border border-gold/30">
-                  <Play size={32} className="text-gold fill-gold ml-1" />
+          )}
+
+          {/* BOOK INFO (LEFT) */}
+          <div className="flex items-center justify-between w-full md:w-64 shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              {!isVideo && (
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-lg">
+                  <img src={book.cover} className="w-full h-full object-cover" alt="" />
                 </div>
+              )}
+              <div className="min-w-0">
+                <div className="text-[12px] md:text-[13px] font-medium text-text truncate">{book.title}</div>
+                <div className="text-[10px] md:text-[11px] text-text-muted truncate">{currentChapter.title}</div>
               </div>
-            )}
+            </div>
+            
+            {/* Mobile Play Button */}
+            <button 
+              onClick={togglePlay}
+              className="md:hidden w-10 h-10 rounded-full bg-gold text-bg flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
+              {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+            </button>
           </div>
-        </div>
-      )}
 
-      <div className="px-4 md:px-8 py-3 md:py-4 flex flex-col md:flex-row items-center gap-4 md:gap-6 shrink-0">
-        {!isVideo && (
-          <audio 
-            ref={audioRef as any}
-            src={streamUrl}
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={handleMetadataLoaded}
-            onEnded={() => {
-              if (currentChapterIndex < book.chapters.length - 1) {
-                setCurrentChapterIndex(prev => prev + 1);
-              } else {
-                setIsPlaying(false);
-              }
-            }}
-          />
-        )}
+          {/* MAIN CONTROLS & PROGRESS (CENTER) */}
+          <div className="flex-1 flex flex-col items-center gap-2 w-full">
+            <div className="hidden md:flex items-center gap-6">
+              <button 
+                onClick={() => currentChapterIndex > 0 && setCurrentChapterIndex(prev => prev - 1)}
+                disabled={currentChapterIndex === 0}
+                className="text-text-dim hover:text-gold transition-colors disabled:opacity-20"
+              >
+                <SkipBack size={22} fill="currentColor" />
+              </button>
 
-        {/* BOOK INFO & MAIN CONTROLS (MOBILE GROUP) */}
-        <div className="flex items-center justify-between w-full md:w-60 shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            {!isVideo && (
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden">
-                <img src={book.cover} className="w-full h-full object-cover" alt="" />
-              </div>
-            )}
-            <div className="min-w-0">
-              <div className="text-[12px] md:text-[13px] font-medium text-text truncate">{book.title}</div>
-              <div className="text-[10px] md:text-[11px] text-text-muted truncate">{currentChapter.title}</div>
+              <button onClick={() => skip(-30)} className="text-text-dim hover:text-text transition-colors">
+                <RotateCcw size={20} />
+              </button>
+
+              <button 
+                onClick={togglePlay}
+                className="w-12 h-12 rounded-full bg-gold text-bg flex items-center justify-center hover:bg-amber hover:scale-105 transition-all shadow-lg shadow-gold/20"
+              >
+                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+              </button>
+
+              <button onClick={() => skip(30)} className="text-text-dim hover:text-text transition-colors">
+                <RotateCw size={20} />
+              </button>
+
+              <button 
+                onClick={() => currentChapterIndex < book.chapters.length - 1 && setCurrentChapterIndex(prev => prev + 1)}
+                disabled={currentChapterIndex === book.chapters.length - 1}
+                className="text-text-dim hover:text-gold transition-colors disabled:opacity-20"
+              >
+                <SkipForward size={22} fill="currentColor" />
+              </button>
+            </div>
+
+            {/* PROGRESS BAR */}
+            <div className="flex items-center gap-3 w-full max-w-[600px]">
+              <span className="text-[10px] text-text-muted w-8 text-center tabular-nums">{formatTime(currentTime)}</span>
+              <input 
+                type="range"
+                min="0"
+                max={duration || 0}
+                value={currentTime}
+                onChange={(e) => seek(Number(e.target.value))}
+                className="flex-1 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold hover:h-1.5 transition-all"
+              />
+              <span className="text-[10px] text-text-muted w-8 text-center tabular-nums">{formatTime(duration)}</span>
+            </div>
+
+            {/* Mobile Sub-controls */}
+            <div className="flex md:hidden items-center justify-center gap-8 w-full mt-1">
+              <button onClick={() => skip(-30)} className="text-text-dim active:text-gold flex flex-col items-center gap-1">
+                <RotateCcw size={18} />
+                <span className="text-[8px] uppercase tracking-tighter">Voltar 30s</span>
+              </button>
+              <button 
+                onClick={changePlaybackRate}
+                className="text-gold text-[11px] font-bold border border-gold/30 px-2 py-0.5 rounded"
+              >
+                {playbackRate}x
+              </button>
+              <button onClick={() => skip(30)} className="text-text-dim active:text-gold flex flex-col items-center gap-1">
+                <RotateCw size={18} />
+                <span className="text-[8px] uppercase tracking-tighter">Avançar 30s</span>
+              </button>
             </div>
           </div>
-        
-          {/* Mobile Play Button */}
-          <button 
-            onClick={togglePlay}
-            className="md:hidden w-10 h-10 rounded-full bg-gold text-bg flex items-center justify-center shadow-lg"
-          >
-            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
-          </button>
-        </div>
 
-      {/* CONTROLS & PROGRESS */}
-      <div className="flex-1 flex flex-col items-center gap-2 md:gap-2.5 w-full">
-        <div className="hidden md:flex items-center gap-5">
-          <button 
-            onClick={() => {
-              if (currentChapterIndex > 0) {
-                setCurrentChapterIndex(prev => prev - 1);
-                setIsPlaying(true);
-              }
-            }}
-            disabled={currentChapterIndex === 0}
-            className="text-text-dim hover:text-gold transition-all disabled:opacity-20"
-          >
-            <SkipBack size={22} fill="currentColor" />
-          </button>
-
-          <button onClick={() => skip(-30)} className="text-text-dim hover:text-text transition-all">
-            <RotateCcw size={20} />
-          </button>
-
-          <button 
-            onClick={togglePlay}
-            className="w-12 h-12 rounded-full bg-gold text-bg flex items-center justify-center hover:bg-amber hover:scale-105 transition-all shadow-lg shadow-gold/20"
-          >
-            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
-          </button>
-
-          <button onClick={() => skip(30)} className="text-text-dim hover:text-text transition-all">
-            <RotateCw size={20} />
-          </button>
-
-          <button 
-            onClick={() => {
-              if (currentChapterIndex < book.chapters.length - 1) {
-                setCurrentChapterIndex(prev => prev + 1);
-                setIsPlaying(true);
-              }
-            }}
-            disabled={currentChapterIndex === book.chapters.length - 1}
-            className="text-text-dim hover:text-gold transition-all disabled:opacity-20"
-          >
-            <SkipForward size={22} fill="currentColor" />
-          </button>
-        </div>
-
-        {/* PROGRESS (FULL WIDTH ON MOBILE) */}
-        <div className="flex items-center gap-2.5 w-full max-w-[600px]">
-          <span className="text-[10px] md:text-[11px] text-text-muted w-8 md:w-10 text-center tabular-nums font-medium">{formatTime(currentTime)}</span>
-          <input 
-            type="range"
-            min="0"
-            max={duration || 0}
-            value={currentTime}
-            onChange={(e) => seek(Number(e.target.value))}
-            className="flex-1 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold hover:h-1.5 transition-all"
-          />
-          <span className="text-[10px] md:text-[11px] text-text-muted w-8 md:w-10 text-center tabular-nums font-medium">{formatTime(duration)}</span>
-        </div>
-
-        {/* Mobile Sub-controls (Skip 30s / Speed) */}
-        <div className="flex md:hidden items-center justify-center gap-8 w-full mt-1">
-          <button onClick={() => skip(-30)} className="text-text-dim active:text-gold flex flex-col items-center gap-1">
-            <RotateCcw size={18} />
-            <span className="text-[8px] uppercase tracking-tighter">Voltar 30s</span>
-          </button>
-          <button 
-            onClick={changePlaybackRate}
-            className="text-gold text-[11px] font-bold border border-gold/30 px-2 py-0.5 rounded"
-          >
-            {playbackRate}x
-          </button>
-          <button onClick={() => skip(30)} className="text-text-dim active:text-gold flex flex-col items-center gap-1">
-            <RotateCw size={18} />
-            <span className="text-[8px] uppercase tracking-tighter">Avançar 30s</span>
-          </button>
-        </div>
-      </div>
-
-      {/* RIGHT CONTROLS (DESKTOP ONLY) */}
-      <div className="hidden md:flex items-center gap-5 w-[240px] justify-end shrink-0">
-        <div className="relative group/speed">
-          <button 
-            onClick={changePlaybackRate}
-            className="bg-surface-3 border border-border-custom text-gold text-[12px] font-bold px-3 py-1 rounded-md hover:bg-gold hover:text-bg transition-all min-w-[50px]"
-          >
-            {playbackRate}x
-          </button>
-          <div className="absolute bottom-full right-0 mb-3 hidden group-hover/speed:flex flex-col bg-surface border border-border-custom rounded-xl overflow-hidden shadow-2xl z-50 min-w-[100px]">
-            <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-text-muted border-b border-border-custom bg-bg font-bold">Sleep Timer</div>
-            {[15, 30, 45, 60].map(m => (
-              <button key={m} onClick={() => setSleepTimer(m * 60)} className="px-4 py-2 text-[12px] hover:bg-gold hover:text-bg transition-colors text-left flex justify-between items-center">
-                {m}m <Moon size={10} />
+          {/* VOLUME & SPEED (RIGHT - DESKTOP) */}
+          <div className="hidden md:flex items-center gap-5 w-64 justify-end shrink-0">
+            <div className="relative group/speed">
+              <button 
+                onClick={changePlaybackRate}
+                className="bg-surface-3 border border-border-custom text-gold text-[12px] font-bold px-3 py-1.5 rounded-md hover:bg-gold hover:text-bg transition-all min-w-[55px] shadow-sm"
+              >
+                {playbackRate}x
               </button>
-            ))}
-          </div>
-        </div>
+              <div className="absolute bottom-full right-0 mb-3 hidden group-hover/speed:flex flex-col bg-surface border border-border-custom rounded-xl overflow-hidden shadow-2xl z-50 min-w-[120px]">
+                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-text-muted border-b border-border-custom bg-bg/50 font-bold">Sleep Timer</div>
+                {[15, 30, 45, 60].map(m => (
+                  <button key={m} onClick={() => setSleepTimer(m * 60)} className="px-4 py-2.5 text-[12px] hover:bg-gold hover:text-bg transition-colors text-left flex justify-between items-center group/item">
+                    {m} min <Moon size={12} className="text-text-dim group-hover/item:text-bg" />
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="flex items-center gap-2.5 group/vol">
-          <Volume2 size={18} className="text-text-dim group-hover/vol:text-gold transition-colors" />
-          <input 
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-20 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-text-dim hover:accent-gold transition-all"
-          />
+            <div className="flex items-center gap-2.5 group/vol">
+              <Volume2 size={18} className="text-text-dim group-hover/vol:text-gold transition-colors" />
+              <input 
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="w-24 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-text-dim hover:accent-gold transition-all"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 }
