@@ -131,4 +131,4 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ---
 
-*Última atualização tática em: 15 de Maio de 2026 às 08:00h*
+*Última atualização tática em: 15 de Maio de 2026 às 08:30h*
