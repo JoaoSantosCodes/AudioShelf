@@ -25,7 +25,8 @@ import {
   Mic,
   Volume2,
   Send,
-  Sparkles
+  Sparkles,
+  Moon
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -39,6 +40,7 @@ import { processVoiceCommand } from '@/lib/commandProcessor';
 import PresenceIndicator from '@/components/PresenceIndicator';
 import { checkSmartAlerts, SmartNotification, generateDailyBriefing } from '@/lib/notificationEngine';
 import { sendTelegramMessage, formatTelegramBriefing } from '@/lib/telegramEngine';
+import { isQuietModeActive } from '@/lib/quietMode';
 
 export default function Home() {
   const { activeMedia, playMedia, closeMedia } = useMedia();
@@ -107,17 +109,18 @@ export default function Home() {
   };
 
   const handleSendToTelegram = async () => {
-    if (!telegramChatId) {
+    if (!telegramChatId || !dailyBriefing) {
       setIsTelegramModalOpen(true);
       return;
     }
+
+    const message = formatTelegramBriefing(dailyBriefing);
+    const result = await sendTelegramMessage(telegramChatId, message, true);
     
-    if (dailyBriefing) {
-      const message = formatTelegramBriefing(dailyBriefing);
-      const result = await sendTelegramMessage(telegramChatId, message);
-      if (result.success) {
-        alert("Briefing enviado com sucesso para o Telegram!");
-      }
+    if (result.success) {
+      alert("Briefing enviado com sucesso para o Telegram!");
+    } else {
+      alert(`Erro ao enviar: ${result.error}`);
     }
   };
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
@@ -441,6 +444,11 @@ export default function Home() {
               <div className="relative z-10 space-y-4">
                 <div className="flex items-center gap-3">
                   <span className="px-3 py-1 bg-gold text-bg text-[9px] font-black uppercase tracking-[0.2em] rounded-full">Inteligência Estratégica</span>
+                  {isQuietModeActive() && (
+                    <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-500/20">
+                      <Moon size={10} fill="currentColor" /> Quiet Mode Ativo
+                    </span>
+                  )}
                   <span className="text-[10px] font-bold text-gold/60">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                 </div>
                 <h2 className="text-3xl font-serif font-bold text-text">{dailyBriefing.title}</h2>

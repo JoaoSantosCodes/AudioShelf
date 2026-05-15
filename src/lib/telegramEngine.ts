@@ -1,3 +1,5 @@
+import { isQuietModeActive } from './quietMode';
+
 export interface TelegramBriefing {
   title: string;
   summary: string;
@@ -23,10 +25,16 @@ export const formatTelegramBriefing = (briefing: TelegramBriefing) => {
   return `${emojiHeader}${body}${taskSection}${footer}`;
 };
 
-export const sendTelegramMessage = async (chatId: string, text: string) => {
+export const sendTelegramMessage = async (chatId: string, text: string, force = false) => {
   if (!chatId) {
     console.error("Tentativa de envio sem Chat ID configurado.");
     return { success: false, error: "Missing Chat ID" };
+  }
+
+  // FILTRO TÁTICO: Quiet Mode
+  if (!force && isQuietModeActive()) {
+    console.log("[TELEGRAM] Envio bloqueado: Smart Quiet Mode está ATIVO.");
+    return { success: false, skipped: true, error: "Quiet Mode Active" };
   }
 
   console.log(`[TELEGRAM MOCK] Enviando para ${chatId}:`, text);
