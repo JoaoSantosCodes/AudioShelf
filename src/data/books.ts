@@ -3,6 +3,7 @@ export interface Chapter {
   title: string;
   telegram_file_id: string;
   type?: 'audio' | 'video';
+  transcription?: string;
 }
 
 export interface Book {
@@ -13,6 +14,7 @@ export interface Book {
   duration: string;
   purchase_url?: string;
   category?: string;
+  summary?: string;
   chapters: Chapter[];
 }
 

@@ -1,196 +1,147 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, RotateCw, Volume2, List, Moon, X, Activity } from 'lucide-react';
-import { Book, Chapter } from '@/data/books';
-import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Play, 
+  Pause, 
+  SkipBack, 
+  SkipForward, 
+  Volume2, 
+  Settings, 
+  Maximize2, 
+  List, 
+  Download,
+  Share2,
+  Heart,
+  Repeat,
+  Shuffle,
+  ChevronUp,
+  FileText,
+  Sparkles,
+  Loader2,
+  X
+} from 'lucide-react';
+import { Book } from '@/data/books';
+import { useMedia } from '@/context/MediaContext';
 
 interface AudioPlayerProps {
   book: Book;
-  initialChapterIndex?: number;
   userId: string;
 }
 
-// COMPONENTE DE VISUALIZAÇÃO DE ONDA (REAL-TIME)
-const WaveformVisualizer = ({ audioRef, isPlaying, isVideo }: { audioRef: React.RefObject<HTMLAudioElement>, isPlaying: boolean, isVideo: boolean }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export default function AudioPlayer({ book, userId }: AudioPlayerProps) {
+  const { closeMedia } = useMedia();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [currentChapter, setCurrentChapter] = useState(0);
+  const [showPlaylist, setShowPlaylist] = useState(false);
+  const [showAISection, setShowAISection] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [transcription, setTranscription] = useState(book.chapters[currentChapter]?.transcription || '');
+  const [summary, setSummary] = useState(book.summary || '');
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationRef = useRef<number | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!audioRef.current || isVideo) return;
+    setTranscription(book.chapters[currentChapter]?.transcription || '');
+    setSummary(book.summary || '');
+  }, [currentChapter, book]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      setupVisualizer();
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+  }, [isPlaying]);
+
+  const setupVisualizer = () => {
+    if (!audioRef.current || !canvasRef.current) return;
 
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const source = audioContext.createMediaElementSource(audioRef.current);
     const analyser = audioContext.createAnalyser();
-    
-    analyser.fftSize = 256;
+
     source.connect(analyser);
     analyser.connect(audioContext.destination);
+    analyser.fftSize = 256;
     analyserRef.current = analyser;
 
-    return () => {
-      source.disconnect();
-      analyser.disconnect();
-      audioContext.close();
-    };
-  }, [audioRef, isVideo]);
-
-  useEffect(() => {
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = canvas.getContext('2d')!;
 
     const draw = () => {
-      if (!analyserRef.current) return;
-      
-      const bufferLength = analyserRef.current.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyserRef.current.getByteFrequencyData(dataArray);
+      animationRef.current = requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
       const barWidth = (canvas.width / bufferLength) * 2.5;
       let barHeight;
       let x = 0;
 
       for (let i = 0; i < bufferLength; i++) {
-        barHeight = (dataArray[i] / 255) * canvas.height;
-        
-        // Gradient Gold/Amber
+        barHeight = dataArray[i] / 2;
         const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-        gradient.addColorStop(0, 'rgba(212, 175, 55, 0.2)');
-        gradient.addColorStop(1, 'rgba(212, 175, 55, 0.8)');
+        gradient.addColorStop(0, '#d4af37');
+        gradient.addColorStop(1, '#f4d03f');
         
         ctx.fillStyle = gradient;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
         x += barWidth + 1;
       }
-
-      animationRef.current = requestAnimationFrame(draw);
     };
 
-    if (isPlaying) {
-      draw();
-    } else {
-      cancelAnimationFrame(animationRef.current);
+    draw();
+  };
+
+  const handleTranscribe = async () => {
+    setIsTranscribing(true);
+    try {
+      const res = await fetch('/api/ai/transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          file_id: book.chapters[currentChapter].telegram_file_id,
+          chapter_id: book.chapters[currentChapter].id 
+        })
+      });
+      const data = await res.json();
+      if (data.text) setTranscription(data.text);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsTranscribing(false);
     }
+  };
 
-    return () => cancelAnimationFrame(animationRef.current);
-  }, [isPlaying]);
-
-  if (isVideo) return null;
-
-  return (
-    <canvas 
-      ref={canvasRef} 
-      className="absolute bottom-0 left-0 w-full h-12 opacity-30 pointer-events-none"
-      width={800}
-      height={100}
-    />
-  );
-};
-
-export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: AudioPlayerProps) {
-  const [currentChapterIndex, setCurrentChapterIndex] = useState(initialChapterIndex);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [volume, setVolume] = useState(1);
-  const [sleepTimer, setSleepTimer] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const currentChapter = book.chapters[currentChapterIndex];
-  const streamUrl = `/api/stream?file_id=${currentChapter.telegram_file_id}`;
-
-  // Sleep Timer logic
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (sleepTimer !== null && sleepTimer > 0) {
-      interval = setInterval(() => {
-        setSleepTimer(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    } else if (sleepTimer === 0) {
-      if (audioRef.current && isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      }
-      setSleepTimer(null);
+  const handleSummarize = async () => {
+    if (!transcription) return;
+    setIsSummarizing(true);
+    try {
+      const res = await fetch('/api/ai/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          text: transcription,
+          book_id: book.id 
+        })
+      });
+      const data = await res.json();
+      if (data.summary) setSummary(data.summary);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSummarizing(false);
     }
-    return () => clearInterval(interval);
-  }, [sleepTimer, isPlaying]);
-
-  // Sincronização inicial com o Cloud
-  useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_progress')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('book_id', book.id)
-          .maybeSingle();
-
-        if (data) {
-          const chapterIdx = book.chapters.findIndex(c => c.telegram_file_id === data.chapter_telegram_id);
-          if (chapterIdx !== -1) {
-            setCurrentChapterIndex(chapterIdx);
-            setCurrentTime(data.current_time);
-            if (audioRef.current) audioRef.current.currentTime = data.current_time;
-          }
-        } else {
-          // Fallback local se não houver no Cloud
-          const saved = localStorage.getItem(`audiobook-progress-${book.id}`);
-          if (saved) {
-            const { chapterIndex, time } = JSON.parse(saved);
-            setCurrentChapterIndex(chapterIndex);
-            setCurrentTime(time);
-            if (audioRef.current) audioRef.current.currentTime = time;
-          }
-        }
-      } catch (err) {
-        console.error("Erro ao carregar progresso:", err);
-      }
-    };
-    fetchProgress();
-  }, [book.id]);
-
-  // Salvar Progresso (Cloud + Local)
-  useEffect(() => {
-    const syncProgress = async () => {
-      if (!isPlaying || !audioRef.current) return;
-
-      const time = audioRef.current.currentTime;
-      
-      // Local (rápido)
-      localStorage.setItem(`audiobook-progress-${book.id}`, JSON.stringify({
-        chapterIndex: currentChapterIndex,
-        time
-      }));
-
-      // Cloud (a cada 10s via intervalo ou quando pausar)
-      try {
-        await supabase
-          .from('user_progress')
-          .upsert({
-            user_id: userId,
-            book_id: book.id,
-            chapter_telegram_id: currentChapter.telegram_file_id,
-            current_time: time,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id, book_id' });
-      } catch (err) {
-        console.error("Erro ao salvar no Cloud:", err);
-      }
-    };
-
-    const interval = setInterval(syncProgress, 10000);
-    return () => clearInterval(interval);
-  }, [isPlaying, currentTime, currentChapter.telegram_file_id, book.id]);
+  };
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -200,231 +151,216 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
     }
   };
 
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleMetadataLoaded = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  };
-
-  const seek = (time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  };
-
-  const skip = (seconds: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime += seconds;
-    }
-  };
-
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const changePlaybackRate = () => {
-    const rates = [1, 1.25, 1.5, 2, 0.75];
-    const nextRate = rates[(rates.indexOf(playbackRate) + 1) % rates.length];
-    setPlaybackRate(nextRate);
-    if (audioRef.current) audioRef.current.playbackRate = nextRate;
-  };
-
-  // Manter velocidade e volume
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = playbackRate;
-      audioRef.current.volume = volume;
-    }
-  }, [currentChapterIndex, playbackRate, volume]);
-
-  const isVideo = currentChapter.type === 'video';
-
   return (
     <motion.div 
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 100, opacity: 0 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-      className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border-custom z-50 shadow-2xl"
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      className="fixed bottom-0 left-0 right-0 z-[100] bg-background/80 backdrop-blur-2xl border-t border-border-custom shadow-2xl"
     >
-      <WaveformVisualizer audioRef={audioRef as any} isPlaying={isPlaying} isVideo={isVideo} />
-      
-      <div className="max-w-7xl mx-auto flex flex-col relative z-10">
-        {/* VÍDEO VIEWPORT (Aparece apenas para vídeos) */}
-        {isVideo && (
-          <div className="w-full max-w-4xl mx-auto mt-4 px-4">
-            <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gold/20 relative group glass-panel">
-              <video 
-                ref={audioRef as any}
-                src={streamUrl}
-                className="w-full h-full"
-                playsInline
-                autoPlay={isPlaying}
-                preload="auto"
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleMetadataLoaded}
-                onEnded={() => {
-                  if (currentChapterIndex < book.chapters.length - 1) {
-                    setCurrentChapterIndex(prev => prev + 1);
-                  } else {
-                    setIsPlaying(false);
-                  }
-                }}
-                onClick={togglePlay}
-              />
-              {!isPlaying && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none transition-all group-hover:bg-black/20">
-                  <div className="w-20 h-20 rounded-full bg-gold/10 backdrop-blur-xl flex items-center justify-center border border-gold/30 shadow-2xl scale-90 group-hover:scale-100 transition-transform duration-500">
-                    <Play size={40} className="text-gold fill-gold ml-1" />
+      <audio 
+        ref={audioRef}
+        src={`/api/stream?file_id=${book.chapters[currentChapter].telegram_file_id}`}
+        onTimeUpdate={() => audioRef.current && setCurrentTime(audioRef.current.currentTime)}
+        onLoadedMetadata={() => audioRef.current && setDuration(audioRef.current.duration)}
+        onEnded={() => currentChapter < book.chapters.length - 1 && setCurrentChapter(currentChapter + 1)}
+      />
+
+      <div className="max-w-[1920px] mx-auto">
+        <AnimatePresence>
+          {showAISection && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-surface-3/50 backdrop-blur-xl border-t border-border-custom overflow-hidden"
+            >
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-gold flex items-center gap-2">
+                      <FileText size={14} /> Transcrição
+                    </h3>
+                    {!transcription && (
+                      <button 
+                        onClick={handleTranscribe}
+                        disabled={isTranscribing}
+                        className="text-[10px] bg-gold/10 hover:bg-gold/20 text-gold px-3 py-1 rounded-full border border-gold/20 transition-all flex items-center gap-2"
+                      >
+                        {isTranscribing ? <Loader2 size={12} className="animate-spin" /> : <Play size={10} />}
+                        {isTranscribing ? 'Processando...' : 'Transcrever Áudio'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="bg-black/20 rounded-xl p-4 h-48 overflow-y-auto custom-scrollbar text-[13px] leading-relaxed text-text-dim">
+                    {transcription || 'Nenhuma transcrição disponível. Clique em transcrever para começar.'}
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* CONTROLS BAR */}
-        <div className="px-4 md:px-8 py-3 md:py-4 flex flex-col md:flex-row items-center gap-4 md:gap-6">
-          {!isVideo && (
-            <audio 
-              ref={audioRef as any}
-              src={streamUrl}
-              onTimeUpdate={handleTimeUpdate}
-              onLoadedMetadata={handleMetadataLoaded}
-              onEnded={() => {
-                if (currentChapterIndex < book.chapters.length - 1) {
-                  setCurrentChapterIndex(prev => prev + 1);
-                } else {
-                  setIsPlaying(false);
-                }
-              }}
-            />
-          )}
-
-          {/* BOOK INFO (LEFT) */}
-          <div className="flex items-center justify-between w-full md:w-64 shrink-0">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-lg relative">
-                <img src={book.cover} className="w-full h-full object-cover" alt="" />
-                {isPlaying && !isVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <Activity size={16} className="text-gold animate-pulse" />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-amber flex items-center gap-2">
+                      <Sparkles size={14} /> Resumo & Insights IA
+                    </h3>
+                    {transcription && !summary && (
+                      <button 
+                        onClick={handleSummarize}
+                        disabled={isSummarizing}
+                        className="text-[10px] bg-amber/10 hover:bg-amber/20 text-amber px-3 py-1 rounded-full border border-amber/20 transition-all flex items-center gap-2"
+                      >
+                        {isSummarizing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={10} />}
+                        {isSummarizing ? 'Analisando...' : 'Gerar Insights'}
+                      </button>
+                    )}
                   </div>
-                )}
+                  <div className="bg-black/20 rounded-xl p-4 h-48 overflow-y-auto custom-scrollbar text-[13px] leading-relaxed text-text-dim">
+                    {summary ? (
+                      <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap">
+                        {summary}
+                      </div>
+                    ) : (
+                      'O resumo será gerado a partir da transcrição.'
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <div className="text-[12px] md:text-[13px] font-semibold text-text truncate group-hover:text-gold transition-colors">{book.title}</div>
-                <div className="text-[10px] md:text-[11px] text-text-muted truncate font-medium">{currentChapter.title}</div>
-              </div>
-            </div>
-            
-            {/* Mobile Play Button */}
-            <button 
-              onClick={togglePlay}
-              className="md:hidden w-10 h-10 rounded-full bg-gold text-bg flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="px-6 py-4 flex items-center justify-between gap-6 relative">
+          <div className="flex items-center gap-4 w-1/4">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="relative w-12 h-12 rounded-lg overflow-hidden shadow-lg border border-gold/20 shrink-0"
             >
-              {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+              <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+            </motion.div>
+            <div className="min-w-0">
+              <h4 className="text-sm font-serif font-bold text-text truncate">{book.title}</h4>
+              <p className="text-[11px] text-text-muted font-medium truncate uppercase tracking-wider">{book.author}</p>
+            </div>
+            <button 
+              onClick={() => setShowAISection(!showAISection)}
+              className={`p-2 rounded-lg transition-all ${showAISection ? 'bg-gold/10 text-gold shadow-[0_0_15px_rgba(212,175,55,0.2)]' : 'text-text-muted hover:text-gold'}`}
+            >
+              <Sparkles size={18} />
             </button>
           </div>
 
-          {/* MAIN CONTROLS & PROGRESS (CENTER) */}
-          <div className="flex-1 flex flex-col items-center gap-2 w-full">
-            <div className="hidden md:flex items-center gap-8">
+          <div className="flex-1 flex flex-col items-center gap-2 max-w-2xl">
+            <div className="flex items-center gap-6">
+              <button className="text-text-dim hover:text-gold transition-colors"><Shuffle size={18} /></button>
               <button 
-                onClick={() => currentChapterIndex > 0 && setCurrentChapterIndex(prev => prev - 1)}
-                disabled={currentChapterIndex === 0}
-                className="text-text-dim hover:text-gold transition-colors disabled:opacity-20"
+                onClick={() => currentChapter > 0 && setCurrentChapter(currentChapter - 1)}
+                className="text-text hover:text-gold transition-colors"
               >
                 <SkipBack size={22} fill="currentColor" />
               </button>
-
-              <button onClick={() => skip(-30)} className="text-text-dim hover:text-text transition-colors">
-                <RotateCcw size={20} />
-              </button>
-
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={togglePlay}
-                className="w-14 h-14 rounded-full bg-gold text-bg flex items-center justify-center hover:bg-gold-bright hover:scale-110 transition-all shadow-xl shadow-gold/20"
+                className="w-12 h-12 rounded-full bg-gold text-bg flex items-center justify-center shadow-lg shadow-gold/20 hover:bg-gold-bright transition-colors"
               >
-                {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
-              </button>
-
-              <button onClick={() => skip(30)} className="text-text-dim hover:text-text transition-colors">
-                <RotateCw size={20} />
-              </button>
-
+                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+              </motion.button>
               <button 
-                onClick={() => currentChapterIndex < book.chapters.length - 1 && setCurrentChapterIndex(prev => prev + 1)}
-                disabled={currentChapterIndex === book.chapters.length - 1}
-                className="text-text-dim hover:text-gold transition-colors disabled:opacity-20"
+                onClick={() => currentChapter < book.chapters.length - 1 && setCurrentChapter(currentChapter + 1)}
+                className="text-text hover:text-gold transition-colors"
               >
                 <SkipForward size={22} fill="currentColor" />
               </button>
+              <button className="text-text-dim hover:text-gold transition-colors"><Repeat size={18} /></button>
             </div>
 
-            {/* PROGRESS BAR */}
-            <div className="flex items-center gap-4 w-full max-w-[700px]">
-              <span className="text-[10px] text-text-muted w-10 text-center tabular-nums font-bold">{formatTime(currentTime)}</span>
-              <input 
-                type="range"
-                min="0"
-                max={duration || 0}
-                value={currentTime}
-                onChange={(e) => seek(Number(e.target.value))}
-                className="flex-1 h-1.5 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold hover:h-2 transition-all shadow-inner"
-              />
-              <span className="text-[10px] text-text-muted w-10 text-center tabular-nums font-bold">{formatTime(duration)}</span>
+            <div className="w-full flex items-center gap-3">
+              <span className="text-[10px] font-bold text-text-muted w-10 text-right">{formatTime(currentTime)}</span>
+              <div className="flex-1 relative group h-6 flex items-center">
+                <canvas ref={canvasRef} width="600" height="24" className="absolute inset-0 w-full h-full opacity-30 pointer-events-none" />
+                <input 
+                  type="range"
+                  min="0"
+                  max={duration || 0}
+                  value={currentTime}
+                  onChange={(e) => {
+                    const time = Number(e.target.value);
+                    setCurrentTime(time);
+                    if (audioRef.current) audioRef.current.currentTime = time;
+                  }}
+                  className="w-full h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold group-hover:h-1.5 transition-all"
+                />
+              </div>
+              <span className="text-[10px] font-bold text-text-muted w-10">{formatTime(duration)}</span>
             </div>
           </div>
 
-          {/* VOLUME & SPEED (RIGHT - DESKTOP) */}
-          <div className="hidden md:flex items-center gap-6 w-64 justify-end shrink-0">
-            <div className="relative group/speed">
-              <button 
-                onClick={changePlaybackRate}
-                className="bg-surface-3 border border-border-custom text-gold text-[12px] font-bold px-4 py-2 rounded-xl hover:bg-gold hover:text-bg transition-all min-w-[65px] shadow-sm"
-              >
-                {playbackRate}x
-              </button>
-              <div className="absolute bottom-full right-0 mb-4 hidden group-hover/speed:flex flex-col bg-surface-2 border border-border-custom rounded-2xl overflow-hidden shadow-2xl z-50 min-w-[140px] animate-in fade-in slide-in-from-bottom-2">
-                <div className="px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-text-muted border-b border-border-custom bg-bg/50 font-bold text-center">Sleep Timer</div>
-                {[15, 30, 45, 60].map(m => (
-                  <button key={m} onClick={() => setSleepTimer(m * 60)} className="px-5 py-3 text-[13px] font-semibold hover:bg-gold hover:text-bg transition-colors text-left flex justify-between items-center group/item">
-                    {m} min <Moon size={14} className="text-text-muted group-hover/item:text-bg" />
-                  </button>
-                ))}
-                {sleepTimer && (
-                  <button onClick={() => setSleepTimer(null)} className="px-5 py-3 text-[13px] font-bold text-red-500 hover:bg-red-500 hover:text-white transition-colors border-t border-border-custom">
-                    Cancelar ({Math.ceil(sleepTimer / 60)}m)
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 group/vol">
-              <Volume2 size={20} className="text-text-muted group-hover/vol:text-gold transition-colors" />
+          <div className="flex items-center justify-end gap-4 w-1/4">
+            <div className="flex items-center gap-2 group">
+              <Volume2 size={18} className="text-text-muted group-hover:text-gold transition-colors" />
               <input 
                 type="range"
                 min="0"
                 max="1"
                 step="0.01"
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-24 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold group-hover:h-1.5 transition-all"
+                defaultValue="0.7"
+                onChange={(e) => audioRef.current && (audioRef.current.volume = Number(e.target.value))}
+                className="w-20 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold"
               />
             </div>
+            <button 
+              onClick={() => setShowPlaylist(!showPlaylist)}
+              className={`p-2 rounded-lg transition-all ${showPlaylist ? 'bg-gold/10 text-gold' : 'text-text-muted hover:text-gold'}`}
+            >
+              <List size={18} />
+            </button>
+            <button 
+              onClick={closeMedia}
+              className="p-2 rounded-lg text-text-muted hover:text-red-500 transition-all"
+            >
+              <X size={18} />
+            </button>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showPlaylist && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute bottom-full right-6 mb-4 w-80 glass-panel rounded-2xl border border-gold/20 shadow-2xl overflow-hidden"
+          >
+            <div className="p-4 border-b border-border-custom bg-gold/5">
+              <h3 className="font-serif font-bold text-gold text-sm">Capítulos</h3>
+              <p className="text-[10px] text-text-muted uppercase tracking-widest font-bold">{book.title}</p>
+            </div>
+            <div className="max-h-64 overflow-y-auto custom-scrollbar">
+              {book.chapters.map((chapter, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => { setCurrentChapter(idx); setIsPlaying(true); if (audioRef.current) audioRef.current.play(); }}
+                  className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${idx === currentChapter ? 'bg-gold/10 border-l-2 border-gold' : 'hover:bg-surface-2'}`}
+                >
+                  <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${idx === currentChapter ? 'text-gold' : 'text-text-muted'}`}>
+                    {idx === currentChapter && isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-xs font-bold truncate ${idx === currentChapter ? 'text-gold' : 'text-text'}`}>{chapter.title}</p>
+                    <p className="text-[10px] text-text-muted">Áudio • Telegram</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

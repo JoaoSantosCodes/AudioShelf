@@ -23,8 +23,8 @@
 - [x] **Temas Dinâmicos:** Permitir troca sutil entre "Obsidian Gold" (atual) e "Cyber Tactical" (neon).
 
 ### 2. 🧠 Inteligência & Automação
-- [ ] **AI Transcriber:** Usar OpenAI Whisper para transcrever áudios de cursos automaticamente.
-- [ ] **Resumo de Insights:** Gerar resumos automáticos de capítulos de livros usando IA.
+- [x] **AI Transcriber:** Usar OpenAI Whisper para transcrever áudios de cursos automaticamente. (Pronto p/ Ativação)
+- [x] **Resumo de Insights:** Gerar resumos automáticos de capítulos de livros usando IA. (Pronto p/ Ativação)
 - [x] **Notificações Push:** Avisar no navegador quando um novo projeto for processado via Telegram.
 
 ### 3. 🛠️ Gestão & Kanban
