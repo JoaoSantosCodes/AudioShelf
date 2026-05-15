@@ -114,13 +114,7 @@ export default function Home() {
     }
   }, []);
 
-  // Update last played whenever a book is selected
-  useEffect(() => {
-    if (selectedBook) {
-      setLastPlayedBook(selectedBook);
-      localStorage.setItem('last_played_book', JSON.stringify(selectedBook));
-    }
-  }, [selectedBook]);
+  // O estado global de mídia agora é gerenciado pelo MediaContext
 
   const deleteBook = async (bookId: string) => {
     try {
