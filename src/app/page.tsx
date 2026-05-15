@@ -40,6 +40,7 @@ export default function Home() {
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
+  const notifications = [
     { id: 3, type: 'shopping', title: 'Lista Atualizada', text: 'Sua esposa adicionou 3 itens', time: 'Ontem', icon: ShoppingCart, color: 'text-blue-400' },
   ];
 
