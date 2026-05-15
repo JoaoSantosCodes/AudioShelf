@@ -20,7 +20,9 @@ import {
   Wallet, 
   ShoppingCart,
   Bell,
-  CheckCircle2
+  CheckCircle2,
+  Mic,
+  Volume2
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -33,6 +35,12 @@ import { useMedia } from '@/context/MediaContext';
 import { processVoiceCommand } from '@/lib/commandProcessor';
 
 export default function Home() {
+  const { activeMedia, playMedia, closeMedia } = useMedia();
+  const [dbBooks, setDbBooks] = useState<Book[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [user, setUser] = useState<User | null>(null);
   const [isListening, setIsListening] = useState(false);
 
   const handleVoiceInput = async () => {
