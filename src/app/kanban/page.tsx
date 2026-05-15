@@ -66,6 +66,7 @@ export default function KanbanPage() {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [newTask, setNewTask] = useState({ 
     title: '', 
