@@ -15,13 +15,15 @@ import {
   Trash2,
   Home,
   RefreshCcw,
-  Search
+  Search,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PresenceIndicator from '@/components/PresenceIndicator';
 import ThemeToggle from '@/components/ThemeToggle';
 import { User } from '@supabase/supabase-js';
+import { getSmartSuggestions, Suggestion } from '@/lib/shoppingEngine';
 
 interface ShoppingItem {
   id: string;
@@ -33,6 +35,7 @@ interface ShoppingItem {
 
 export default function ShoppingListPage() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [newItemName, setNewItemName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Geral');
   const [user, setUser] = useState<User | null>(null);
@@ -51,6 +54,7 @@ export default function ShoppingListPage() {
       if (session?.user) {
         setUser(session.user);
         fetchItems(session.user.id);
+        getSmartSuggestions(session.user.id).then(setSuggestions);
         
         // ASSINATURA REALTIME
         const channel = supabase
@@ -147,6 +151,21 @@ export default function ShoppingListPage() {
     if (!error) {
       setItems(items.filter(item => !item.completed));
     }
+  const handleSuggestionClick = async (suggestion: Suggestion) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('shopping_list')
+      .insert([{
+        user_id: user.id,
+        name: suggestion.name,
+        category: suggestion.category,
+        completed: false
+      }]);
+    
+    if (!error) {
+      fetchItems(user.id);
+      setSuggestions(prev => prev.filter(s => s.name !== suggestion.name));
+    }
   };
 
   return (
@@ -174,6 +193,33 @@ export default function ShoppingListPage() {
       <main className="flex-1 p-8 overflow-y-auto no-scrollbar">
         <div className="max-w-3xl mx-auto space-y-8">
           
+          {/* AI SUGGESTIONS */}
+          {suggestions.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 px-2">
+                <Sparkles size={14} className="text-gold" />
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/70">Sugerido pela IA</h3>
+              </div>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.name}
+                    onClick={() => handleSuggestionClick(s)}
+                    className="shrink-0 px-4 py-3 bg-surface-1 border border-gold/20 rounded-2xl flex items-center gap-3 hover:border-gold/50 transition-all group shadow-lg"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
+                      <Plus size={16} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-text">{s.name}</p>
+                      <p className="text-[9px] text-text-dim uppercase tracking-wider">{s.category}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ADD ITEM INPUT */}
           <div className="bg-surface-1 border border-border-custom p-6 rounded-3xl shadow-xl space-y-4">
             <div className="flex gap-4">

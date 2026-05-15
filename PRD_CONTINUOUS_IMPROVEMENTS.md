@@ -88,8 +88,8 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 10. 🎙️ Automação & IA Avançada
 - [x] **Voice-to-Action (Whisper):** Processador central que interpreta comandos de voz para Finanças, Mercado e Kanban.
-- [/] **Assistente de Insights:** Chat de IA interativo para consultar dados: "Quanto gastei com mercado este mês?".
-- [ ] **Sugestões Inteligentes:** Sugerir itens de mercado baseados no histórico de compras anteriores.
+- [x] **Assistente de Insights:** Chat de IA interativo disponível globalmente para consulta de dados.
+- [/] **Sugestões Inteligentes:** Motor preditivo que sugere itens de mercado baseados na frequência de compra histórica.
 
 ### 11. 🔍 Ecossistema Unificado
 - [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar tudo em um só lugar.
