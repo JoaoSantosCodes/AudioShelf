@@ -68,7 +68,6 @@ export default function Home() {
       supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('completed', false),
       supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId).neq('status', 'done')
     ]);
-
     const totalExp = txRes.data?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
 
     setDashboardStats({
@@ -76,6 +75,18 @@ export default function Home() {
       shoppingCount: shopRes.count || 0,
       pendingTasks: tasksRes.count || 0
     });
+  };
+
+  const fetchRecentActivities = async (userId: string) => {
+    const { data } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'done')
+      .order('created_at', { ascending: false })
+      .limit(3);
+    
+    if (data) setRecentActivities(data);
   };
 
   const fetchBooks = async () => {
