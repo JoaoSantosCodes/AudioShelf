@@ -29,7 +29,7 @@
 
 ### 3. 🛠️ Gestão & Kanban
 - [x] **Drag & Drop Real:** Implementar `dnd-kit` para arrastar cards entre colunas no Kanban.
-- [ ] **Deadline Tracking:** Adicionar datas de entrega e alertas visuais para tarefas atrasadas.
+- [x] **Deadline Tracking:** Adicionar datas de entrega e alertas visuais para tarefas atrasadas.
 - [ ] **Anexos de Mídia:** Permitir abrir o áudio/vídeo do projeto diretamente de um card do Kanban.
 
 ### 4. 📱 Mobile & PWA

@@ -37,6 +37,7 @@ interface Task {
   status: 'todo' | 'doing' | 'done';
   category: string;
   created_at: string;
+  due_date?: string;
 }
 
 export default function KanbanPage() {
@@ -45,7 +46,7 @@ export default function KanbanPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', category: 'Geral', status: 'todo' as 'todo' | 'doing' | 'done' });
+  const [newTask, setNewTask] = useState({ title: '', description: '', category: 'Geral', status: 'todo' as 'todo' | 'doing' | 'done', due_date: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['Geral', 'Manga', 'SaaS', 'Música', 'Curso', 'Publishing'];
@@ -78,7 +79,7 @@ export default function KanbanPage() {
 
       if (error) {
         setTasks([
-          { id: '1', title: 'Terminar esboço do capítulo 5', description: 'Usar as novas artes como referência', status: 'todo', category: 'Manga', created_at: new Date().toISOString() },
+          { id: '1', title: 'Terminar esboço do capítulo 5', description: 'Usar as novas artes como referência', status: 'todo', category: 'Manga', created_at: new Date().toISOString(), due_date: new Date().toISOString() },
           { id: '2', title: 'Configurar Webhook do Telegram', description: 'Ajustar para novas hashtags', status: 'doing', category: 'SaaS', created_at: new Date().toISOString() },
           { id: '3', title: 'Mixagem da faixa Suno #42', description: 'Ajustar graves e agudos', status: 'done', category: 'Música', created_at: new Date().toISOString() },
         ]);
@@ -129,7 +130,8 @@ export default function KanbanPage() {
       title: newTask.title,
       description: newTask.description,
       category: newTask.category,
-      status: newTask.status
+      status: newTask.status,
+      due_date: newTask.due_date || null
     };
 
     const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
@@ -141,7 +143,7 @@ export default function KanbanPage() {
     }
     
     setIsModalOpen(false);
-    setNewTask({ title: '', description: '', category: 'Geral', status: 'todo' });
+    setNewTask({ title: '', description: '', category: 'Geral', status: 'todo', due_date: '' });
   };
 
   const filteredTasks = tasks.filter(t => 
@@ -255,6 +257,15 @@ export default function KanbanPage() {
                     onChange={e => setNewTask({...newTask, description: e.target.value})}
                     className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all h-24 resize-none"
                     placeholder="Detalhes da tarefa..."
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-1.5 block">Prazo de Entrega</label>
+                  <input 
+                    type="date" 
+                    value={newTask.due_date}
+                    onChange={e => setNewTask({...newTask, due_date: e.target.value})}
+                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold outline-none transition-all text-text"
                   />
                 </div>
                 <div>
