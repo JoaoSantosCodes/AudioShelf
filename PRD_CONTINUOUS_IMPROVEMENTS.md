@@ -49,9 +49,11 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [x] **Category Breakdown:** Gráfico visual de distribuição de esforço entre estudos, lazer e casa.
 
 ### 8. 💰 Finanças & Orçamento
-- [ ] **Controle de Gastos:** Registro rápido de notas fiscais e despesas diárias (Mercado, Lazer, etc).
-- [ ] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
-- [ ] **Relatórios Financeiros:** Visão clara de quanto foi gasto na semana e no mês por categoria.
+- [/] **Controle de Gastos:** Registro de despesas diárias implementado; Pendente upload de fotos.
+- [ ] **Gestão de Receitas:** Registro de ganhos e salários para comparação de fluxo.
+- [ ] **Arquivo Digital de Notas:** Upload e armazenamento de fotos de notas fiscais no Supabase Storage.
+- [ ] **Fluxo de Caixa:** Gráfico comparativo entre Entradas vs. Saídas (Ganhos vs. Despesas).
+- [x] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
 
 ---
 
