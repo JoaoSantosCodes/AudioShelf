@@ -3,17 +3,18 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Calendar, BarChart3 } from 'lucide-react';
+import { Library, LayoutDashboard, Calendar, BarChart3, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function MobileNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: 'Biblioteca', icon: Library, path: '/' },
+    { name: 'Home', icon: Library, path: '/' },
+    { name: 'Finanças', icon: Wallet, path: '/financas' },
     { name: 'Agenda', icon: Calendar, path: '/agenda' },
     { name: 'Kanban', icon: LayoutDashboard, path: '/kanban' },
-    { name: 'Insights', icon: BarChart3, path: '/insights' },
+    { name: 'Status', icon: BarChart3, path: '/insights' },
   ];
 
   return (

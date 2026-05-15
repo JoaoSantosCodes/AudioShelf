@@ -19,7 +19,8 @@ import {
   Share2,
   Mail,
   Send,
-  BarChart3
+  BarChart3,
+  Wallet
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -235,6 +236,11 @@ export default function KanbanPage() {
           <Link href="/insights" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
             <BarChart3 size={18} />
             <span className="text-sm font-semibold">Insights</span>
+          </Link>
+
+          <Link href="/financas" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+            <Wallet size={18} />
+            <span className="text-sm font-semibold">Finanças</span>
           </Link>
 
           <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold ml-4">

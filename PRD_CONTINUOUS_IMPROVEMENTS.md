@@ -44,9 +44,14 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [x] **Social Feed:** Painel de atividades em tempo real integrado à sidebar principal.
 
 ### 7. 📊 Insights & Estatísticas
-- [ ] **Relatórios de Progresso:** Visão semanal/mensal de tarefas concluídas por categoria.
-- [ ] **Métricas de Saúde:** Dashboard dedicado para acompanhar peso, frequência na academia e metas de saúde.
-- [ ] **Category Breakdown:** Gráfico visual de distribuição de esforço entre estudos, lazer e casa.
+- [x] **Relatórios de Progresso:** Visão semanal/mensal de tarefas concluídas por categoria.
+- [x] **Métricas de Saúde:** Dashboard dedicado para acompanhar peso, frequência na academia e metas de saúde.
+- [x] **Category Breakdown:** Gráfico visual de distribuição de esforço entre estudos, lazer e casa.
+
+### 8. 💰 Finanças & Orçamento
+- [ ] **Controle de Gastos:** Registro rápido de notas fiscais e despesas diárias (Mercado, Lazer, etc).
+- [ ] **Orçamento Familiar:** Definição de metas de gasto mensal e acompanhamento em tempo real.
+- [ ] **Relatórios Financeiros:** Visão clara de quanto foi gasto na semana e no mês por categoria.
 
 ---
 
