@@ -48,6 +48,7 @@ import { User } from '@supabase/supabase-js';
 import { books as initialBooks, Book } from '@/data/books';
 import { useMedia } from '@/context/MediaContext';
 import { supabase } from '@/lib/supabase';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface Task {
   id: string;
@@ -188,8 +189,11 @@ export default function KanbanPage() {
 
       if (error) {
         setTasks(originalTasks);
+        triggerHaptic('error');
         alert("Erro ao mover tarefa. Revertendo...");
-      } else if (newStatus === 'done' && activeTask.is_recurring) {
+      } else {
+        triggerHaptic(newStatus === 'done' ? 'success' : 'medium');
+        if (newStatus === 'done' && activeTask.is_recurring) {
         // Lógica de RECURSÃO: Se a tarefa foi para 'done' e é recorrente, cria a próxima
         const nextDate = new Date(activeTask.due_date || new Date());
         if (activeTask.frequency === 'daily') nextDate.setDate(nextDate.getDate() + 1);

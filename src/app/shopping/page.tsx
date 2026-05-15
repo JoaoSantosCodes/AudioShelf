@@ -26,6 +26,7 @@ import { User } from '@supabase/supabase-js';
 import { getSmartSuggestions, Suggestion } from '@/lib/shoppingEngine';
 import ShoppingSkeleton from '@/components/shopping/ShoppingSkeleton';
 import Skeleton from '@/components/Skeleton';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface ShoppingItem {
   id: string;
@@ -166,7 +167,10 @@ export default function ShoppingListPage() {
 
     if (error) {
       setItems(originalItems);
+      triggerHaptic('error');
       alert("Erro ao atualizar item.");
+    } else {
+      triggerHaptic(!item.completed ? 'success' : 'light');
     }
   };
 
@@ -182,6 +186,8 @@ export default function ShoppingListPage() {
     if (error) {
       setItems(originalItems);
       alert("Erro ao remover item.");
+    } else {
+      triggerHaptic('light');
     }
   };
 
@@ -195,6 +201,7 @@ export default function ShoppingListPage() {
 
     if (!error) {
       setItems(items.filter(item => !item.completed));
+      triggerHaptic('light');
     }
   };
 
@@ -227,9 +234,11 @@ export default function ShoppingListPage() {
     if (error) {
       setItems(prev => prev.filter(i => i.id !== tempId));
       setSuggestions(prev => [{ ...suggestion }, ...prev]);
+      triggerHaptic('error');
       alert("Erro ao adicionar sugestão.");
     } else if (data) {
       setItems(prev => prev.map(i => i.id === tempId ? data[0] : i));
+      triggerHaptic('light');
     }
   };
 
