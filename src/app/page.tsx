@@ -18,7 +18,8 @@ import {
   Activity, 
   BarChart3, 
   Wallet, 
-  ShoppingCart 
+  ShoppingCart,
+  Bell
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -35,6 +36,13 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<User | null>(null);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  const notifications = [
+    { id: 1, type: 'task', title: 'Missão Vencendo', text: 'Academia (Pernas) em 30 min', time: 'Agora', icon: Calendar, color: 'text-gold' },
+    { id: 2, type: 'finance', title: 'Alerta de Orçamento', text: '80% da meta de Mercado atingida', time: '2h atrás', icon: Wallet, color: 'text-red-400' },
+    { id: 3, type: 'shopping', title: 'Lista Atualizada', text: 'Sua esposa adicionou 3 itens', time: 'Ontem', icon: ShoppingCart, color: 'text-blue-400' },
+  ];
 
   const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
 
@@ -211,6 +219,52 @@ export default function Home() {
               />
             </div>
             <ThemeToggle />
+            
+            {/* NOTIFICATION CENTER */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className={`w-10 h-10 rounded-full bg-surface-2 border border-border-custom flex items-center justify-center transition-all relative ${isNotificationsOpen ? 'text-gold border-gold/50 shadow-lg shadow-gold/10' : 'text-text-muted hover:text-gold'}`}
+              >
+                <Bell size={18} />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background shadow-sm" />
+              </button>
+
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-14 right-0 w-80 bg-surface-1 border border-border-custom rounded-3xl shadow-2xl overflow-hidden z-50 glass-panel"
+                  >
+                    <div className="p-5 border-b border-border-custom bg-surface-2/50 flex items-center justify-between">
+                      <h3 className="text-sm font-serif font-bold text-text">Notificações</h3>
+                      <button className="text-[10px] font-bold text-gold uppercase tracking-widest hover:underline">Limpar Tudo</button>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto no-scrollbar divide-y divide-border-custom">
+                      {notifications.map((notif) => (
+                        <div key={notif.id} className="p-4 hover:bg-surface-2 transition-colors flex gap-4 cursor-pointer group">
+                          <div className={`p-2 rounded-xl bg-surface-3 ${notif.color} border border-white/5`}>
+                            <notif.icon size={16} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-0.5">
+                              <span className="text-xs font-bold text-text group-hover:text-gold transition-colors">{notif.title}</span>
+                              <span className="text-[9px] text-text-dim font-medium">{notif.time}</span>
+                            </div>
+                            <p className="text-[11px] text-text-muted leading-tight">{notif.text}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-3 bg-surface-2 text-center">
+                      <button className="text-[10px] font-bold text-text-dim uppercase tracking-widest hover:text-text transition-colors">Ver histórico completo</button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </header>
 

@@ -69,6 +69,12 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [ ] **Dashboard de Widgets:** Resumo visual na Home com dados de todos os módulos (Mercado, Finanças, Agenda).
 - [ ] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento.
 
+### 12. 🔔 Notificações & Alertas Inteligentes
+- [ ] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais.
+- [ ] **Lembretes de Tarefas:** Notificações programadas para missões que estão para vencer.
+- [ ] **Alertas Financeiros:** Avisos automáticos ao atingir limites de orçamento.
+- [ ] **Telegram Push:** Envio de resumos diários e alertas críticos via Bot de Telegram.
+
 ---
 
 ## 📈 Critérios de Sucesso
