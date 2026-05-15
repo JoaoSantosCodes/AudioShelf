@@ -111,7 +111,8 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 14. 🤖 Próximos Passos & Refinamentos
 - [x] **Global Voice Assistant:** Onipresença de voz via captura real no Header Global.
-- [/] **Deep Linking AI:** Sugestões da IA vinculadas a botões de ação direta (In progress).
+- [x] **Deep Linking AI:** Sugestões da IA vinculadas a botões de ação direta.
+- [/] **Optimistic UI & Realtime:** Sincronização instantânea e atualizações de UI sem espera (In progress).
 - [ ] **Smart Quiet Mode:** Filtro de notificações noturnas e foco tático.
 - [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações.
 

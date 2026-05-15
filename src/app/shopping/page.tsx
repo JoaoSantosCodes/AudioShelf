@@ -97,6 +97,19 @@ export default function ShoppingListPage() {
   const addItem = async () => {
     if (!newItemName || !user) return;
     
+    const tempId = Date.now().toString();
+    const optimisticItem: ShoppingItem = {
+      id: tempId,
+      name: newItemName,
+      category: selectedCategory,
+      completed: false,
+      user_id: user.id,
+      created_at: new Date().toISOString()
+    };
+
+    setItems(prev => [optimisticItem, ...prev]);
+    setNewItemName('');
+
     const { data, error } = await supabase
       .from('shopping_list')
       .insert([{
@@ -107,9 +120,12 @@ export default function ShoppingListPage() {
       }])
       .select();
 
-    if (data) {
-      setItems([data[0], ...items]);
-      setNewItemName('');
+    if (error) {
+      setItems(prev => prev.filter(i => i.id !== tempId));
+      alert("Erro ao adicionar item. Tente novamente.");
+    } else if (data) {
+      // Substituir o item otimista pelo real do banco (com ID correto)
+      setItems(prev => prev.map(i => i.id === tempId ? data[0] : i));
     }
   };
 
@@ -117,26 +133,33 @@ export default function ShoppingListPage() {
     const item = items.find(i => i.id === id);
     if (!item) return;
 
+    // UPDATE OTIMISTA
+    const originalItems = [...items];
+    setItems(prev => prev.map(i => i.id === id ? { ...i, completed: !i.completed } : i));
+
     const { error } = await supabase
       .from('shopping_list')
       .update({ completed: !item.completed })
       .eq('id', id);
 
-    if (!error) {
-      setItems(items.map(i => 
-        i.id === id ? { ...i, completed: !i.completed } : i
-      ));
+    if (error) {
+      setItems(originalItems);
+      alert("Erro ao atualizar item.");
     }
   };
 
   const removeItem = async (id: string) => {
+    const originalItems = [...items];
+    setItems(prev => prev.filter(item => item.id !== id));
+
     const { error } = await supabase
       .from('shopping_list')
       .delete()
       .eq('id', id);
 
-    if (!error) {
-      setItems(items.filter(item => item.id !== id));
+    if (error) {
+      setItems(originalItems);
+      alert("Erro ao remover item.");
     }
   };
 
@@ -155,18 +178,36 @@ export default function ShoppingListPage() {
 
   const handleSuggestionClick = async (suggestion: Suggestion) => {
     if (!user) return;
-    const { error } = await supabase
+    
+    const tempId = `suggest-${Date.now()}`;
+    const optimisticItem: ShoppingItem = {
+      id: tempId,
+      name: suggestion.name,
+      category: suggestion.category,
+      completed: false,
+      user_id: user.id,
+      created_at: new Date().toISOString()
+    };
+
+    setItems(prev => [optimisticItem, ...prev]);
+    setSuggestions(prev => prev.filter(s => s.name !== suggestion.name));
+
+    const { data, error } = await supabase
       .from('shopping_list')
       .insert([{
         user_id: user.id,
         name: suggestion.name,
         category: suggestion.category,
         completed: false
-      }]);
+      }])
+      .select();
     
-    if (!error) {
-      fetchItems(user.id);
-      setSuggestions(prev => prev.filter(s => s.name !== suggestion.name));
+    if (error) {
+      setItems(prev => prev.filter(i => i.id !== tempId));
+      setSuggestions(prev => [{ ...suggestion }, ...prev]);
+      alert("Erro ao adicionar sugestão.");
+    } else if (data) {
+      setItems(prev => prev.map(i => i.id === tempId ? data[0] : i));
     }
   };
 

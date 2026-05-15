@@ -106,7 +106,7 @@ export default function KanbanPage() {
       if (session?.user) {
         fetchInitialData(session.user.id);
 
-        // ASSINATURA REALTIME KANBAN
+        // ASSINATURA REALTIME
         const channel = supabase
           .channel('kanban_realtime')
           .on(
@@ -114,7 +114,11 @@ export default function KanbanPage() {
             { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${session.user.id}` },
             (payload) => {
               if (payload.eventType === 'INSERT') {
-                setTasks(prev => [payload.new as Task, ...prev]);
+                setTasks(prev => {
+                  const exists = prev.some(t => t.id === payload.new.id);
+                  if (exists) return prev;
+                  return [payload.new as Task, ...prev];
+                });
               } else if (payload.eventType === 'UPDATE') {
                 setTasks(prev => prev.map(t => t.id === payload.new.id ? payload.new as Task : t));
               } else if (payload.eventType === 'DELETE') {
@@ -172,11 +176,16 @@ export default function KanbanPage() {
     }
 
     if (newStatus && activeTask && activeTask.status !== newStatus) {
+      const originalTasks = [...tasks];
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus! } : t));
-      await supabase.from('tasks').update({ status: newStatus }).eq('id', taskId);
+      
+      const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', taskId);
 
-      // LÓGICA DE RECURSÃO: Se a tarefa foi para 'done' e é recorrente, cria a próxima
-      if (newStatus === 'done' && activeTask.is_recurring) {
+      if (error) {
+        setTasks(originalTasks);
+        alert("Erro ao mover tarefa. Revertendo...");
+      } else if (newStatus === 'done' && activeTask.is_recurring) {
+        // Lógica de RECURSÃO: Se a tarefa foi para 'done' e é recorrente, cria a próxima
         const nextDate = new Date(activeTask.due_date || new Date());
         if (activeTask.frequency === 'daily') nextDate.setDate(nextDate.getDate() + 1);
         else if (activeTask.frequency === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
@@ -191,11 +200,12 @@ export default function KanbanPage() {
           due_date: nextDate.toISOString().split('T')[0],
           is_recurring: true,
           frequency: activeTask.frequency,
-          linked_book_id: activeTask.linked_book_id
+          linked_book_id: activeTask.linked_book_id,
+          priority: activeTask.priority || 'medium'
         };
 
-        const { data: nextTask, error } = await supabase.from('tasks').insert(nextTaskData).select().single();
-        if (!error && nextTask) {
+        const { data: nextTask, error: insertError } = await supabase.from('tasks').insert(nextTaskData).select().single();
+        if (!insertError && nextTask) {
           setTasks(prev => [nextTask, ...prev]);
         }
       }
@@ -257,6 +267,25 @@ export default function KanbanPage() {
   const addTask = async () => {
     if (!user || !newTask.title) return;
     
+    const tempId = Date.now().toString();
+    const optimisticTask: Task = {
+      id: tempId,
+      user_id: user.id,
+      title: newTask.title,
+      description: newTask.description,
+      category: newTask.category,
+      status: newTask.status,
+      due_date: newTask.due_date || undefined,
+      created_at: new Date().toISOString(),
+      linked_book_id: newTask.linked_book_id || undefined,
+      is_recurring: newTask.is_recurring,
+      frequency: newTask.is_recurring ? newTask.frequency : undefined,
+      priority: newTask.priority
+    } as any;
+
+    setTasks(prev => [optimisticTask, ...prev]);
+    setIsModalOpen(false);
+
     const taskData = {
       user_id: user.id,
       title: newTask.title,
@@ -272,11 +301,14 @@ export default function KanbanPage() {
 
     const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
     
-    if (!error && data) {
-      setTasks([data, ...tasks]);
+    if (error) {
+      setTasks(prev => prev.filter(t => t.id !== tempId));
+      alert("Erro ao adicionar missão. Tente novamente.");
+    } else if (data) {
+      // Substituir item otimista pelo real
+      setTasks(prev => prev.map(t => t.id === tempId ? data : t));
     }
     
-    setIsModalOpen(false);
     setNewTask({ 
       title: '', 
       description: '', 
@@ -286,7 +318,7 @@ export default function KanbanPage() {
       linked_book_id: '',
       is_recurring: false,
       frequency: 'weekly',
-      priority: 'medium' as 'low' | 'medium' | 'high'
+      priority: 'medium'
     });
   };
 
