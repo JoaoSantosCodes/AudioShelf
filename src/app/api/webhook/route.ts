@@ -12,16 +12,30 @@ export async function POST(req: NextRequest) {
     // --- LÓGICA DE FOTO (CAPA) ---
     if (post.photo) {
       const photo = post.photo[post.photo.length - 1]; // Maior resolução
-      const bookTitle = post.caption?.trim();
+      const rawCaption = post.caption?.trim() || "";
+      
+      // Limpar hashtags e espaços extras
+      const bookTitle = rawCaption.replace(/#[a-zA-Z0-9]+/g, '').trim();
       
       if (bookTitle) {
-        console.log(`📸 Foto recebida para o livro: ${bookTitle}`);
+        console.log(`📸 Tentando vincular foto ao conteúdo: "${bookTitle}"`);
         const coverUrl = `/api/stream?file_id=${photo.file_id}&type=image`;
         
-        await supabase
+        // Tenta encontrar o livro por busca flexível (contém o nome)
+        const { data: matchedBooks } = await supabase
           .from('books')
-          .update({ cover: coverUrl })
-          .ilike('title', bookTitle);
+          .select('id, title')
+          .ilike('title', `%${bookTitle}%`);
+
+        if (matchedBooks && matchedBooks.length > 0) {
+          console.log(`✅ Arte vinculada com sucesso a: ${matchedBooks[0].title}`);
+          await supabase
+            .from('books')
+            .update({ cover: coverUrl })
+            .eq('id', matchedBooks[0].id);
+        } else {
+          console.log(`❌ Nenhum conteúdo encontrado para vincular a arte: "${bookTitle}"`);
+        }
       }
       return NextResponse.json({ ok: true });
     }
