@@ -87,10 +87,10 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [ ] **Sugestões Inteligentes:** Sugerir itens baseados no histórico de compras anteriores.
 
 ### 10. 🎙️ Automação & IA Avançada
-- [x] **Voice-to-Action (Whisper):** Processador central que interpreta comandos de voz para Finanças, Mercado e Kanban.
+- [/] **Voice-to-Action (Whisper):** Transição de comandos simulados para captura de áudio real via navegador (In progress).
 - [x] **Assistente de Insights:** Chat de IA interativo disponível globalmente para consulta de dados.
 - [x] **Sugestões Inteligentes:** Motor preditivo que sugere itens de mercado baseados na frequência de compra histórica.
-- [/] **Telegram Automation:** Lógica de despacho de mensagens para resumos e alertas táticos no celular (In progress).
+- [x] **Telegram Automation:** Lógica de despacho de mensagens para resumos e alertas táticos no celular.
 
 ### 11. 🔍 Ecossistema Unificado
 - [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar tudo em um só lugar.

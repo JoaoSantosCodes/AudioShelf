@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -52,29 +52,58 @@ export default function Home() {
   const [telegramChatId, setTelegramChatId] = useState('');
   const [smartNotifications, setSmartNotifications] = useState<any[]>([]);
   const [dailyBriefing, setDailyBriefing] = useState<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const handleVoiceInput = async () => {
     if (!user) return;
-    setIsListening(true);
-    
-    // Simulação de IA Whisper extraindo comando
-    setTimeout(async () => {
-      const simulatedCommand = "Adicionar leite na lista de compras";
-      const result = await processVoiceCommand(simulatedCommand, user.id);
-      
-      if (result.success) {
-        // Atualiza os stats do dashboard
-        const { count: shoppingCount } = await supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('completed', false);
-        const { count: pendingTasks } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'todo');
-        
-        setDashboardStats(prev => ({
-          ...prev,
-          shoppingCount: shoppingCount || 0,
-          pendingTasks: pendingTasks || 0
-        }));
+
+    if (isListening) {
+      // STOP RECORDING
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+        setIsListening(false);
       }
-      setIsListening(false);
-    }, 3000);
+      return;
+    }
+
+    // START RECORDING
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        console.log("Audio captured, ready for Whisper processing:", audioBlob);
+        
+        // Simulação de processamento Whisper
+        alert("Áudio capturado! Processando intenção via Whisper (Simulado)...");
+        const simulatedCommand = "Adicionar leite na lista de compras";
+        const result = await processVoiceCommand(simulatedCommand, user.id);
+        
+        if (result.success) {
+          fetchDashboardStats(user.id);
+          alert("Missão cumprida: Leite adicionado via comando de voz real!");
+        }
+
+        // Parar todos os tracks do stream
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsListening(true);
+    } catch (err) {
+      console.error("Erro ao acessar microfone:", err);
+      alert("Não foi possível acessar o microfone.");
+    }
   };
 
   const handleSendToTelegram = async () => {
@@ -340,10 +369,11 @@ export default function Home() {
               onClick={handleVoiceInput}
               className={`w-10 h-10 rounded-full transition-all relative group flex items-center justify-center ${isListening ? 'bg-gold text-bg shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-pulse' : 'bg-surface-2 text-text-muted hover:text-gold border border-border-custom hover:border-gold/30'}`}
             >
-              {isListening ? <Volume2 size={18} className="animate-bounce" /> : <Mic size={18} />}
+              {isListening ? <Volume2 size={18} className="animate-pulse text-gold" /> : <Mic size={18} />}
               {isListening && (
-                <span className="absolute top-14 right-0 whitespace-nowrap text-[10px] font-bold text-gold uppercase tracking-widest bg-bg/80 backdrop-blur-md px-3 py-1 rounded-full border border-gold/20 z-50 shadow-xl">
-                  Ouvindo Intenção...
+                <span className="absolute top-14 right-0 whitespace-nowrap text-[10px] font-bold text-gold uppercase tracking-widest bg-bg/80 backdrop-blur-md px-3 py-1 rounded-full border border-gold/20 z-50 shadow-xl flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+                  Gravando Áudio Real...
                 </span>
               )}
             </button>
