@@ -216,7 +216,8 @@ export default function KanbanPage() {
       due_date: '', 
       linked_book_id: '',
       is_recurring: false,
-      frequency: 'weekly'
+      frequency: 'weekly',
+      priority: 'medium' as 'low' | 'medium' | 'high'
     });
   };
 
