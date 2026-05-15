@@ -64,7 +64,7 @@ export default function GlobalVoiceAssistant() {
   };
 
   return (
-    <div className="fixed bottom-8 right-28 z-[150]">
+    <div className="fixed bottom-24 right-24 md:bottom-8 md:right-28 z-[150]">
       <AnimatePresence>
         {isListening && (
           <motion.div 

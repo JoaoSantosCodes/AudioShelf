@@ -76,7 +76,7 @@ export default function InsightsAssistant() {
       {/* CHAT BUBBLE TRIGGER */}
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gold text-bg shadow-[0_0_30px_rgba(212,175,55,0.4)] flex items-center justify-center z-[150] hover:scale-110 transition-transform active:scale-95 group"
+        className="fixed bottom-24 right-4 md:bottom-8 md:right-8 w-16 h-16 rounded-full bg-gold text-bg shadow-[0_0_30px_rgba(212,175,55,0.4)] flex items-center justify-center z-[150] hover:scale-110 transition-transform active:scale-95 group"
       >
         <Sparkles size={28} className="group-hover:rotate-12 transition-transform" />
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-background flex items-center justify-center animate-bounce">
@@ -91,7 +91,7 @@ export default function InsightsAssistant() {
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-28 right-8 w-96 h-[32rem] bg-surface-1 border border-border-custom rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden z-[160] glass-panel"
+            className="fixed bottom-36 md:bottom-28 right-4 md:right-8 w-[calc(100vw-2rem)] md:w-96 h-[32rem] max-h-[70vh] bg-surface-1 border border-border-custom rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden z-[160] glass-panel"
           >
             {/* HEADER */}
             <div className="p-6 border-b border-border-custom bg-surface-2/50 flex items-center justify-between">

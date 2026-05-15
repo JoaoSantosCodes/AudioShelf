@@ -239,13 +239,9 @@ export default function Home() {
             className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] md:hidden"
           />
         )}
-        {(isSidebarOpen || (typeof window !== 'undefined' && window.innerWidth >= 768)) && (
-          <motion.aside 
-            initial={{ x: -300 }}
-            animate={{ x: 0 }}
-            exit={{ x: -300 }}
-            className="fixed md:relative z-[110] w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar shadow-2xl md:shadow-none"
-          >
+        <motion.aside 
+          className={`fixed md:sticky top-0 left-0 z-[110] w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar shadow-2xl md:shadow-none transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        >
             <div className="p-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-lg shadow-gold/20">
@@ -349,23 +345,25 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
+        </motion.aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-24 md:pb-0">
-        <header className="h-20 flex items-center justify-between px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-text-muted hover:text-text">
+      <main className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-32 md:pb-0">
+        <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+          <div className="flex items-center gap-3 md:gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-text-muted hover:text-text bg-surface-2 rounded-lg">
               <List size={20} />
             </button>
-            <h2 className="text-xl font-serif font-bold text-text">Sua Biblioteca</h2>
+            <h2 className="text-lg md:text-xl font-serif font-bold text-text truncate">Sua Biblioteca</h2>
           </div>
-          <div className="flex items-center gap-4">
-            <PresenceIndicator />
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="hidden sm:block">
+              <PresenceIndicator />
+            </div>
             <GlobalSearch />
-            <ThemeToggle />
+            <div className="hidden xs:block">
+              <ThemeToggle />
+            </div>
             
             {/* VOICE ASSISTANT */}
             <button 
@@ -429,14 +427,14 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="p-8 space-y-10">
+        <div className="p-4 md:p-8 space-y-6 md:space-y-10 pb-32 md:pb-10">
           {/* SMART WIDGETS SECTION */}
           {/* BRIEFING AI SECTION */}
           {dailyBriefing && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-8 rounded-[2.5rem] bg-gradient-to-br from-gold/20 via-surface-1 to-surface-2 border border-gold/30 shadow-2xl relative overflow-hidden group"
+              className="p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-br from-gold/20 via-surface-1 to-surface-2 border border-gold/30 shadow-2xl relative overflow-hidden group"
             >
               <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Sparkles size={80} className="text-gold" />
@@ -455,7 +453,7 @@ export default function Home() {
                 <p className="text-sm text-text-muted max-w-2xl leading-relaxed">
                   {dailyBriefing.summary} {dailyBriefing.urgent > 0 ? `Atenção especial para as ${dailyBriefing.urgent} missões críticas.` : 'Seu dia parece sob controle.'}
                 </p>
-                <div className="flex gap-4 pt-2">
+                <div className="flex flex-wrap gap-3 md:gap-4 pt-2">
                   <Link href="/kanban" className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border-custom rounded-xl text-xs font-bold transition-all flex items-center gap-2">
                     <Calendar size={14} className="text-gold" /> Ver Missões
                   </Link>
@@ -474,7 +472,7 @@ export default function Home() {
             </motion.div>
           )}
 
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {/* GASTOS WIDGET */}
             <Link href="/financas" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-red-500/30 transition-all shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
