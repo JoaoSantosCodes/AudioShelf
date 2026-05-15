@@ -131,13 +131,6 @@ export default function Home() {
       alert(`Erro ao enviar: ${result.error}`);
     }
   };
-  const [recentActivities, setRecentActivities] = useState<any[]>([]);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [dashboardStats, setDashboardStats] = useState({
-    expenses: 0,
-    shoppingCount: 0,
-    pendingTasks: 0
-  });
 
   const notifications = [
     ...smartNotifications.map(n => ({

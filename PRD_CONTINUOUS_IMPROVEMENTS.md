@@ -117,9 +117,9 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações.
 
 ### 15. ✨ Polimento de Elite & Performance
-- [ ] **Skeleton Screens:** Implementar carregamento progressivo "fantasma" em todos os módulos.
+- [x] **Skeleton Screens:** Implementar carregamento progressivo "fantasma" em todos os módulos.
 - [ ] **Haptic Feedback (Mobile):** Adicionar vibrações táteis sutis em ações de conclusão de tarefas.
-- [ ] **Smart Cache:** Otimizar persistência local para carregamentos instantâneos offline.
+- [x] **Smart Cache:** Otimizar persistência local para carregamentos instantâneos offline.
 - [ ] **Tactical UI Overhaul:** Refinar gradientes e bordas neon para máxima nitidez (Retina ready).
 
 ---

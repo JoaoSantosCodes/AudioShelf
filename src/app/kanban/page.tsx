@@ -142,11 +142,20 @@ export default function KanbanPage() {
     });
   }, []);
 
+  const fetchTasks = async (userId: string) => {
+    try {
+      const [tasksRes, booksRes] = await Promise.all([
+        supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+        supabase.from('books').select('*')
+      ]);
+
+      if (booksRes.data) setBooks(booksRes.data);
+      if (tasksRes.data) {
+        setTasks(tasksRes.data);
+        localStorage.setItem('kanbanTasks', JSON.stringify(tasksRes.data));
       }
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
