@@ -37,6 +37,33 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [x] **Agenda Semanal:** Criar uma visão tática de 7 dias para planejamento de estudos, músicas e leituras.
 - [x] **Tarefas Recorrentes:** Interface e lógica de auto-geração de nova tarefa após conclusão implementadas.
 
+## [v2.2] Sincronização em Tempo Real (Supabase Realtime) 📡🔄
+**Status:** In Progress 🏗️
+
+### Objetivo:
+Eliminar a necessidade de recarregar a página para ver atualizações feitas por outros membros da casa (ex: esposa adicionando item no mercado).
+
+### Implementações:
+- [ ] Assinatura Realtime na tabela `shopping_list`.
+- [ ] Assinatura Realtime na tabela `tasks` (Kanban).
+- [ ] Atualização otimista de UI com fallback de segurança.
+
+---
+
+## [v2.1] Sincronização e Persistência de Dados 🗄️✅
+**Status:** Completed 🏆
+
+### Objetivo:
+Mudar de dados mockados para um banco de dados real (Supabase) com persistência multi-dispositivo.
+
+### Implementações:
+- [x] Schema SQL completo (Tasks, Transactions, Shopping).
+- [x] Integração Supabase no Módulo de Finanças.
+- [x] Integração Supabase no Módulo de Mercado.
+- [x] Integração Supabase no Kanban.
+- [x] Dashboard de Insights alimentado por dados reais.
+- [x] Sidebar de Atividades Recentes sincronizada.
+
 ### 6. 🤝 Social & Colaborativo
 - [x] **Shared Boards:** Interface de convite e modal de compartilhamento familiar integrados.
 - [x] **Categorias Sociais & Ícones:** Implementação de ícones para Lazer, Social, Saúde e Casa.

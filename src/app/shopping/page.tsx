@@ -50,6 +50,28 @@ export default function ShoppingListPage() {
       if (session?.user) {
         setUser(session.user);
         fetchItems(session.user.id);
+        
+        // ASSINATURA REALTIME
+        const channel = supabase
+          .channel('shopping_realtime')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'shopping_list', filter: `user_id=eq.${session.user.id}` },
+            (payload) => {
+              if (payload.eventType === 'INSERT') {
+                setItems(prev => [payload.new as ShoppingItem, ...prev]);
+              } else if (payload.eventType === 'UPDATE') {
+                setItems(prev => prev.map(item => item.id === payload.new.id ? payload.new as ShoppingItem : item));
+              } else if (payload.eventType === 'DELETE') {
+                setItems(prev => prev.filter(item => item.id !== payload.old.id));
+              }
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
       } else {
         setIsLoading(false);
       }

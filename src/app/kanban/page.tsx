@@ -99,7 +99,31 @@ export default function KanbanPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchInitialData(session.user.id);
+      if (session?.user) {
+        fetchInitialData(session.user.id);
+
+        // ASSINATURA REALTIME KANBAN
+        const channel = supabase
+          .channel('kanban_realtime')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${session.user.id}` },
+            (payload) => {
+              if (payload.eventType === 'INSERT') {
+                setTasks(prev => [payload.new as Task, ...prev]);
+              } else if (payload.eventType === 'UPDATE') {
+                setTasks(prev => prev.map(t => t.id === payload.new.id ? payload.new as Task : t));
+              } else if (payload.eventType === 'DELETE') {
+                setTasks(prev => prev.filter(t => t.id !== payload.old.id));
+              }
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      }
     });
   }, []);
 
