@@ -15,6 +15,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Task {
   id: string;
@@ -142,37 +143,43 @@ export default function KanbanPage() {
               </div>
 
               <div className="flex-1 space-y-4 overflow-y-auto no-scrollbar pb-10">
-                {tasks.filter(t => t.status === column.id).map(task => (
-                  <div 
-                    key={task.id}
-                    className="glass-card p-4 group cursor-default hover:border-gold/30 transition-all"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/5 px-2 py-0.5 rounded border border-gold/10">
-                        {task.category}
-                      </span>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {column.id !== 'todo' && (
-                          <button onClick={() => moveTask(task.id, column.id === 'doing' ? 'todo' : 'doing')} className="p-1 hover:text-gold"><ArrowLeft size={14} /></button>
-                        )}
-                        {column.id !== 'done' && (
-                          <button onClick={() => moveTask(task.id, column.id === 'todo' ? 'doing' : 'done')} className="p-1 hover:text-gold"><ChevronRight size={14} /></button>
-                        )}
+                <AnimatePresence mode="popLayout">
+                  {tasks.filter(t => t.status === column.id).map(task => (
+                    <motion.div 
+                      key={task.id}
+                      layout
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="glass-card p-4 group cursor-default hover:border-gold/30 transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/5 px-2 py-0.5 rounded border border-gold/10">
+                          {task.category}
+                        </span>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {column.id !== 'todo' && (
+                            <button onClick={() => moveTask(task.id, column.id === 'doing' ? 'todo' : 'doing')} className="p-1 hover:text-gold"><ArrowLeft size={14} /></button>
+                          )}
+                          {column.id !== 'done' && (
+                            <button onClick={() => moveTask(task.id, column.id === 'todo' ? 'doing' : 'done')} className="p-1 hover:text-gold"><ChevronRight size={14} /></button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="text-[14px] font-semibold text-text mb-1 group-hover:text-gold transition-colors">{task.title}</h3>
-                    <p className="text-[12px] text-text-dim line-clamp-2 leading-relaxed mb-4">{task.description}</p>
-                    
-                    <div className="flex items-center justify-between pt-3 border-t border-border-custom">
-                      <div className="flex -space-x-2">
-                        <div className="w-6 h-6 rounded-full border-2 border-bg bg-surface-3 flex items-center justify-center text-[10px] font-bold">JS</div>
+                      <h3 className="text-[14px] font-semibold text-text mb-1 group-hover:text-gold transition-colors">{task.title}</h3>
+                      <p className="text-[12px] text-text-dim line-clamp-2 leading-relaxed mb-4">{task.description}</p>
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-border-custom">
+                        <div className="flex -space-x-2">
+                          <div className="w-6 h-6 rounded-full border-2 border-bg bg-surface-3 flex items-center justify-center text-[10px] font-bold">JS</div>
+                        </div>
+                        <span className="text-[10px] text-text-muted font-medium">
+                          {new Date(task.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-text-muted font-medium">
-                        {new Date(task.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
                 
                 <button 
                   onClick={() => {

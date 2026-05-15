@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { Book } from '@/data/books';
-import { Play, Headphones, Clock } from 'lucide-react';
+import { Play, Headphones, Clock, Music, Video } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface BookCardProps {
   book: Book;
@@ -11,46 +12,52 @@ interface BookCardProps {
 
 export default function BookCard({ book, onSelect }: BookCardProps) {
   const isVideo = book.category?.toLowerCase() === 'vídeo' || book.category?.toLowerCase() === 'video';
+  const isMusic = book.category?.toLowerCase() === 'música' || book.category?.toLowerCase() === 'suno';
 
   return (
-    <div 
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => onSelect(book)}
-      className="group cursor-pointer glass-card p-2 relative"
+      className="group relative glass-card p-3 cursor-pointer overflow-hidden transition-all duration-500 border-gold/10 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/10"
     >
-      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-surface-2 mb-3 shadow-inner">
+      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-2 mb-4 shadow-xl">
         <img 
           src={book.cover} 
           alt={book.title} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
         
         {/* Media Type Badge */}
-        <div className="absolute top-2 right-2 w-8 h-8 rounded-full glass-panel flex items-center justify-center text-gold shadow-xl">
-          {isVideo ? <Play size={14} fill="currentColor" /> : <Headphones size={14} />}
+        <div className="absolute top-3 right-3 w-8 h-8 rounded-full glass-panel flex items-center justify-center text-gold border border-gold/20 backdrop-blur-md shadow-lg">
+          {isVideo ? <Video size={14} /> : isMusic ? <Music size={14} /> : <Headphones size={14} />}
         </div>
 
-        {/* Duration Badge */}
-        <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md glass-panel flex items-center gap-1.5 text-[10px] font-bold text-text/80">
-          <Clock size={10} />
-          {book.duration}
-        </div>
-
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-gold text-bg flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
-            {isVideo ? <Play size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
+        {/* Play Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+          <div className="w-14 h-14 rounded-full bg-gold/20 backdrop-blur-xl flex items-center justify-center border border-gold/40 shadow-2xl">
+            <Play size={24} className="text-gold fill-gold ml-1" />
           </div>
         </div>
       </div>
 
-      <div className="px-1.5 pb-1">
-        <h3 className="text-[13px] font-semibold text-text truncate group-hover:text-gold transition-colors leading-snug mb-0.5">
-          {book.title}
-        </h3>
-        <p className="text-[11px] text-text-dim truncate font-medium">
-          {book.author}
-        </p>
+      <div className="space-y-2 px-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-gold px-2 py-0.5 rounded-full bg-gold/5 border border-gold/10">
+            {book.category}
+          </span>
+          <div className="flex items-center gap-1 text-[9px] text-text-muted font-bold">
+            <Clock size={10} />
+            {book.duration}
+          </div>
+        </div>
+        <h3 className="font-serif text-[15px] text-text leading-tight group-hover:text-gold transition-colors line-clamp-1">{book.title}</h3>
+        <p className="text-[11px] text-text-dim font-medium line-clamp-1">{book.author}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }

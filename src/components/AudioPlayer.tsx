@@ -1,15 +1,98 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, RotateCw, Volume2, List, Moon, X } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, RotateCw, Volume2, List, Moon, X, Activity } from 'lucide-react';
 import { Book, Chapter } from '@/data/books';
 import { supabase } from '@/lib/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AudioPlayerProps {
   book: Book;
   initialChapterIndex?: number;
   userId: string;
 }
+
+// COMPONENTE DE VISUALIZAÇÃO DE ONDA (REAL-TIME)
+const WaveformVisualizer = ({ audioRef, isPlaying, isVideo }: { audioRef: React.RefObject<HTMLAudioElement>, isPlaying: boolean, isVideo: boolean }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!audioRef.current || isVideo) return;
+
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = audioContext.createMediaElementSource(audioRef.current);
+    const analyser = audioContext.createAnalyser();
+    
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyserRef.current = analyser;
+
+    return () => {
+      source.disconnect();
+      analyser.disconnect();
+      audioContext.close();
+    };
+  }, [audioRef, isVideo]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const draw = () => {
+      if (!analyserRef.current) return;
+      
+      const bufferLength = analyserRef.current.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyserRef.current.getByteFrequencyData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 255) * canvas.height;
+        
+        // Gradient Gold/Amber
+        const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+        gradient.addColorStop(0, 'rgba(212, 175, 55, 0.2)');
+        gradient.addColorStop(1, 'rgba(212, 175, 55, 0.8)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+        x += barWidth + 1;
+      }
+
+      animationRef.current = requestAnimationFrame(draw);
+    };
+
+    if (isPlaying) {
+      draw();
+    } else {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    return () => cancelAnimationFrame(animationRef.current);
+  }, [isPlaying]);
+
+  if (isVideo) return null;
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="absolute bottom-0 left-0 w-full h-12 opacity-30 pointer-events-none"
+      width={800}
+      height={100}
+    />
+  );
+};
 
 export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: AudioPlayerProps) {
   const [currentChapterIndex, setCurrentChapterIndex] = useState(initialChapterIndex);
@@ -166,8 +249,16 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
   const isVideo = currentChapter.type === 'video';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border-custom z-50 animate-in slide-in-from-bottom duration-500">
-      <div className="max-w-7xl mx-auto flex flex-col">
+    <motion.div 
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+      className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border-custom z-50 shadow-2xl"
+    >
+      <WaveformVisualizer audioRef={audioRef as any} isPlaying={isPlaying} isVideo={isVideo} />
+      
+      <div className="max-w-7xl mx-auto flex flex-col relative z-10">
         {/* VÍDEO VIEWPORT (Aparece apenas para vídeos) */}
         {isVideo && (
           <div className="w-full max-w-4xl mx-auto mt-4 px-4">
@@ -222,14 +313,17 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
           {/* BOOK INFO (LEFT) */}
           <div className="flex items-center justify-between w-full md:w-64 shrink-0">
             <div className="flex items-center gap-3 min-w-0">
-              {!isVideo && (
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-lg">
-                  <img src={book.cover} className="w-full h-full object-cover" alt="" />
-                </div>
-              )}
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-surface-2 border border-border-custom flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-lg relative">
+                <img src={book.cover} className="w-full h-full object-cover" alt="" />
+                {isPlaying && !isVideo && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                    <Activity size={16} className="text-gold animate-pulse" />
+                  </div>
+                )}
+              </div>
               <div className="min-w-0">
-                <div className="text-[12px] md:text-[13px] font-medium text-text truncate">{book.title}</div>
-                <div className="text-[10px] md:text-[11px] text-text-muted truncate">{currentChapter.title}</div>
+                <div className="text-[12px] md:text-[13px] font-semibold text-text truncate group-hover:text-gold transition-colors">{book.title}</div>
+                <div className="text-[10px] md:text-[11px] text-text-muted truncate font-medium">{currentChapter.title}</div>
               </div>
             </div>
             
@@ -244,7 +338,7 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
 
           {/* MAIN CONTROLS & PROGRESS (CENTER) */}
           <div className="flex-1 flex flex-col items-center gap-2 w-full">
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-8">
               <button 
                 onClick={() => currentChapterIndex > 0 && setCurrentChapterIndex(prev => prev - 1)}
                 disabled={currentChapterIndex === 0}
@@ -259,9 +353,9 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
 
               <button 
                 onClick={togglePlay}
-                className="w-12 h-12 rounded-full bg-gold text-bg flex items-center justify-center hover:bg-amber hover:scale-105 transition-all shadow-lg shadow-gold/20"
+                className="w-14 h-14 rounded-full bg-gold text-bg flex items-center justify-center hover:bg-gold-bright hover:scale-110 transition-all shadow-xl shadow-gold/20"
               >
-                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+                {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
               </button>
 
               <button onClick={() => skip(30)} className="text-text-dim hover:text-text transition-colors">
@@ -278,59 +372,46 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
             </div>
 
             {/* PROGRESS BAR */}
-            <div className="flex items-center gap-3 w-full max-w-[600px]">
-              <span className="text-[10px] text-text-muted w-8 text-center tabular-nums">{formatTime(currentTime)}</span>
+            <div className="flex items-center gap-4 w-full max-w-[700px]">
+              <span className="text-[10px] text-text-muted w-10 text-center tabular-nums font-bold">{formatTime(currentTime)}</span>
               <input 
                 type="range"
                 min="0"
                 max={duration || 0}
                 value={currentTime}
                 onChange={(e) => seek(Number(e.target.value))}
-                className="flex-1 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold hover:h-1.5 transition-all"
+                className="flex-1 h-1.5 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold hover:h-2 transition-all shadow-inner"
               />
-              <span className="text-[10px] text-text-muted w-8 text-center tabular-nums">{formatTime(duration)}</span>
-            </div>
-
-            {/* Mobile Sub-controls */}
-            <div className="flex md:hidden items-center justify-center gap-8 w-full mt-1">
-              <button onClick={() => skip(-30)} className="text-text-dim active:text-gold flex flex-col items-center gap-1">
-                <RotateCcw size={18} />
-                <span className="text-[8px] uppercase tracking-tighter">Voltar 30s</span>
-              </button>
-              <button 
-                onClick={changePlaybackRate}
-                className="text-gold text-[11px] font-bold border border-gold/30 px-2 py-0.5 rounded"
-              >
-                {playbackRate}x
-              </button>
-              <button onClick={() => skip(30)} className="text-text-dim active:text-gold flex flex-col items-center gap-1">
-                <RotateCw size={18} />
-                <span className="text-[8px] uppercase tracking-tighter">Avançar 30s</span>
-              </button>
+              <span className="text-[10px] text-text-muted w-10 text-center tabular-nums font-bold">{formatTime(duration)}</span>
             </div>
           </div>
 
           {/* VOLUME & SPEED (RIGHT - DESKTOP) */}
-          <div className="hidden md:flex items-center gap-5 w-64 justify-end shrink-0">
+          <div className="hidden md:flex items-center gap-6 w-64 justify-end shrink-0">
             <div className="relative group/speed">
               <button 
                 onClick={changePlaybackRate}
-                className="bg-surface-3 border border-border-custom text-gold text-[12px] font-bold px-3 py-1.5 rounded-md hover:bg-gold hover:text-bg transition-all min-w-[55px] shadow-sm"
+                className="bg-surface-3 border border-border-custom text-gold text-[12px] font-bold px-4 py-2 rounded-xl hover:bg-gold hover:text-bg transition-all min-w-[65px] shadow-sm"
               >
                 {playbackRate}x
               </button>
-              <div className="absolute bottom-full right-0 mb-3 hidden group-hover/speed:flex flex-col bg-surface border border-border-custom rounded-xl overflow-hidden shadow-2xl z-50 min-w-[120px]">
-                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-text-muted border-b border-border-custom bg-bg/50 font-bold">Sleep Timer</div>
+              <div className="absolute bottom-full right-0 mb-4 hidden group-hover/speed:flex flex-col bg-surface-2 border border-border-custom rounded-2xl overflow-hidden shadow-2xl z-50 min-w-[140px] animate-in fade-in slide-in-from-bottom-2">
+                <div className="px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-text-muted border-b border-border-custom bg-bg/50 font-bold text-center">Sleep Timer</div>
                 {[15, 30, 45, 60].map(m => (
-                  <button key={m} onClick={() => setSleepTimer(m * 60)} className="px-4 py-2.5 text-[12px] hover:bg-gold hover:text-bg transition-colors text-left flex justify-between items-center group/item">
-                    {m} min <Moon size={12} className="text-text-dim group-hover/item:text-bg" />
+                  <button key={m} onClick={() => setSleepTimer(m * 60)} className="px-5 py-3 text-[13px] font-semibold hover:bg-gold hover:text-bg transition-colors text-left flex justify-between items-center group/item">
+                    {m} min <Moon size={14} className="text-text-muted group-hover/item:text-bg" />
                   </button>
                 ))}
+                {sleepTimer && (
+                  <button onClick={() => setSleepTimer(null)} className="px-5 py-3 text-[13px] font-bold text-red-500 hover:bg-red-500 hover:text-white transition-colors border-t border-border-custom">
+                    Cancelar ({Math.ceil(sleepTimer / 60)}m)
+                  </button>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 group/vol">
-              <Volume2 size={18} className="text-text-dim group-hover/vol:text-gold transition-colors" />
+            <div className="flex items-center gap-3 group/vol">
+              <Volume2 size={20} className="text-text-muted group-hover/vol:text-gold transition-colors" />
               <input 
                 type="range"
                 min="0"
@@ -338,12 +419,12 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
                 step="0.01"
                 value={volume}
                 onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-24 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-text-dim hover:accent-gold transition-all"
+                className="w-24 h-1 bg-surface-3 rounded-full appearance-none cursor-pointer accent-gold group-hover:h-1.5 transition-all"
               />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -8,6 +8,7 @@ import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Home() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -564,30 +565,42 @@ export default function Home() {
               </div>
 
               {dbBooks.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                  {filteredBooks.map((book) => (
-                    <div key={book.id} className="relative group">
-                      {isAdminMode && (
-                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 rounded-lg">
-                          <button 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              deleteBook(book.id);
-                            }}
-                            className="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-red-500 hover:scale-110 active:scale-95 transition-all"
-                          >
-                            <X size={32} strokeWidth={3} />
-                          </button>
-                        </div>
-                      )}
-                      <BookCard 
-                        book={book} 
-                        onSelect={setSelectedBook} 
-                      />
-                    </div>
-                  ))}
-                </div>
+                <motion.div 
+                  layout
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
+                >
+                  <AnimatePresence mode="popLayout">
+                    {filteredBooks.map((book) => (
+                      <motion.div 
+                        key={book.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="relative group"
+                      >
+                        {isAdminMode && (
+                          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 rounded-lg">
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteBook(book.id);
+                              }}
+                              className="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-red-500 hover:scale-110 active:scale-95 transition-all"
+                            >
+                              <X size={32} strokeWidth={3} />
+                            </button>
+                          </div>
+                        )}
+                        <BookCard 
+                          book={book} 
+                          onSelect={setSelectedBook} 
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
               ) : (
                 <div className="text-center py-20 bg-surface border border-border-custom rounded-2xl flex flex-col items-center gap-4">
                   {isLoading ? (

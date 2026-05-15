@@ -17,9 +17,9 @@
 ## 🚀 Roadmap de Próximas Melhorias
 
 ### 1. 🎨 UI/UX & Aesthetics
-- [ ] **Waveform Visualizer:** Adicionar visualizador de ondas sonoras dinâmico para projetos do Suno.AI.
+- [x] **Waveform Visualizer:** Adicionar visualizador de ondas sonoras dinâmico para projetos do Suno.AI.
 - [ ] **Modo Leitura Manga:** Implementar um visualizador de imagens otimizado para rascunhos de Manga.
-- [ ] **Micro-interações:** Adicionar animações Framer Motion ao abrir cards e trocar de colunas no Kanban.
+- [x] **Micro-interações:** Adicionar animações Framer Motion ao abrir cards e trocar de colunas no Kanban.
 - [ ] **Temas Dinâmicos:** Permitir troca sutil entre "Obsidian Gold" (atual) e "Cyber Tactical" (neon).
 
 ### 2. 🧠 Inteligência & Automação
