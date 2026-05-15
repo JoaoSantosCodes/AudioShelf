@@ -28,6 +28,16 @@ export async function GET(request: NextRequest) {
     const filePath = getFileData.result.file_path;
     const downloadUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
 
+    // Detectar Content-Type pela extensão
+    let contentType = 'audio/mpeg'; // Default
+    if (filePath.endsWith('.mp4')) contentType = 'video/mp4';
+    else if (filePath.endsWith('.mkv')) contentType = 'video/x-matroska';
+    else if (filePath.endsWith('.mov')) contentType = 'video/quicktime';
+    else if (filePath.endsWith('.webm')) contentType = 'video/webm';
+    else if (filePath.endsWith('.m4a')) contentType = 'audio/mp4';
+    else if (filePath.endsWith('.wav')) contentType = 'audio/wav';
+    else if (filePath.endsWith('.ogg')) contentType = 'audio/ogg';
+
     // 2. Fetch the file content (forwarding Range headers for seeking support)
     const range = request.headers.get('Range');
     const fetchOptions: RequestInit = {
@@ -45,7 +55,6 @@ export async function GET(request: NextRequest) {
     
     // Copy relevant headers from Telegram response
     const headersToCopy = [
-      'content-type',
       'content-length',
       'content-range',
       'accept-ranges',
@@ -57,6 +66,9 @@ export async function GET(request: NextRequest) {
       if (val) headers.set(h, val);
     });
 
+    // Forçar o Content-Type detectado
+    headers.set('Content-Type', contentType);
+    
     // Ensure CORS is handled
     headers.set('Access-Control-Allow-Origin', '*');
 
