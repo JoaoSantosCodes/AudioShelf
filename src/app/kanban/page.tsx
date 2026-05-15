@@ -15,7 +15,10 @@ import {
   X,
   Repeat,
   MoreHorizontal,
-  Home
+  Home,
+  Share2,
+  Mail,
+  Send
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -57,6 +60,8 @@ export default function KanbanPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
   const [newTask, setNewTask] = useState({ 
     title: '', 
     description: '', 
@@ -134,6 +139,31 @@ export default function KanbanPage() {
     if (newStatus && activeTask && activeTask.status !== newStatus) {
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus! } : t));
       await supabase.from('tasks').update({ status: newStatus }).eq('id', taskId);
+
+      // LÓGICA DE RECURSÃO: Se a tarefa foi para 'done' e é recorrente, cria a próxima
+      if (newStatus === 'done' && activeTask.is_recurring) {
+        const nextDate = new Date(activeTask.due_date || new Date());
+        if (activeTask.frequency === 'daily') nextDate.setDate(nextDate.getDate() + 1);
+        else if (activeTask.frequency === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
+        else if (activeTask.frequency === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+
+        const nextTaskData = {
+          user_id: user?.id,
+          title: activeTask.title,
+          description: activeTask.description,
+          category: activeTask.category,
+          status: 'todo',
+          due_date: nextDate.toISOString().split('T')[0],
+          is_recurring: true,
+          frequency: activeTask.frequency,
+          linked_book_id: activeTask.linked_book_id
+        };
+
+        const { data: nextTask, error } = await supabase.from('tasks').insert(nextTaskData).select().single();
+        if (!error && nextTask) {
+          setTasks(prev => [nextTask, ...prev]);
+        }
+      }
     }
 
     setActiveTask(null);
@@ -175,6 +205,14 @@ export default function KanbanPage() {
     });
   };
 
+  const handleSendInvite = () => {
+    if (inviteEmail) {
+      alert(`Convite enviado para ${inviteEmail}! (Simulação de integração Supabase)`);
+      setInviteEmail('');
+      setIsShareModalOpen(false);
+    }
+  };
+
   const filteredTasks = tasks.filter(t => 
     t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -207,6 +245,13 @@ export default function KanbanPage() {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
+          <button 
+            onClick={() => setIsShareModalOpen(true)}
+            className="p-2.5 rounded-xl bg-surface-2 border border-border-custom text-text-dim hover:text-gold hover:border-gold/30 transition-all"
+            title="Convidar Colaborador"
+          >
+            <Share2 size={20} />
+          </button>
           <button 
             onClick={() => setIsModalOpen(true)}
             className="bg-gold text-bg px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-gold/20"
@@ -380,6 +425,62 @@ export default function KanbanPage() {
                   >
                     Criar Missão
                   </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DE COMPARTILHAMENTO */}
+      <AnimatePresence>
+        {isShareModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-surface-1 border border-border-custom w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
+            >
+              <div className="p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-gold">
+                    <Share2 size={24} />
+                    <h3 className="text-2xl font-serif font-bold text-text">Convidar Família</h3>
+                  </div>
+                  <button onClick={() => setIsShareModalOpen(false)} className="text-text-muted hover:text-text"><X size={24} /></button>
+                </div>
+
+                <p className="text-sm text-text-dim leading-relaxed">
+                  Trabalhe em conjunto! Convide membros da sua família ou equipe para gerenciar este board de projetos.
+                </p>
+
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-gold transition-colors" size={18} />
+                    <input 
+                      type="email" 
+                      placeholder="E-mail do convidado..."
+                      value={inviteEmail}
+                      onChange={e => setInviteEmail(e.target.value)}
+                      className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 pl-12 pr-6 text-sm outline-none focus:border-gold/50 transition-all"
+                    />
+                  </div>
+
+                  <button 
+                    onClick={handleSendInvite}
+                    className="w-full py-4 bg-gold text-bg rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gold-bright transition-all shadow-xl shadow-gold/20"
+                  >
+                    <Send size={18} /> Enviar Convite
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-border-custom">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-4">Colaboradores Ativos</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-[10px] font-bold text-gold border border-gold/20">EU</div>
+                    <p className="text-xs text-text-muted font-medium">Você (Proprietário)</p>
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar } from 'lucide-react';
+import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar, Activity } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
@@ -164,6 +164,25 @@ export default function Home() {
                 <Database size={18} />
                 <span className="text-sm font-semibold">Projetos & Kanban</span>
               </Link>
+
+              <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>
+              <div className="px-4 space-y-4">
+                {[
+                  { user: "Você", action: "completou", target: "Treino 💪", time: "2h atrás" },
+                  { user: "Sistema", action: "agendou", target: "Pizza Night 🍕", time: "5h atrás" },
+                  { user: "Você", action: "adicionou", target: "Novo Manga", time: "Ontem" }
+                ].map((act, i) => (
+                  <div key={i} className="flex gap-3 items-start group cursor-default">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0 group-hover:scale-150 transition-transform" />
+                    <div>
+                      <p className="text-[11px] leading-tight text-text-muted">
+                        <span className="text-text font-bold">{act.user}</span> {act.action} <span className="text-gold font-medium">{act.target}</span>
+                      </p>
+                      <span className="text-[9px] text-text-dim">{act.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>
               <div className="grid grid-cols-1 gap-1">

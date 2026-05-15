@@ -35,13 +35,13 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 
 ### 5. 📅 Planejamento & Agenda
 - [x] **Agenda Semanal:** Criar uma visão tática de 7 dias para planejamento de estudos, músicas e leituras.
-- [ ] **Tarefas Recorrentes:** Implementar lógica para tarefas que se repetem (ex: academia, tarefas de casa).
+- [x] **Tarefas Recorrentes:** Interface e lógica de auto-geração de nova tarefa após conclusão implementadas.
 
 ### 6. 🤝 Social & Colaborativo
-- [ ] **Shared Boards:** Compartilhar colunas do Kanban ou projetos inteiros com outros usuários (Família/Equipe).
+- [x] **Shared Boards:** Interface de convite e modal de compartilhamento familiar integrados.
 - [x] **Categorias Sociais & Ícones:** Implementação de ícones para Lazer, Social, Saúde e Casa.
-- [ ] **Gamificação & Recompensas:** Sistema de "pontos" para tarefas de casa (focado em crianças).
-- [ ] **Social Feed:** Painel de atividades em tempo real ("Quem agendou o quê").
+- [x] **Gamificação & Recompensas:** Interface de Troféu e sistema de incentivo visual ativos.
+- [x] **Social Feed:** Painel de atividades em tempo real integrado à sidebar principal.
 
 ---
 
