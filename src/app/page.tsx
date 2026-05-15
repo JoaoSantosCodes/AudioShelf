@@ -39,6 +39,11 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState({
+    expenses: 0,
+    shoppingCount: 0,
+    pendingTasks: 0
+  });
 
   const notifications = [
     { id: 3, type: 'shopping', title: 'Lista Atualizada', text: 'Sua esposa adicionou 3 itens', time: 'Ontem', icon: ShoppingCart, color: 'text-blue-400' },
@@ -48,10 +53,30 @@ export default function Home() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+        fetchRecentActivities(session.user.id);
+        fetchDashboardStats(session.user.id);
+      }
       fetchBooks();
     });
   }, []);
+
+  const fetchDashboardStats = async (userId: string) => {
+    const [txRes, shopRes, tasksRes] = await Promise.all([
+      supabase.from('transactions').select('amount').eq('user_id', userId).eq('type', 'expense'),
+      supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('completed', false),
+      supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId).neq('status', 'done')
+    ]);
+
+    const totalExp = txRes.data?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
+
+    setDashboardStats({
+      expenses: totalExp,
+      shoppingCount: shopRes.count || 0,
+      pendingTasks: tasksRes.count || 0
+    });
+  };
 
   const fetchBooks = async () => {
     const { data, error } = await supabase
@@ -290,32 +315,52 @@ export default function Home() {
 
             <Link href="/shopping" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-gold/30 transition-all shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <ShoppingCart size={60} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Lista de Mercado</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-text">8 Itens</span>
-                <span className="text-[10px] font-bold text-gold">Faltam comprar</span>
-              </div>
-              <div className="mt-4 flex -space-x-2">
-                {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-[8px] font-bold text-gold">{i}</div>)}
-              </div>
-            </Link>
+            </div>
+            <div className="mt-4 w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
+              <div className="h-full bg-red-400/60 w-[45%]" />
+            </div>
+            <Wallet className="absolute top-6 right-6 text-text-dim/10 group-hover:text-gold/10 transition-colors" size={48} />
+          </motion.div>
 
-            <Link href="/agenda" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-emerald-500/30 transition-all shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Calendar size={60} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Missões de Hoje</p>
+          {/* MERCADO WIDGET */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="bg-surface-1 border border-border-custom p-6 rounded-[2rem] shadow-xl relative overflow-hidden group"
+          >
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-text-dim uppercase tracking-[0.2em]">Lista de Mercado</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-text">3 Pendentes</span>
+                <h3 className="text-3xl font-black text-text group-hover:text-gold transition-colors">{dashboardStats.shoppingCount} Itens</h3>
+                <span className="text-[10px] font-bold text-blue-400">Faltam comprar</span>
+              </div>
+            </div>
+            <div className="flex gap-1 mt-4">
+              {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-2 border border-border-custom flex items-center justify-center text-[9px] font-bold text-text-dim">{i}</div>)}
+            </div>
+            <ShoppingCart className="absolute top-6 right-6 text-text-dim/10 group-hover:text-gold/10 transition-colors" size={48} />
+          </motion.div>
+
+          {/* MISSÕES WIDGET */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="bg-surface-1 border border-border-custom p-6 rounded-[2rem] shadow-xl relative overflow-hidden group"
+          >
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-text-dim uppercase tracking-[0.2em]">Missões de Hoje</span>
+              <div className="flex items-baseline gap-2">
+                <h3 className="text-3xl font-black text-text group-hover:text-gold transition-colors">{dashboardStats.pendingTasks} Pendentes</h3>
                 <span className="text-[10px] font-bold text-emerald-400">Foco total</span>
               </div>
-              <div className="mt-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-text-muted truncate">Academia (Pernas)</span>
-              </div>
-            </Link>
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="text-[10px] font-bold text-text-muted truncate">
+                {recentActivities.length > 0 ? `Próxima: ${recentActivities[0].title}` : 'Sem missões pendentes'}
+              </span>
+            </div>
+            <Calendar className="absolute top-6 right-6 text-text-dim/10 group-hover:text-gold/10 transition-colors" size={48} />
+          </motion.div>
+        </div>
           </section>
 
           <div>

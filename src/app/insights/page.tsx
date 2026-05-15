@@ -183,29 +183,41 @@ export default function InsightsPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                    <span className="text-text">Academia (15/20 dias)</span>
-                    <span className="text-gold">75%</span>
+                    <span className="text-text">Academia (Missões Saúde)</span>
+                    <span className="text-gold">{realStats.healthScore}%</span>
                   </div>
                   <div className="w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                    <div className="h-full bg-gold w-[75%]"></div>
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${realStats.healthScore}%` }}
+                      className="h-full bg-gold"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                    <span className="text-text">Economia Mensal</span>
-                    <span className="text-emerald-400">92%</span>
+                    <span className="text-text">Meta de Compras (Itens/Mês)</span>
+                    <span className="text-emerald-400">{Math.min(100, realStats.shoppingItems * 10)}%</span>
                   </div>
                   <div className="w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-400 w-[92%]"></div>
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, realStats.shoppingItems * 10)}%` }}
+                      className="h-full bg-emerald-400"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                    <span className="text-text">Leitura de Livros</span>
-                    <span className="text-blue-400">40%</span>
+                    <span className="text-text">Economia Doméstica</span>
+                    <span className="text-blue-400">{realStats.totalExpenses > 0 ? 85 : 0}%</span>
                   </div>
                   <div className="w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-400 w-[40%]"></div>
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${realStats.totalExpenses > 0 ? 85 : 0}%` }}
+                      className="h-full bg-blue-400"
+                    />
                   </div>
                 </div>
               </div>
