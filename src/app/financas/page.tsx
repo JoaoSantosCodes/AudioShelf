@@ -20,7 +20,9 @@ import {
   Camera,
   Image as ImageIcon,
   DollarSign,
-  Eye
+  Eye,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -50,6 +52,7 @@ export default function FinancePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isScanning, setIsScanning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
@@ -86,6 +89,22 @@ export default function FinancePage() {
     }
   };
 
+  const handleAIScan = async () => {
+    if (!previewUrl) return;
+    setIsScanning(true);
+    
+    // Simulação de chamada de API OCR
+    setTimeout(() => {
+      setNewTx({
+        ...newTx,
+        amount: '342.90',
+        description: 'Supermercado Central',
+        category: 'Mercado'
+      });
+      setIsScanning(false);
+    }, 2500);
+  };
+
   const handleAddTransaction = () => {
     if (!newTx.description || !newTx.amount) return;
     
@@ -104,6 +123,7 @@ export default function FinancePage() {
     setNewTx({ description: '', amount: '', category: 'Mercado', type: 'expense' });
     setPreviewUrl(null);
     setSelectedImage(null);
+    setIsScanning(false);
   };
 
   return (
@@ -302,19 +322,50 @@ export default function FinancePage() {
                   <div className="flex gap-4">
                     <div className="flex-1 space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Anexar Nota Fiscal</label>
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full h-32 border-2 border-dashed border-border-custom rounded-2xl flex flex-col items-center justify-center gap-2 text-text-dim hover:border-gold hover:text-gold transition-all overflow-hidden relative"
-                      >
+                      <div className="w-full h-32 border-2 border-dashed border-border-custom rounded-2xl flex flex-col items-center justify-center gap-2 text-text-dim hover:border-gold hover:text-gold transition-all overflow-hidden relative">
                         {previewUrl ? (
-                          <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                        ) : (
                           <>
+                            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                            {isScanning && (
+                              <motion.div 
+                                initial={{ top: '-10%' }}
+                                animate={{ top: '110%' }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                                className="absolute left-0 right-0 h-1 bg-gold shadow-[0_0_15px_rgba(212,175,55,0.8)] z-10"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white"
+                              >
+                                <Camera size={20} />
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <button 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full h-full flex flex-col items-center justify-center gap-2"
+                          >
                             <Camera size={32} />
                             <span className="text-[10px] font-bold uppercase">Tirar Foto / Anexar</span>
-                          </>
+                          </button>
                         )}
-                      </button>
+                      </div>
+                      {previewUrl && !isScanning && (
+                        <button 
+                          onClick={handleAIScan}
+                          className="w-full py-2 bg-gold/10 border border-gold/30 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold hover:text-bg transition-all flex items-center justify-center gap-2"
+                        >
+                          <Sparkles size={14} /> Analisar com IA
+                        </button>
+                      )}
+                      {isScanning && (
+                        <div className="w-full py-2 text-center text-[10px] font-bold uppercase tracking-widest text-gold animate-pulse flex items-center justify-center gap-2">
+                          <Loader2 size={14} className="animate-spin" /> Lendo Recibo...
+                        </div>
+                      )}
                       <input 
                         type="file" 
                         ref={fileInputRef} 
