@@ -96,12 +96,21 @@ export default function Home() {
     <div className="min-h-screen bg-background text-text flex flex-col md:flex-row overflow-hidden">
       {/* SIDEBAR */}
       <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] md:hidden"
+          />
+        )}
         {(isSidebarOpen || (typeof window !== 'undefined' && window.innerWidth >= 768)) && (
           <motion.aside 
             initial={{ x: -300 }}
             animate={{ x: 0 }}
             exit={{ x: -300 }}
-            className="fixed md:relative z-50 w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar"
+            className="fixed md:relative z-[110] w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar shadow-2xl md:shadow-none"
           >
             <div className="p-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
