@@ -10,6 +10,7 @@ import { User } from '@supabase/supabase-js';
 
 export default function Home() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [lastPlayedBook, setLastPlayedBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -100,7 +101,25 @@ export default function Home() {
 
   useEffect(() => {
     fetchBooks();
+    
+    // Load last played book from local storage
+    const saved = localStorage.getItem('last_played_book');
+    if (saved) {
+      try {
+        setLastPlayedBook(JSON.parse(saved));
+      } catch (e) {
+        console.error("Erro ao carregar último livro:", e);
+      }
+    }
   }, []);
+
+  // Update last played whenever a book is selected
+  useEffect(() => {
+    if (selectedBook) {
+      setLastPlayedBook(selectedBook);
+      localStorage.setItem('last_played_book', JSON.stringify(selectedBook));
+    }
+  }, [selectedBook]);
 
   const deleteBook = async (bookId: string) => {
     try {
@@ -249,51 +268,57 @@ export default function Home() {
       )}
 
       {/* HEADER */}
-      <header className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 border-b border-border-custom bg-surface shrink-0 z-[60]">
-        <div className="flex items-center gap-2.5 font-serif text-lg md:text-xl text-gold tracking-tight">
-          {selectedBook && (
+      <header className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-border-custom glass-panel shrink-0 z-[60]">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold">
+            {selectedBook && (
+              <button 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="md:hidden p-1.5 -ml-1 text-text-dim active:text-gold"
+              >
+                <List size={20} />
+              </button>
+            )}
+            <span className="hidden sm:inline bg-gold/10 p-1.5 rounded-lg border border-gold/20 shadow-inner">📚</span>
+            <span className="text-gradient">AudioShelf</span>
+          </div>
+          
+          <nav className="hidden md:flex gap-1 ml-8 bg-surface-2 p-1 rounded-full border border-border-custom">
             <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="md:hidden p-1.5 -ml-1 text-text-dim active:text-gold"
+              onClick={() => { setSelectedBook(null); setIsSidebarOpen(false); }}
+              className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all ${!selectedBook ? 'bg-gold text-bg shadow-lg shadow-gold/20' : 'text-text-dim hover:text-text'}`}
             >
-              <List size={20} />
+              Biblioteca
             </button>
-          )}
-          <span className="hidden sm:inline">📚</span>
-          AudioShelf
+            <button 
+              onClick={toggleAdminMode}
+              className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all ${isAdminMode ? 'bg-amber text-bg' : 'text-text-dim hover:text-text'}`}
+            >
+              {isAdminMode ? 'Admin' : 'Gerenciar'}
+            </button>
+          </nav>
         </div>
         
-        <nav className="flex gap-1">
-          <button 
-            onClick={() => { setSelectedBook(null); setIsSidebarOpen(false); }}
-            className={`px-3 py-1.5 rounded-full text-[12px] md:text-[13px] font-medium transition-all ${!selectedBook ? 'bg-surface-3 text-gold' : 'text-text-dim hover:bg-surface-2 hover:text-text'}`}
-          >
-            Biblioteca
-          </button>
-          <button 
-            onClick={toggleAdminMode}
-            className={`px-3 py-1.5 rounded-full text-[12px] md:text-[13px] font-medium transition-all ${isAdminMode ? 'bg-amber/10 text-amber' : 'text-text-dim hover:bg-surface-2 hover:text-text'}`}
-          >
-            {isAdminMode ? 'Admin' : 'Gerenciar'}
-          </button>
-        </nav>
-        
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex flex-col items-end mr-2">
+            <span className="text-[11px] text-text-muted font-bold uppercase tracking-widest">Bem-vindo</span>
+            <span className="text-[13px] text-text font-semibold">
+              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorador'}
+            </span>
+          </div>
           <button 
             onClick={handleSignOut}
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 group relative"
             title="Sair da Conta"
           >
-            <div className="w-8 h-8 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-sm group-hover:bg-red-500/20 group-hover:border-red-500/50 transition-all overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-surface-3 border-2 border-gold/30 flex items-center justify-center text-sm group-hover:border-red-500/50 transition-all overflow-hidden shadow-xl">
               {user?.user_metadata?.avatar_url ? (
                 <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="" />
               ) : (
-                '👤'
+                <span className="text-lg">👤</span>
               )}
             </div>
-            <span className="hidden md:inline text-[13px] text-text-dim group-hover:text-red-500 font-medium truncate max-w-[120px]">
-              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Perfil'}
-            </span>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green rounded-full border-2 border-bg shadow-sm"></div>
           </button>
         </div>
       </header>
@@ -457,21 +482,55 @@ export default function Home() {
               </div>
             ) : null}
 
-            {/* CATEGORIES FILTER */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar mb-6 md:mb-8">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs md:text-sm font-medium whitespace-nowrap transition-all border ${
-                    selectedCategory === cat 
-                    ? 'bg-gold/10 border-gold text-gold shadow-lg shadow-gold/10' 
-                    : 'border-border-custom text-text-dim hover:border-text-muted hover:text-text'
-                  }`}
+            {/* CONTINUE SECTION */}
+            {lastPlayedBook && !selectedBook && (
+              <section className="animate-in slide-in-from-top-4 duration-700">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="font-serif text-xl text-text flex items-center gap-2">
+                    <Clock size={20} className="text-gold" />
+                    Continuar de onde parou
+                  </h2>
+                </div>
+                <div 
+                  onClick={() => setSelectedBook(lastPlayedBook)}
+                  className="group cursor-pointer glass-panel p-4 md:p-6 rounded-3xl flex flex-col md:flex-row gap-6 items-center border-gold/20 hover:border-gold/40 transition-all duration-500 hover:shadow-2xl hover:shadow-gold/5"
                 >
-                  {cat}
-                </button>
-              ))}
+                  <div className="w-32 h-44 rounded-xl overflow-hidden shadow-2xl shrink-0">
+                    <img src={lastPlayedBook.cover} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-2 block">Última Atividade</span>
+                    <h3 className="font-serif text-2xl md:text-3xl text-text mb-2 group-hover:text-gold transition-colors">{lastPlayedBook.title}</h3>
+                    <p className="text-text-dim mb-6">{lastPlayedBook.author} · {lastPlayedBook.category}</p>
+                    
+                    <button className="bg-gold text-bg px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 mx-auto md:mx-0 group-hover:scale-105 transition-transform">
+                      <Play size={18} fill="currentColor" /> Retomar Agora
+                    </button>
+                  </div>
+                  <div className="hidden lg:flex flex-col items-end justify-center pr-4">
+                    <div className="text-4xl font-serif text-gold/20 font-black italic select-none">RESUME</div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* CATEGORIES FILTER */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
+              <div className="p-1 bg-surface-2 rounded-full border border-border-custom flex gap-1">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-6 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-all ${
+                      selectedCategory === cat 
+                      ? 'bg-gold text-bg shadow-lg shadow-gold/20' 
+                      : 'text-text-dim hover:text-text'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* LIBRARY GRID */}

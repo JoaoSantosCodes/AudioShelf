@@ -1,25 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0e0c0a;
-  --surface: #1a1612;
-  --surface2: #241f19;
+  --bg: #0a0908;
+  --surface: rgba(22, 20, 18, 0.7);
+  --surface2: rgba(36, 31, 25, 0.8);
   --surface3: #2e2720;
-  --border: #3a3028;
-  --gold: #c9a84c;
+  --border: rgba(58, 48, 40, 0.5);
+  --gold: #d4af37;
   --gold-dim: #8a6f30;
+  --gold-bright: #f4d03f;
   --amber: #e8b84b;
-  --text: #f0e8d8;
-  --text-dim: #9a8a72;
-  --text-muted: #5a4e3e;
+  --text: #f8f4eb;
+  --text-dim: #a69a85;
+  --text-muted: #6b5c4b;
   --green: #4caf7a;
+  --glass: rgba(255, 255, 255, 0.03);
 }
 
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);
-  --color-accent: var(--gold);
-  --color-accent-muted: var(--gold-dim);
+  --color-gold: var(--gold);
+  --color-gold-dim: var(--gold-dim);
+  --color-gold-bright: var(--gold-bright);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface2);
   --color-surface-3: var(--surface3);
@@ -28,8 +31,11 @@
 
 body {
   background: var(--bg);
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.02) 0%, transparent 50%);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -40,19 +46,37 @@ body {
   font-family: 'Playfair Display', serif;
 }
 
-.glass-card {
+.glass-panel {
   background: var(--surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  @apply rounded-2xl transition-all duration-300;
+}
+
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  @apply rounded-2xl transition-all duration-500 ease-out;
 }
 
 .glass-card:hover {
-  background: var(--surface2);
-  border-color: var(--gold-dim);
+  background: rgba(212, 175, 55, 0.05);
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--text) 0%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -61,7 +85,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dim);
 }
 
 @keyframes eq {

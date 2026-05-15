@@ -171,11 +171,14 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
         {/* VÍDEO VIEWPORT (Aparece apenas para vídeos) */}
         {isVideo && (
           <div className="w-full max-w-4xl mx-auto mt-4 px-4">
-            <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gold/10 relative group">
+            <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gold/20 relative group glass-panel">
               <video 
                 ref={audioRef as any}
                 src={streamUrl}
                 className="w-full h-full"
+                playsInline
+                autoPlay={isPlaying}
+                preload="auto"
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleMetadataLoaded}
                 onEnded={() => {
@@ -189,8 +192,8 @@ export default function AudioPlayer({ book, initialChapterIndex = 0, userId }: A
               />
               {!isPlaying && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none transition-all group-hover:bg-black/20">
-                  <div className="w-16 h-16 rounded-full bg-gold/20 backdrop-blur-md flex items-center justify-center border border-gold/30 shadow-2xl">
-                    <Play size={32} className="text-gold fill-gold ml-1" />
+                  <div className="w-20 h-20 rounded-full bg-gold/10 backdrop-blur-xl flex items-center justify-center border border-gold/30 shadow-2xl scale-90 group-hover:scale-100 transition-transform duration-500">
+                    <Play size={40} className="text-gold fill-gold ml-1" />
                   </div>
                 </div>
               )}
