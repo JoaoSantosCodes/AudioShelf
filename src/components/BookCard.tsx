@@ -7,10 +7,10 @@ import { motion } from 'framer-motion';
 
 interface BookCardProps {
   book: Book;
-  onSelect: (book: Book) => void;
+  onClick: (book: Book) => void;
 }
 
-export default function BookCard({ book, onSelect }: BookCardProps) {
+export default function BookCard({ book, onClick }: BookCardProps) {
   const isVideo = book.category?.toLowerCase() === 'vídeo' || book.category?.toLowerCase() === 'video';
   const isMusic = book.category?.toLowerCase() === 'música' || book.category?.toLowerCase() === 'suno';
 
@@ -21,7 +21,7 @@ export default function BookCard({ book, onSelect }: BookCardProps) {
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -8, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => onSelect(book)}
+      onClick={() => onClick(book)}
       className="group relative glass-card p-3 cursor-pointer overflow-hidden transition-all duration-500 border-gold/10 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/10"
     >
       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-2 mb-4 shadow-xl">
