@@ -31,6 +31,7 @@ interface ShoppingItem {
   category: string;
   completed: boolean;
   user_id: string;
+  created_at: string;
 }
 
 export default function ShoppingListPage() {
