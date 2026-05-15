@@ -37,9 +37,13 @@ export async function POST(req: NextRequest) {
 
     const type = video ? 'video' : 'audio';
     const file_id = media.file_id;
-    const rawTitle = media.title || media.file_name || "Sem Título";
-    const author = media.performer || "Autor Desconhecido";
+    
+    // Prioridade: Legenda da mensagem > Título do arquivo > Nome do arquivo > Padrão
+    const rawTitle = post.caption || media.title || media.file_name || "Sem Título";
+    
+    const author = media.performer || (type === 'video' ? "Diretor Desconhecido" : "Autor Desconhecido");
     const duration = media.duration ? `${Math.floor(media.duration / 60)} min` : "??";
+    const category = type === 'video' ? 'Vídeo' : 'Audiobook';
 
     // Lógica simples de Split: "1984 - Capítulo 01" -> Livro: "1984", Capítulo: "Capítulo 01"
     let bookTitle = rawTitle;
@@ -68,6 +72,7 @@ export async function POST(req: NextRequest) {
           title: bookTitle,
           author: author,
           duration: duration,
+          category: category,
           cover: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=400' // Placeholder
         })
         .select()
