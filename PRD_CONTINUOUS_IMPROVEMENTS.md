@@ -38,15 +38,15 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [x] **Tarefas Recorrentes:** Interface e lógica de auto-geração de nova tarefa após conclusão implementadas.
 
 ## [v2.2] Sincronização em Tempo Real (Supabase Realtime) 📡🔄
-**Status:** In Progress 🏗️
+**Status:** Completed 🏆
 
 ### Objetivo:
 Eliminar a necessidade de recarregar a página para ver atualizações feitas por outros membros da casa (ex: esposa adicionando item no mercado).
 
 ### Implementações:
-- [ ] Assinatura Realtime na tabela `shopping_list`.
-- [ ] Assinatura Realtime na tabela `tasks` (Kanban).
-- [ ] Atualização otimista de UI com fallback de segurança.
+- [x] Assinatura Realtime na tabela `shopping_list`.
+- [x] Assinatura Realtime na tabela `tasks` (Kanban).
+- [x] Atualização otimista de UI com fallback de segurança.
 
 ---
 
@@ -113,8 +113,14 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [x] **Global Voice Assistant:** Onipresença de voz via captura real no Header Global.
 - [x] **Deep Linking AI:** Sugestões da IA vinculadas a botões de ação direta.
 - [x] **Optimistic UI & Realtime:** Sincronização instantânea e atualizações de UI sem espera.
-- [/] **Smart Quiet Mode:** Filtro de notificações noturnas e foco tático (In progress).
+- [x] **Smart Quiet Mode:** Filtro de notificações noturnas e foco tático.
 - [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações.
+
+### 15. ✨ Polimento de Elite & Performance
+- [ ] **Skeleton Screens:** Implementar carregamento progressivo "fantasma" em todos os módulos.
+- [ ] **Haptic Feedback (Mobile):** Adicionar vibrações táteis sutis em ações de conclusão de tarefas.
+- [ ] **Smart Cache:** Otimizar persistência local para carregamentos instantâneos offline.
+- [ ] **Tactical UI Overhaul:** Refinar gradientes e bordas neon para máxima nitidez (Retina ready).
 
 ---
 
@@ -125,4 +131,4 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ---
 
-*Documento atualizado em: 15 de Maio de 2026*
+*Última atualização tática em: 15 de Maio de 2026 às 08:00h*

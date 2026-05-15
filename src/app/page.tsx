@@ -41,6 +41,8 @@ import PresenceIndicator from '@/components/PresenceIndicator';
 import { checkSmartAlerts, SmartNotification, generateDailyBriefing } from '@/lib/notificationEngine';
 import { sendTelegramMessage, formatTelegramBriefing } from '@/lib/telegramEngine';
 import { isQuietModeActive } from '@/lib/quietMode';
+import Skeleton from '@/components/Skeleton';
+import HomeSkeleton from '@/components/HomeSkeleton';
 
 export default function Home() {
   const { activeMedia, playMedia, closeMedia } = useMedia();
@@ -50,12 +52,18 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [telegramChatId, setTelegramChatId] = useState('');
   const [smartNotifications, setSmartNotifications] = useState<any[]>([]);
   const [dailyBriefing, setDailyBriefing] = useState<any>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState({
+    expenses: 0,
+    shoppingCount: 0,
+    pendingTasks: 0
+  });
 
   const handleVoiceInput = async () => {
     if (!user) return;
@@ -149,13 +157,26 @@ export default function Home() {
   const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
 
   useEffect(() => {
+    // SMART CACHE: Load from localStorage first
+    const cachedStats = localStorage.getItem('dashboardStats');
+    const cachedActivities = localStorage.getItem('recentActivities');
+    const cachedBooks = localStorage.getItem('dbBooks');
+
+    if (cachedStats) setDashboardStats(JSON.parse(cachedStats));
+    if (cachedActivities) setRecentActivities(JSON.parse(cachedActivities));
+    if (cachedBooks) setDbBooks(JSON.parse(cachedBooks));
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        fetchRecentActivities(session.user.id);
-        fetchDashboardStats(session.user.id);
-        checkSmartAlerts(session.user.id).then(setSmartNotifications);
-        generateDailyBriefing(session.user.id).then(setDailyBriefing);
+        Promise.all([
+          fetchRecentActivities(session.user.id),
+          fetchDashboardStats(session.user.id),
+          checkSmartAlerts(session.user.id).then(setSmartNotifications),
+          generateDailyBriefing(session.user.id).then(setDailyBriefing)
+        ]).finally(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
       }
       fetchBooks();
     });
@@ -174,6 +195,11 @@ export default function Home() {
       shoppingCount: shopRes.count || 0,
       pendingTasks: tasksRes.count || 0
     });
+    localStorage.setItem('dashboardStats', JSON.stringify({
+      expenses: totalExp,
+      shoppingCount: shopRes.count || 0,
+      pendingTasks: tasksRes.count || 0
+    }));
   };
 
   const fetchRecentActivities = async (userId: string) => {
@@ -185,7 +211,10 @@ export default function Home() {
       .order('created_at', { ascending: false })
       .limit(3);
     
-    if (data) setRecentActivities(data);
+    if (data) {
+      setRecentActivities(data);
+      localStorage.setItem('recentActivities', JSON.stringify(data));
+    }
   };
 
   const fetchBooks = async () => {
@@ -196,6 +225,7 @@ export default function Home() {
     
     if (data) {
       setDbBooks(data);
+      localStorage.setItem('dbBooks', JSON.stringify(data));
     } else {
       setDbBooks(initialBooks);
     }
@@ -301,23 +331,33 @@ export default function Home() {
               </button>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>
-              <div className="px-4 space-y-4">
-                {recentActivities.length > 0 ? (
-                  recentActivities.map((act, i) => (
-                    <div key={i} className="flex gap-3 items-start group cursor-default">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0 group-hover:scale-150 transition-transform" />
-                      <div>
-                        <p className="text-[11px] leading-tight text-text-muted">
-                          Você concluiu <span className="text-gold font-medium">{act.title}</span>
-                        </p>
-                        <span className="text-[9px] text-text-dim">Recentemente</span>
-                      </div>
+              <div className="space-y-4">
+              {isLoading && recentActivities.length === 0 ? (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="flex items-center gap-3 p-3">
+                    <Skeleton variant="rect" className="w-8 h-8 rounded-lg" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton variant="text" className="w-full h-3" />
+                      <Skeleton variant="text" className="w-1/2 h-2" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-[10px] text-text-dim px-2 italic">Nenhuma atividade recente.</p>
-                )}
-              </div>
+                  </div>
+                ))
+              ) : recentActivities.length > 0 ? recentActivities.map((act) => (
+                <div key={act.id} className="flex items-center gap-4 p-4 rounded-2xl bg-surface-2 border border-border-custom hover:border-gold/30 transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold group-hover:scale-110 transition-transform shrink-0">
+                    <CheckCircle2 size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-text truncate">{act.title}</p>
+                    <p className="text-[10px] text-text-dim mt-0.5">Concluído</p>
+                  </div>
+                </div>
+              )) : (
+                <div className="p-8 text-center bg-surface-2 rounded-2xl border border-dashed border-border-custom">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Nenhuma missão recente</p>
+                </div>
+              )}
+            </div>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>
               <div className="grid grid-cols-1 gap-1">
@@ -345,12 +385,18 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            <div className="md:hidden p-4 flex justify-end">
+              <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-text-muted"><X size={24} /></button>
+            </div>
         </motion.aside>
       </AnimatePresence>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-32 md:pb-0">
-        <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+      {isLoading && dbBooks.length === 0 ? (
+        <HomeSkeleton />
+      ) : (
+        <main className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-32 md:pb-0">
+          <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
           <div className="flex items-center gap-3 md:gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-text-muted hover:text-text bg-surface-2 rounded-lg">
               <List size={20} />
@@ -563,6 +609,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      )}
 
       <MobileNav />
       <MediaExpandedView 

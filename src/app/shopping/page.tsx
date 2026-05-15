@@ -24,6 +24,8 @@ import PresenceIndicator from '@/components/PresenceIndicator';
 import ThemeToggle from '@/components/ThemeToggle';
 import { User } from '@supabase/supabase-js';
 import { getSmartSuggestions, Suggestion } from '@/lib/shoppingEngine';
+import ShoppingSkeleton from '@/components/shopping/ShoppingSkeleton';
+import Skeleton from '@/components/Skeleton';
 
 interface ShoppingItem {
   id: string;
@@ -51,10 +53,14 @@ export default function ShoppingListPage() {
   ];
 
   useEffect(() => {
+    // SMART CACHE: Load from localStorage first
+    const cachedItems = localStorage.getItem('shoppingItems');
+    if (cachedItems) setItems(JSON.parse(cachedItems));
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        fetchItems(session.user.id);
+        fetchItems(session.user.id).finally(() => setIsLoading(false));
         getSmartSuggestions(session.user.id).then(setSuggestions);
         
         // ASSINATURA REALTIME
@@ -65,11 +71,23 @@ export default function ShoppingListPage() {
             { event: '*', schema: 'public', table: 'shopping_list', filter: `user_id=eq.${session.user.id}` },
             (payload) => {
               if (payload.eventType === 'INSERT') {
-                setItems(prev => [payload.new as ShoppingItem, ...prev]);
+                setItems(prev => {
+                  const newList = [payload.new as ShoppingItem, ...prev];
+                  localStorage.setItem('shoppingItems', JSON.stringify(newList));
+                  return newList;
+                });
               } else if (payload.eventType === 'UPDATE') {
-                setItems(prev => prev.map(item => item.id === payload.new.id ? payload.new as ShoppingItem : item));
+                setItems(prev => {
+                  const newList = prev.map(item => item.id === payload.new.id ? payload.new as ShoppingItem : item);
+                  localStorage.setItem('shoppingItems', JSON.stringify(newList));
+                  return newList;
+                });
               } else if (payload.eventType === 'DELETE') {
-                setItems(prev => prev.filter(item => item.id !== payload.old.id));
+                setItems(prev => {
+                  const newList = prev.filter(item => item.id !== payload.old.id);
+                  localStorage.setItem('shoppingItems', JSON.stringify(newList));
+                  return newList;
+                });
               }
             }
           )
@@ -91,7 +109,10 @@ export default function ShoppingListPage() {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (data) setItems(data);
+    if (data) {
+      setItems(data);
+      localStorage.setItem('shoppingItems', JSON.stringify(data));
+    }
     setIsLoading(false);
   };
 
@@ -211,6 +232,10 @@ export default function ShoppingListPage() {
       setItems(prev => prev.map(i => i.id === tempId ? data[0] : i));
     }
   };
+
+  if (isLoading && items.length === 0) {
+    return <ShoppingSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col">

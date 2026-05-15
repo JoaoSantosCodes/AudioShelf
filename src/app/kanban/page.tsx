@@ -42,11 +42,12 @@ import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import KanbanColumn from '@/components/kanban/KanbanColumn';
 import SortableTask from '@/components/kanban/SortableTask';
 import ThemeToggle from '@/components/ThemeToggle';
-import { supabase } from '@/lib/supabase';
 import PresenceIndicator from '@/components/PresenceIndicator';
+import KanbanSkeleton from '@/components/kanban/KanbanSkeleton';
 import { User } from '@supabase/supabase-js';
 import { books as initialBooks, Book } from '@/data/books';
 import { useMedia } from '@/context/MediaContext';
+import { supabase } from '@/lib/supabase';
 
 interface Task {
   id: string;
@@ -64,7 +65,9 @@ interface Task {
 
 export default function KanbanPage() {
   const { playMedia } = useMedia();
+  const [user, setUser] = useState<User | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -85,8 +88,6 @@ export default function KanbanPage() {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState<Book[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const categories = ['Geral', 'Manga', 'SaaS', 'Música', 'Curso', 'Lazer', 'Social', 'Saúde', 'Casa'];
   const columns: { id: 'todo' | 'doing' | 'done', title: string, icon: any }[] = [
@@ -101,10 +102,14 @@ export default function KanbanPage() {
   );
 
   useEffect(() => {
+    // SMART CACHE: Load from localStorage first
+    const cachedTasks = localStorage.getItem('kanbanTasks');
+    if (cachedTasks) setTasks(JSON.parse(cachedTasks));
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchInitialData(session.user.id);
+        fetchTasks(session.user.id).finally(() => setIsLoading(false));
 
         // ASSINATURA REALTIME
         const channel = supabase
@@ -131,21 +136,12 @@ export default function KanbanPage() {
         return () => {
           supabase.removeChannel(channel);
         };
+      } else {
+        setIsLoading(false);
       }
     });
   }, []);
 
-  const fetchInitialData = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      const [tasksRes, booksRes] = await Promise.all([
-        supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-        supabase.from('books').select('*')
-      ]);
-
-      if (booksRes.data) setBooks(booksRes.data);
-      if (tasksRes.data) {
-        setTasks(tasksRes.data);
       }
     } catch (err) {
       console.error(err);
@@ -334,6 +330,10 @@ export default function KanbanPage() {
     t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading && tasks.length === 0) {
+    return <KanbanSkeleton />;
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">

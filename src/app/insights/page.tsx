@@ -19,6 +19,8 @@ import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
+import InsightsSkeleton from '@/components/insights/InsightsSkeleton';
+import Skeleton from '@/components/Skeleton';
 
 export default function InsightsPage() {
   const [realStats, setRealStats] = useState({
@@ -31,7 +33,14 @@ export default function InsightsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchRealStats();
+    // SMART CACHE: Load from localStorage first
+    const cachedStats = localStorage.getItem('realStats');
+    const cachedActivity = localStorage.getItem('weeklyActivity');
+    
+    if (cachedStats) setRealStats(JSON.parse(cachedStats));
+    if (cachedActivity) setWeeklyActivity(JSON.parse(cachedActivity));
+
+    fetchRealStats().finally(() => setIsLoading(false));
   }, []);
 
   const fetchRealStats = async () => {
@@ -64,12 +73,16 @@ export default function InsightsPage() {
     const normalizedActivity = activity.map(count => (count / maxTasks) * 100);
 
     setWeeklyActivity(normalizedActivity);
-    setRealStats({
+    const finalStats = {
       tasksDone: tasksRes.data?.length || 0,
       totalExpenses: expensesTotal,
       shoppingItems: shopRes.count || 0,
-      healthScore: Math.min(100, (tasksRes.data?.length || 0) * 5) // Exemplo: cada tarefa concluída dá 5% de saúde
-    });
+      healthScore: Math.min(100, (tasksRes.data?.length || 0) * 5)
+    };
+
+    setRealStats(finalStats);
+    localStorage.setItem('realStats', JSON.stringify(finalStats));
+    localStorage.setItem('weeklyActivity', JSON.stringify(normalizedActivity));
     setIsLoading(false);
   };
 
@@ -82,6 +95,10 @@ export default function InsightsPage() {
 
   const weeklyData = [65, 80, 45, 90, 100, 75, 85];
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  if (isLoading && realStats.tasksDone === 0) {
+    return <InsightsSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col">

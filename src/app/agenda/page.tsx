@@ -20,6 +20,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ThemeToggle from '@/components/ThemeToggle';
 import { User } from '@supabase/supabase-js';
+import AgendaSkeleton from '@/components/agenda/AgendaSkeleton';
+import Skeleton from '@/components/Skeleton';
 
 interface AgendaItem {
   id: string;
@@ -36,6 +38,7 @@ export default function AgendaPage() {
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -62,11 +65,19 @@ export default function AgendaPage() {
   const weekDays = getWeekDays(currentDate);
 
   useEffect(() => {
+    // SMART CACHE: Load from localStorage first
+    const cachedAgenda = localStorage.getItem('agendaItems');
+    if (cachedAgenda) setItems(JSON.parse(cachedAgenda));
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) fetchAgendaItems(session.user.id);
+      if (session?.user) {
+        setUser(session.user);
+        fetchAgendaItems(session.user.id).finally(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
+      }
     });
-  }, [currentDate]);
+  }, []);
 
   const fetchAgendaItems = async (userId: string) => {
     setIsLoading(true);
@@ -77,14 +88,16 @@ export default function AgendaPage() {
       .not('due_date', 'is', null);
     
     if (data) {
-      setItems(data.map(t => ({
+      const formattedItems = data.map(t => ({
         id: t.id,
         title: t.title,
         description: t.description,
         category: t.category,
         is_completed: t.status === 'done',
         scheduled_date: t.due_date
-      })));
+      }));
+      setItems(formattedItems);
+      localStorage.setItem('agendaItems', JSON.stringify(formattedItems));
     }
     setIsLoading(false);
   };
@@ -100,6 +113,10 @@ export default function AgendaPage() {
       setItems(items.map(i => i.id === item.id ? { ...i, is_completed: !i.is_completed } : i));
     }
   };
+
+  if (isLoading && items.length === 0) {
+    return <AgendaSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col">
