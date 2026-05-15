@@ -26,7 +26,7 @@ interface ShoppingItem {
   id: string;
   name: string;
   category: string;
-  is_bought: boolean;
+  completed: boolean;
   user_id: string;
 }
 
@@ -47,40 +47,83 @@ export default function ShoppingListPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      // Mock inicial
-      setItems([
-        { id: '1', name: 'Leite Desnatado', category: 'Laticínios', is_bought: false, user_id: '' },
-        { id: '2', name: 'Picanha', category: 'Proteínas', is_bought: true, user_id: '' },
-        { id: '3', name: 'Maçã Fuji', category: 'Hortifruti', is_bought: false, user_id: '' },
-      ]);
-      setIsLoading(false);
+      if (session?.user) {
+        setUser(session.user);
+        fetchItems(session.user.id);
+      } else {
+        setIsLoading(false);
+      }
     });
   }, []);
 
-  const addItem = () => {
-    if (!newItemName) return;
-    const item: ShoppingItem = {
-      id: Math.random().toString(),
-      name: newItemName,
-      category: selectedCategory,
-      is_bought: false,
-      user_id: user?.id || ''
-    };
-    setItems([item, ...items]);
-    setNewItemName('');
+  const fetchItems = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('shopping_list')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (data) setItems(data);
+    setIsLoading(false);
   };
 
-  const toggleBought = (id: string) => {
-    setItems(items.map(item => item.id === id ? { ...item, is_bought: !item.is_bought } : item));
+  const addItem = async () => {
+    if (!newItemName || !user) return;
+    
+    const { data, error } = await supabase
+      .from('shopping_list')
+      .insert([{
+        user_id: user.id,
+        name: newItemName,
+        category: selectedCategory,
+        completed: false
+      }])
+      .select();
+
+    if (data) {
+      setItems([data[0], ...items]);
+      setNewItemName('');
+    }
   };
 
-  const removeItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+  const toggleBought = async (id: string) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    const { error } = await supabase
+      .from('shopping_list')
+      .update({ completed: !item.completed })
+      .eq('id', id);
+
+    if (!error) {
+      setItems(items.map(i => 
+        i.id === id ? { ...i, completed: !i.completed } : i
+      ));
+    }
   };
 
-  const clearBought = () => {
-    setItems(items.filter(item => !item.is_bought));
+  const removeItem = async (id: string) => {
+    const { error } = await supabase
+      .from('shopping_list')
+      .delete()
+      .eq('id', id);
+
+    if (!error) {
+      setItems(items.filter(item => item.id !== id));
+    }
+  };
+
+  const clearBought = async () => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('shopping_list')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('completed', true);
+
+    if (!error) {
+      setItems(items.filter(item => !item.completed));
+    }
   };
 
   return (
@@ -151,7 +194,7 @@ export default function ShoppingListPage() {
 
             <div className="grid grid-cols-1 gap-3">
               <AnimatePresence mode="popLayout">
-                {items.sort((a, b) => Number(a.is_bought) - Number(b.is_bought)).map((item) => {
+                {items.sort((a, b) => Number(a.completed) - Number(b.completed)).map((item) => {
                   const categoryData = categories.find(c => c.name === item.category);
                   const Icon = categoryData?.icon || ShoppingCart;
 
@@ -162,17 +205,17 @@ export default function ShoppingListPage() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className={`group p-4 rounded-2xl border transition-all flex items-center justify-between ${item.is_bought ? 'bg-surface-3/50 border-transparent opacity-60' : 'bg-surface-1 border-border-custom hover:border-gold/30 shadow-lg'}`}
+                      className={`group p-4 rounded-2xl border transition-all flex items-center justify-between ${item.completed ? 'bg-surface-3/50 border-transparent opacity-60' : 'bg-surface-1 border-border-custom hover:border-gold/30 shadow-lg'}`}
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <button 
                           onClick={() => toggleBought(item.id)}
-                          className={`transition-all ${item.is_bought ? 'text-gold' : 'text-text-dim hover:text-gold'}`}
+                          className={`transition-all ${item.completed ? 'text-gold' : 'text-text-dim hover:text-gold'}`}
                         >
-                          {item.is_bought ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                          {item.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
                         </button>
                         <div className="flex flex-col">
-                          <span className={`text-sm font-bold ${item.is_bought ? 'line-through text-text-dim' : 'text-text'}`}>
+                          <span className={`text-sm font-bold ${item.completed ? 'line-through text-text-dim' : 'text-text'}`}>
                             {item.name}
                           </span>
                           <span className={`text-[9px] font-black uppercase tracking-widest ${categoryData?.color}`}>

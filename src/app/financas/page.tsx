@@ -74,15 +74,25 @@ export default function FinancePage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setTransactions([
-        { id: '1', description: 'Salário Mensal', amount: 6500.00, category: 'Salário', date: '2026-05-01', type: 'income' },
-        { id: '2', description: 'Mercado Mensal', amount: 850.50, category: 'Mercado', date: '2026-05-14', type: 'expense', receipt_url: '#' },
-        { id: '3', description: 'Pizza de Sexta', amount: 120.00, category: 'Lazer', date: '2026-05-13', type: 'expense' },
-      ]);
-      setIsLoading(false);
+      if (session?.user) {
+        setUser(session.user);
+        fetchTransactions(session.user.id);
+      } else {
+        setIsLoading(false);
+      }
     });
   }, []);
+
+  const fetchTransactions = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (data) setTransactions(data);
+    setIsLoading(false);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,26 +132,31 @@ export default function FinancePage() {
     }, 3000);
   };
 
-  const handleAddTransaction = () => {
-    if (!newTx.description || !newTx.amount) return;
+  const handleAddTransaction = async () => {
+    if (!newTx.description || !newTx.amount || !user) return;
     
-    const tx: Transaction = {
-      id: Math.random().toString(),
-      description: newTx.description,
-      amount: parseFloat(newTx.amount),
-      category: newTx.category,
-      date: new Date().toISOString().split('T')[0],
-      type: newTx.type,
-      receipt_url: previewUrl || undefined
-    };
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert([{
+        user_id: user.id,
+        description: newTx.description,
+        amount: parseFloat(newTx.amount),
+        category: newTx.category,
+        date: new Date().toISOString().split('T')[0],
+        type: newTx.type,
+        receipt_url: previewUrl || null
+      }])
+      .select();
 
-    setTransactions([tx, ...transactions]);
-    setIsModalOpen(false);
-    setNewTx({ description: '', amount: '', category: 'Mercado', type: 'expense' });
-    setPreviewUrl(null);
-    setSelectedImage(null);
-    setIsScanning(false);
-    setIsListening(false);
+    if (data) {
+      setTransactions([data[0], ...transactions]);
+      setIsModalOpen(false);
+      setNewTx({ description: '', amount: '', category: 'Mercado', type: 'expense' });
+      setPreviewUrl(null);
+      setSelectedImage(null);
+      setIsScanning(false);
+      setIsListening(false);
+    }
   };
 
   return (

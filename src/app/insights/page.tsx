@@ -17,13 +17,48 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 
 export default function InsightsPage() {
+  const [realStats, setRealStats] = useState({
+    tasksDone: 0,
+    totalExpenses: 0,
+    shoppingItems: 0,
+    healthScore: 85
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRealStats();
+  }, []);
+
+  const fetchRealStats = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const [tasksRes, txRes, shopRes] = await Promise.all([
+      supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id).eq('status', 'done'),
+      supabase.from('transactions').select('amount').eq('user_id', session.user.id).eq('type', 'expense'),
+      supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id).eq('completed', true)
+    ]);
+
+    const expensesTotal = txRes.data?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
+
+    setRealStats({
+      tasksDone: tasksRes.count || 0,
+      totalExpenses: expensesTotal,
+      shoppingItems: shopRes.count || 0,
+      healthScore: 85 // Mocked for now, can be linked to a specific task category
+    });
+    setIsLoading(false);
+  };
+
   const stats = [
-    { title: 'Missões Concluídas', value: '42', change: '+12%', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { title: 'Gastos do Mês', value: 'R$ 2.450', change: '-5%', icon: Wallet, color: 'text-red-400', bg: 'bg-red-400/10' },
-    { title: 'Itens de Mercado', value: '128', change: '+18%', icon: ShoppingCart, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { title: 'Foco em Saúde', value: '88%', change: '+2%', icon: Dumbbell, color: 'text-gold', bg: 'bg-gold/10' },
+    { title: 'Missões Concluídas', value: realStats.tasksDone.toString(), change: '+12%', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { title: 'Gastos do Mês', value: `R$ ${realStats.totalExpenses.toLocaleString('pt-BR')}`, change: '-5%', icon: Wallet, color: 'text-red-400', bg: 'bg-red-400/10' },
+    { title: 'Itens de Mercado', value: realStats.shoppingItems.toString(), change: '+18%', icon: ShoppingCart, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { title: 'Foco em Saúde', value: `${realStats.healthScore}%`, change: '+2%', icon: Dumbbell, color: 'text-gold', bg: 'bg-gold/10' },
   ];
 
   const weeklyData = [65, 80, 45, 90, 100, 75, 85];

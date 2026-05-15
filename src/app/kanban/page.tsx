@@ -76,7 +76,8 @@ export default function KanbanPage() {
     due_date: '', 
     linked_book_id: '',
     is_recurring: false,
-    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly'
+    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+    priority: 'medium' as 'low' | 'medium' | 'high'
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState<Book[]>([]);
@@ -196,15 +197,14 @@ export default function KanbanPage() {
       due_date: newTask.due_date || null,
       linked_book_id: newTask.linked_book_id || null,
       is_recurring: newTask.is_recurring,
-      frequency: newTask.is_recurring ? newTask.frequency : null
+      frequency: newTask.is_recurring ? newTask.frequency : null,
+      priority: newTask.priority
     };
 
     const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
     
     if (!error && data) {
       setTasks([data, ...tasks]);
-    } else {
-      setTasks([{ ...taskData, id: Math.random().toString(), created_at: new Date().toISOString() } as Task, ...tasks]);
     }
     
     setIsModalOpen(false);
