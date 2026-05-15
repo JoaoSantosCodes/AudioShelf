@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { books as initialBooks, Book } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar, Activity } from 'lucide-react';
+import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play, Calendar, Activity, BarChart3 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
@@ -163,6 +163,11 @@ export default function Home() {
               <Link href="/kanban" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
                 <Database size={18} />
                 <span className="text-sm font-semibold">Projetos & Kanban</span>
+              </Link>
+
+              <Link href="/insights" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+                <BarChart3 size={18} />
+                <span className="text-sm font-semibold">Insights & Resultados</span>
               </Link>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>

@@ -18,7 +18,8 @@ import {
   Home,
   Share2,
   Mail,
-  Send
+  Send,
+  BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -226,7 +227,17 @@ export default function KanbanPage() {
           <Link href="/" className="p-2 rounded-xl bg-surface-2 hover:bg-surface-3 transition-colors border border-border-custom text-text-dim hover:text-gold">
             <Home size={20} />
           </Link>
-          <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold">
+          <Link href="/agenda" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+            <Calendar size={18} />
+            <span className="text-sm font-semibold">Agenda Semanal</span>
+          </Link>
+
+          <Link href="/insights" className="flex items-center gap-2 px-4 py-2 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
+            <BarChart3 size={18} />
+            <span className="text-sm font-semibold">Insights</span>
+          </Link>
+
+          <div className="flex items-center gap-2.5 font-serif text-xl md:text-2xl text-gold tracking-tighter font-bold ml-4">
             <LayoutDashboard size={24} className="text-gold" />
             <span className="text-gradient">Project Kanban</span>
           </div>
