@@ -94,17 +94,17 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 - [x] **Busca Global (Omni-Search):** Barra de busca única (Ctrl+K) para encontrar Livros, Tarefas, Notas e Compras.
 - [x] **OCR de Notas Fiscais Inteligente:** Simulação de alta fidelidade com histórico e processamento multi-step.
 - [x] **Dashboard de Widgets:** Resumo visual na Home com dados reais de Finanças, Mercado e Kanban.
-- [/] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento (Avatares Live).
+- [x] **Realtime Presence:** Indicadores visuais de quem está online e colaborando no momento (Avatares Live).
 
 ### 12. 🔔 Notificações & Alertas Inteligentes
 - [x] **In-App Notification Center:** Ícone de sino com histórico de alertas táticos e sociais sincronizado.
 - [ ] **Lembretes de Tarefas:** Notificações programadas para missões que estão para vencer.
 - [ ] **Alertas Financeiros:** Avisos automáticos ao atingir limites de orçamento.
-- [ ] **Telegram Push:** Envio de resumos diários e alertas críticos via Bot de Telegram.
+- [/] **Telegram Push:** Envio de resumos diários e alertas críticos via Bot de Telegram (Integração em progresso).
 
 ### 13. 🔊 Mini-Player Flutuante Universal
 - [x] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Glassmorphism persistent player).
-- [x] **Visualização Compacta:** Design de vidro flutuante com controles essenciais e capa da mídia.
+- [x] **Visualização Compacta:** Design de vidro fluantte com controles essenciais e capa da mídia.
 
 ### 14. 🤖 OCR & Inteligência de Dados ✅
 - [x] **Leitura de Notas via IA:** Extração simulada de alta fidelidade de valor, data e itens.

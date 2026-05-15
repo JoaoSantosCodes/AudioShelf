@@ -22,7 +22,8 @@ import {
   Bell,
   CheckCircle2,
   Mic,
-  Volume2
+  Volume2,
+  Send
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -43,6 +44,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
+  const [telegramChatId, setTelegramChatId] = useState('');
 
   const handleVoiceInput = async () => {
     if (!user) return;
@@ -223,11 +226,22 @@ export default function Home() {
                 <span className="text-sm font-semibold">Lista de Mercado</span>
               </Link>
 
-              <Link href="/financas" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 text-text-dim hover:text-gold transition-all group">
+              <Link href="/financas" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
                 <Wallet size={18} />
-                <span className="text-xs font-bold uppercase tracking-widest">Finanças</span>
+                <span className="text-sm font-semibold">Finanças</span>
               </Link>
-              <Link href="/insights" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 text-text-dim hover:text-gold transition-all group">
+
+              <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Integrações</div>
+              <button 
+                onClick={() => setIsTelegramModalOpen(true)}
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all group"
+              >
+                <Send size={18} className="group-hover:text-sky-400 transition-colors" />
+                <div className="text-left">
+                  <span className="text-sm font-semibold block">Telegram Bot</span>
+                  <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">Ativo</span>
+                </div>
+              </button>
                 <BarChart3 size={18} />
                 <span className="text-xs font-bold uppercase tracking-widest">Insights</span>
               </Link>
@@ -453,6 +467,64 @@ export default function Home() {
       <MediaExpandedView 
         onUpdateProgress={handleUpdateProgress}
       />
+
+      {/* TELEGRAM CONNECTION MODAL */}
+      <AnimatePresence>
+        {isTelegramModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-surface-1 border border-border-custom w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl"
+            >
+              <div className="p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
+                      <Send className="text-sky-400" size={20} />
+                    </div>
+                    <h3 className="text-xl font-serif font-bold text-text">Conectar Telegram</h3>
+                  </div>
+                  <button onClick={() => setIsTelegramModalOpen(false)} className="text-text-muted hover:text-text"><X size={24} /></button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-surface-2 rounded-2xl border border-border-custom text-xs leading-relaxed text-text-muted">
+                    <p className="mb-2">Para receber alertas e resumos diários:</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>Inicie uma conversa com <span className="text-sky-400 font-bold">@MediaShelf_Bot</span></li>
+                      <li>Envie o comando <span className="text-gold font-bold">/start</span></li>
+                      <li>Cole o seu <span className="text-text font-bold">Chat ID</span> abaixo:</li>
+                    </ol>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Seu Telegram Chat ID</label>
+                    <input 
+                      type="text" 
+                      placeholder="Ex: 123456789"
+                      value={telegramChatId}
+                      onChange={e => setTelegramChatId(e.target.value)}
+                      className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 text-sm font-mono focus:border-sky-400 outline-none transition-all"
+                    />
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      alert("Simulando envio de resumo para o Telegram...");
+                      setIsTelegramModalOpen(false);
+                    }}
+                    className="w-full py-4 bg-sky-500 text-white rounded-2xl font-bold hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2"
+                  >
+                    <Send size={18} /> Testar Notificação Push
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
