@@ -37,6 +37,9 @@ export async function GET(request: NextRequest) {
     else if (filePath.endsWith('.m4a')) contentType = 'audio/mp4';
     else if (filePath.endsWith('.wav')) contentType = 'audio/wav';
     else if (filePath.endsWith('.ogg')) contentType = 'audio/ogg';
+    else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) contentType = 'image/jpeg';
+    else if (filePath.endsWith('.png')) contentType = 'image/png';
+    else if (filePath.endsWith('.webp')) contentType = 'image/webp';
 
     // 2. Fetch the file content (forwarding Range headers for seeking support)
     const range = request.headers.get('Range');
