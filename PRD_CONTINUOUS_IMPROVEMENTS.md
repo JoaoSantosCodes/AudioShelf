@@ -99,18 +99,20 @@ Mudar de dados mockados para um banco de dados real (Supabase) com persistência
 
 ### 12. 🔔 Notificações & Alertas Proativos
 - [x] **In-App Notification Center:** Central de alertas táticos com histórico.
-- [x] **Lembretes de Tarefas:** Notificações automáticas para missões vencendo em 24h.
+- [x] **Lembretes de Tarefas:** Inteligência de Missões (Kanban) com prioridades e alertas de 24h.
 - [x] **Alertas Financeiros:** Avisos ao atingir 80% e 100% do orçamento.
 - [x] **Motor de Resumo Diário:** Briefing matinal dinâmico no Dashboard.
 - [x] **Telegram Push (Interface):** Modal de conexão e infraestrutura de chat vinculada.
+- [x] **Telegram Automation:** Envio real de mensagens formatadas para o celular.
 
 ### 13. 🔊 Mini-Player Flutuante Universal
 - [x] **Persistent Playback:** Player de vidro que acompanha o usuário em todas as páginas.
 - [x] **Visualização Compacta:** Controles essenciais com design minimalista.
 
-### 14. 🤖 OCR & Inteligência de Dados ✅
-- [x] **Leitura de Notas via IA:** Extração de valor, data e itens.
-- [x] **Categorização Inteligente:** IA sugere a categoria da despesa automaticamente.
+### 14. 🤖 Próximos Passos & Refinamentos
+- [ ] **Global Voice Assistant:** Mover o microfone de captura real para o Header Global.
+- [ ] **Deep Linking AI:** Sugestões da IA vinculadas a ações diretas no sistema.
+- [ ] **Smart Quiet Mode:** Filtro de notificações noturnas e foco tático.
 - [x] **Histórico de Processamento:** Tela para revisar e aprovar extrações.
 
 ---
