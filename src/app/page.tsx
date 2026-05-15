@@ -22,7 +22,6 @@ export default function Home() {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [user, setUser] = useState<User | null>(null);
 
   const categories = ['Todos', 'Audiobook', 'Vídeo', 'Música', 'Curso', 'Manga', 'SaaS', 'Publishing'];
 
