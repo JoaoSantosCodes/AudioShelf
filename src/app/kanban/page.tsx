@@ -158,7 +158,7 @@ export default function KanbanPage() {
     }
     
     setIsModalOpen(false);
-    setNewTask({ title: '', description: '', category: 'Geral', status: 'todo', due_date: '' });
+    setNewTask({ title: '', description: '', category: 'Geral', status: 'todo', due_date: '', linked_book_id: '' });
   };
 
   const filteredTasks = tasks.filter(t => 
