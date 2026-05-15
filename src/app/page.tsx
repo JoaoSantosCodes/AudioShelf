@@ -19,7 +19,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [user, setUser] = useState<User | null>(null);
 
-  const categories = ['Todos', 'Audiobook', 'Vídeo', 'Música', 'Curso'];
+  const categories = ['Todos', 'Audiobook', 'Vídeo', 'Música', 'Curso', 'Manga', 'SaaS', 'Publishing'];
 
   // ... (dentro de fetchBooks)
   // const transformed = data.map((b: any) => ({
@@ -207,10 +207,12 @@ export default function Home() {
     fetchBooks();
   };
 
-  const filteredBooks = dbBooks.filter(book => 
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBooks = dbBooks.filter(book => {
+    const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          book.author.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'Todos' || book.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const toggleAdminMode = () => {
     if (isAdminMode) {

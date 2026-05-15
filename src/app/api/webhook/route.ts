@@ -39,23 +39,36 @@ export async function POST(req: NextRequest) {
     const file_id = media.file_id;
     
     // Prioridade: Legenda da mensagem > Título do arquivo > Nome do arquivo > Padrão
-    const rawTitle = post.caption || media.title || media.file_name || "Sem Título";
+    const caption = post.caption || "";
+    const rawTitle = caption || media.title || media.file_name || "Sem Título";
     
     const author = media.performer || (type === 'video' ? "Diretor Desconhecido" : "Autor Desconhecido");
     const duration = media.duration ? `${Math.floor(media.duration / 60)} min` : "??";
-    const category = type === 'video' ? 'Vídeo' : 'Audiobook';
+    
+    // --- LÓGICA DE CATEGORIZAÇÃO POR HASHTAG ---
+    let category = type === 'video' ? 'Vídeo' : 'Audiobook';
+    
+    if (caption.toLowerCase().includes('#manga')) category = 'Manga';
+    else if (caption.toLowerCase().includes('#curso')) category = 'Curso';
+    else if (caption.toLowerCase().includes('#musica')) category = 'Música';
+    else if (caption.toLowerCase().includes('#saas')) category = 'SaaS';
+    else if (caption.toLowerCase().includes('#pub')) category = 'Publishing';
+    else if (caption.toLowerCase().includes('#udemy')) category = 'Curso';
 
-    // Lógica simples de Split: "1984 - Capítulo 01" -> Livro: "1984", Capítulo: "Capítulo 01"
-    let bookTitle = rawTitle;
-    let chapterTitle = rawTitle;
+    // Limpar as hashtags do título
+    const cleanTitle = rawTitle.replace(/#[a-zA-Z0-9]+/g, '').trim();
 
-    if (rawTitle.includes(' - ')) {
-      const parts = rawTitle.split(' - ');
+    // LÓGICA DE SPLIT: "1984 - Capítulo 01" -> Livro: "1984", Capítulo: "Capítulo 01"
+    let bookTitle = cleanTitle;
+    let chapterTitle = cleanTitle;
+
+    if (cleanTitle.includes(' - ')) {
+      const parts = cleanTitle.split(' - ');
       bookTitle = parts[0].trim();
       chapterTitle = parts.slice(1).join(' - ').trim();
     }
 
-    console.log(`Processing: Book="${bookTitle}", Chapter="${chapterTitle}"`);
+    console.log(`Processing: Book="${bookTitle}", Chapter="${chapterTitle}", Category="${category}"`);
 
     // 1. Buscar ou Criar o Livro
     let { data: book, error: bookError } = await supabase
