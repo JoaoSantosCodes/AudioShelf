@@ -75,6 +75,14 @@ Este documento serve como o roadmap oficial para a evolução da plataforma Medi
 - [ ] **Alertas Financeiros:** Avisos automáticos ao atingir limites de orçamento.
 - [ ] **Telegram Push:** Envio de resumos diários e alertas críticos via Bot de Telegram.
 
+### 13. 🔊 Mini-Player Flutuante Universal
+- [ ] **Persistent Playback:** Player que acompanha o usuário em todas as páginas (Finanças, Mercado, Kanban).
+- [ ] **Visualização Compacta:** Design de vidro flutuante com controles essenciais e capa da mídia.
+
+### 14. 🤖 OCR & Inteligência de Dados
+- [ ] **Leitura de Notas via IA:** Extração automática de valor, data e itens de fotos de notas fiscais.
+- [ ] **Categorização Inteligente:** IA sugere a categoria da despesa baseada no nome do estabelecimento.
+
 ---
 
 ## 📈 Critérios de Sucesso
