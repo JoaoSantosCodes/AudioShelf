@@ -38,6 +38,7 @@ import { useMedia } from '@/context/MediaContext';
 import { processVoiceCommand } from '@/lib/commandProcessor';
 import PresenceIndicator from '@/components/PresenceIndicator';
 import { checkSmartAlerts, SmartNotification, generateDailyBriefing } from '@/lib/notificationEngine';
+import { sendTelegramMessage, formatTelegramBriefing } from '@/lib/telegramEngine';
 
 export default function Home() {
   const { activeMedia, playMedia, closeMedia } = useMedia();
@@ -74,6 +75,21 @@ export default function Home() {
       }
       setIsListening(false);
     }, 3000);
+  };
+
+  const handleSendToTelegram = async () => {
+    if (!telegramChatId) {
+      setIsTelegramModalOpen(true);
+      return;
+    }
+    
+    if (dailyBriefing) {
+      const message = formatTelegramBriefing(dailyBriefing);
+      const result = await sendTelegramMessage(telegramChatId, message);
+      if (result.success) {
+        alert("Briefing enviado com sucesso para o Telegram!");
+      }
+    }
   };
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -408,6 +424,13 @@ export default function Home() {
                   <Link href="/shopping" className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border-custom rounded-xl text-xs font-bold transition-all flex items-center gap-2">
                     <ShoppingCart size={14} className="text-gold" /> Lista de Mercado
                   </Link>
+                  <button 
+                    onClick={handleSendToTelegram}
+                    className="px-6 py-2.5 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 rounded-xl text-xs font-bold transition-all flex items-center gap-2 group"
+                  >
+                    <Send size={14} className="group-hover:translate-x-1 transition-transform" /> 
+                    Enviar p/ Telegram
+                  </button>
                 </div>
               </div>
             </motion.div>
