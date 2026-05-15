@@ -6,6 +6,7 @@ import BookCard from '@/components/BookCard';
 import AudioPlayer from '@/components/AudioPlayer';
 import { Headphones, Library, X, Search, RefreshCcw, Database, List, Clock, Play } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
 
 export default function Home() {
@@ -292,6 +293,12 @@ export default function Home() {
             >
               Biblioteca
             </button>
+            <Link 
+              href="/kanban"
+              className="px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all text-text-dim hover:text-text flex items-center"
+            >
+              Kanban
+            </Link>
             <button 
               onClick={toggleAdminMode}
               className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all ${isAdminMode ? 'bg-amber text-bg' : 'text-text-dim hover:text-text'}`}
