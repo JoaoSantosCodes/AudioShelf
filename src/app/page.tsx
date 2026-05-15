@@ -27,6 +27,7 @@ import { User } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileNav from '@/components/MobileNav';
 import MediaExpandedView from '@/components/MediaExpandedView';
+import GlobalSearch from '@/components/GlobalSearch';
 import { useMedia } from '@/context/MediaContext';
 
 export default function Home() {
@@ -208,16 +209,7 @@ export default function Home() {
             <h2 className="text-xl font-serif font-bold text-text">Sua Biblioteca</h2>
           </div>
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-              <input 
-                type="text" 
-                placeholder="Pesquisar no seu cérebro..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-surface-2 border border-border-custom rounded-full py-2 pl-10 pr-4 text-sm outline-none focus:border-gold/50 transition-all w-64"
-              />
-            </div>
+            <GlobalSearch />
             <ThemeToggle />
             
             {/* NOTIFICATION CENTER */}
