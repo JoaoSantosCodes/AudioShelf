@@ -37,11 +37,9 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<User | null>(null);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-  const notifications = [
-    { id: 1, type: 'task', title: 'Missão Vencendo', text: 'Academia (Pernas) em 30 min', time: 'Agora', icon: Calendar, color: 'text-gold' },
-    { id: 2, type: 'finance', title: 'Alerta de Orçamento', text: '80% da meta de Mercado atingida', time: '2h atrás', icon: Wallet, color: 'text-red-400' },
     { id: 3, type: 'shopping', title: 'Lista Atualizada', text: 'Sua esposa adicionou 3 itens', time: 'Ontem', icon: ShoppingCart, color: 'text-blue-400' },
   ];
 
@@ -164,21 +162,21 @@ export default function Home() {
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>
               <div className="px-4 space-y-4">
-                {[
-                  { user: "Você", action: "completou", target: "Treino 💪", time: "2h atrás" },
-                  { user: "Sistema", action: "agendou", target: "Pizza Night 🍕", time: "5h atrás" },
-                  { user: "Você", action: "adicionou", target: "Novo Manga", time: "Ontem" }
-                ].map((act, i) => (
-                  <div key={i} className="flex gap-3 items-start group cursor-default">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0 group-hover:scale-150 transition-transform" />
-                    <div>
-                      <p className="text-[11px] leading-tight text-text-muted">
-                        <span className="text-text font-bold">{act.user}</span> {act.action} <span className="text-gold font-medium">{act.target}</span>
-                      </p>
-                      <span className="text-[9px] text-text-dim">{act.time}</span>
+                {recentActivities.length > 0 ? (
+                  recentActivities.map((act, i) => (
+                    <div key={i} className="flex gap-3 items-start group cursor-default">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0 group-hover:scale-150 transition-transform" />
+                      <div>
+                        <p className="text-[11px] leading-tight text-text-muted">
+                          Você concluiu <span className="text-gold font-medium">{act.title}</span>
+                        </p>
+                        <span className="text-[9px] text-text-dim">Recentemente</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-[10px] text-text-dim px-2 italic">Nenhuma atividade recente.</p>
+                )}
               </div>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>

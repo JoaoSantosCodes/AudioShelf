@@ -27,6 +27,7 @@ export default function InsightsPage() {
     shoppingItems: 0,
     healthScore: 85
   });
+  const [weeklyActivity, setWeeklyActivity] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -37,19 +38,37 @@ export default function InsightsPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
 
+    // Busca dados reais
     const [tasksRes, txRes, shopRes] = await Promise.all([
-      supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id).eq('status', 'done'),
+      supabase.from('tasks').select('*').eq('user_id', session.user.id).eq('status', 'done'),
       supabase.from('transactions').select('amount').eq('user_id', session.user.id).eq('type', 'expense'),
       supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id).eq('completed', true)
     ]);
 
+    // Cálculo de Gastos
     const expensesTotal = txRes.data?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
 
+    // Cálculo de Atividade Semanal (Últimos 7 dias)
+    const now = new Date();
+    const activity = Array(7).fill(0);
+    tasksRes.data?.forEach(task => {
+      const taskDate = new Date(task.created_at);
+      const diffDays = Math.floor((now.getTime() - taskDate.getTime()) / (1000 * 3600 * 24));
+      if (diffDays < 7) {
+        activity[6 - diffDays]++;
+      }
+    });
+
+    // Normalizar para porcentagem do gráfico (ex: max 5 tarefas = 100%)
+    const maxTasks = Math.max(...activity, 1);
+    const normalizedActivity = activity.map(count => (count / maxTasks) * 100);
+
+    setWeeklyActivity(normalizedActivity);
     setRealStats({
-      tasksDone: tasksRes.count || 0,
+      tasksDone: tasksRes.data?.length || 0,
       totalExpenses: expensesTotal,
       shoppingItems: shopRes.count || 0,
-      healthScore: 85 // Mocked for now, can be linked to a specific task category
+      healthScore: Math.min(100, (tasksRes.data?.length || 0) * 5) // Exemplo: cada tarefa concluída dá 5% de saúde
     });
     setIsLoading(false);
   };
@@ -132,7 +151,7 @@ export default function InsightsPage() {
               </div>
 
               <div className="flex items-end justify-between gap-4 h-64 px-4">
-                {weeklyData.map((val, idx) => (
+                {(weeklyActivity.length > 0 ? weeklyActivity : [0,0,0,0,0,0,0]).map((val, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-4">
                     <div className="w-full relative group">
                       <motion.div 
@@ -142,7 +161,7 @@ export default function InsightsPage() {
                         className="w-full bg-gradient-to-t from-gold/40 to-gold rounded-t-xl group-hover:from-gold group-hover:to-gold-bright transition-all"
                       />
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gold text-bg text-[10px] font-bold px-2 py-1 rounded">
-                        {val}%
+                        {val > 0 ? 'Ativo' : '0'}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold text-text-muted uppercase">{days[idx]}</span>
