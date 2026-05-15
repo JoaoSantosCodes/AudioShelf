@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Calendar, BarChart3, Wallet } from 'lucide-react';
+import { Library, LayoutDashboard, Calendar, BarChart3, Wallet, ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function MobileNav() {
