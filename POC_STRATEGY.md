@@ -23,7 +23,7 @@ Remover tudo o que não é "Core Criativo" (Suno, Manga, Audiobooks, Cursos) par
 ---
 
 ## 💰 POC 2: Finance Standalone (Mini-App)
-**Status:** ⏳ Planejada
+**Status:** ✅ Concluída (Mini-App Standalone)
 
 ### Visão
 Extrair o módulo financeiro como uma aplicação web separada, focada em velocidade e automação (OCR de notas).
