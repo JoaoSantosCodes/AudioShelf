@@ -14,7 +14,8 @@ import {
   BookOpen,
   GraduationCap,
   TrendingUp,
-  BellOff
+  BellOff,
+  Brain as BrainIcon
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
@@ -136,6 +137,14 @@ export default function Home() {
                 >
                   <Library size={18} />
                   <span className="text-sm font-semibold">Biblioteca</span>
+                </button>
+
+                <button 
+                  onClick={() => window.location.href = '/brain'}
+                  className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all"
+                >
+                  <BrainIcon size={18} />
+                  <span className="text-sm font-semibold">Brain Layer</span>
                 </button>
 
                 <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>
