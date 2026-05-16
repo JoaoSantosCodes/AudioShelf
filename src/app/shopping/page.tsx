@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 export default function ShoppingDashboard() {
   const [items, setItems] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [newItem, setNewItem] = useState({ title: '', quantity: '', category: 'Geral' });
 
   useEffect(() => {
@@ -24,8 +25,13 @@ export default function ShoppingDashboard() {
   }, []);
 
   const fetchShoppingList = async () => {
-    const { data } = await supabase.from('shopping_list').select('*').order('created_at', { ascending: false });
-    if (data) setItems(data);
+    setIsLoading(true);
+    try {
+      const { data } = await supabase.from('shopping_list').select('*').order('created_at', { ascending: false });
+      if (data) setItems(data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddItem = async (e: React.FormEvent) => {
