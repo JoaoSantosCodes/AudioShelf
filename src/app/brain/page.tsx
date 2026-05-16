@@ -106,8 +106,7 @@ export default function BrainDashboard() {
   };
 
   return (
-    <NeuralShield>
-      <div className="bg-background text-text p-6 md:p-12">
+    <div className="min-h-screen bg-bg text-text pb-24 md:pb-8 relative overflow-hidden">
         <div className="max-w-6xl mx-auto mb-12">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
@@ -247,8 +246,7 @@ export default function BrainDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-      </div>
-    </NeuralShield>
+    </div>
   );
 }
 

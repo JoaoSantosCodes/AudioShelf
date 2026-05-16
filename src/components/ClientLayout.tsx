@@ -14,6 +14,8 @@ import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import QuickActions from "@/components/QuickActions";
 
+import NeuralShield from "@/components/NeuralShield";
+
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Solicitar permissão de notificação
@@ -47,23 +49,25 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <MediaProvider>
-            <NavigationProvider>
-              <div className="flex h-screen overflow-hidden">
-                <Sidebar />
-                <div className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
-                  <Header />
-                  <main className="flex-1 overflow-y-auto no-scrollbar relative">
-                    {children}
-                  </main>
+          <NeuralShield>
+            <MediaProvider>
+              <NavigationProvider>
+                <div className="flex h-screen overflow-hidden">
+                  <Sidebar />
+                  <div className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
+                    <Header />
+                    <main className="flex-1 overflow-y-auto no-scrollbar relative">
+                      {children}
+                    </main>
+                  </div>
                 </div>
-              </div>
-              <NeuralSyncIndicator />
-              <MediaExpandedView />
-              <MobileNav />
-              <QuickActions />
-            </NavigationProvider>
-          </MediaProvider>
+                <NeuralSyncIndicator />
+                <MediaExpandedView />
+                <MobileNav />
+                <QuickActions />
+              </NavigationProvider>
+            </MediaProvider>
+          </NeuralShield>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>

@@ -78,8 +78,7 @@ export default function FinanceDashboard() {
   };
 
   return (
-    <NeuralShield>
-      <div className="p-6 md:p-12 max-w-6xl mx-auto">
+    <div className="bg-background text-text p-6 md:p-12 max-w-6xl mx-auto">
         <header className="mb-12">
           <Link href="/" className="inline-flex items-center gap-2 text-text-dim hover:text-gold transition-all text-xs font-bold uppercase tracking-widest mb-6 group">
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
@@ -287,7 +286,6 @@ export default function FinanceDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-      </div>
-    </NeuralShield>
+    </div>
   );
 }
