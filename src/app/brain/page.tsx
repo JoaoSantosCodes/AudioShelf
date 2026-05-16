@@ -111,12 +111,12 @@ export default function BrainDashboard() {
             >
               Otimizar Rotina
             </button>
-            <button 
-              onClick={() => alert("Abrindo painel analítico avançado...")}
-              className="px-6 py-2 bg-surface-2 text-text-dim border border-border-custom rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-gold/50 transition-all"
+            <Link 
+              href="/financas"
+              className="px-6 py-2 bg-surface-2 text-text-dim border border-border-custom rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-gold/50 transition-all text-center flex items-center justify-center"
             >
               Ver Detalhes
-            </button>
+            </Link>
           </div>
         </motion.div>
 
