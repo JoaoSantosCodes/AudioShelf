@@ -16,14 +16,15 @@ export default function BookCard({ book, onClick }: BookCardProps) {
   const isMusic = book.category?.toLowerCase() === 'música' || book.category?.toLowerCase() === 'suno';
 
   return (
-    <motion.div 
+    <motion.button 
       layoutId={`book-${book.id}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -8, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick(book)}
-      className="group relative glass-card p-3 cursor-pointer overflow-hidden transition-all duration-500 border-gold/10 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/10 shimmer-effect"
+      type="button"
+      className="group relative glass-card p-3 cursor-pointer overflow-hidden transition-all duration-500 border-gold/10 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/10 shimmer-effect text-left w-full"
     >
       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-2 mb-4 shadow-xl">
         <Image 
@@ -61,6 +62,6 @@ export default function BookCard({ book, onClick }: BookCardProps) {
         <h3 className="font-serif text-[15px] text-text leading-tight group-hover:text-gold transition-colors line-clamp-1">{book.title}</h3>
         <p className="text-[11px] text-text-dim font-medium line-clamp-1">{book.author}</p>
       </div>
-    </motion.div>
+    </motion.button>
   );
 }

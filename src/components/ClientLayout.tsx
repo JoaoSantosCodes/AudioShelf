@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { ThemeProvider } from "@/context/ThemeContext";
 import { MediaProvider } from "@/context/MediaContext";
-import GlobalMediaContainer from "@/components/GlobalMediaContainer";
+import MediaExpandedView from "@/components/MediaExpandedView";
 import MobileNav from "@/components/MobileNav";
 import { supabase } from "@/lib/supabase";
 import NeuralSyncIndicator from "@/components/NeuralSyncIndicator";
@@ -40,11 +40,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <ThemeProvider>
       <MediaProvider>
-        <div className="flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col">
           {children}
         </div>
-        <GlobalMediaContainer />
         <NeuralSyncIndicator />
+        <MediaExpandedView />
         <MobileNav />
       </MediaProvider>
     </ThemeProvider>

@@ -60,10 +60,7 @@ body {
     radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.02) 0%, transparent 50%);
   color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .font-serif {
