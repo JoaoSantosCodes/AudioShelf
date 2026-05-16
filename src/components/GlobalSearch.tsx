@@ -6,7 +6,6 @@ import {
   Search, 
   X, 
   Book, 
-  CheckCircle2, 
   ShoppingCart, 
   Wallet, 
   Command,
