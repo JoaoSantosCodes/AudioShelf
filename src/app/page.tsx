@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import BookCard from '@/components/BookCard';
 import { Book } from '@/data/books';
 import ThemeToggle from '@/components/ThemeToggle';
 import { 
