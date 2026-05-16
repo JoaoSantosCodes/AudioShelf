@@ -45,7 +45,8 @@ Transformar o MediaShelf Hub de um gerenciador de mídias em um **Sistema Operac
 
 ### GMUD 9: Auto-Catalogação por IA
 *   **Objetivo:** O usuário sobe um arquivo e a IA preenche Título, Autor, Categoria e busca a Capa automaticamente.
-*   **Implementação:** Integração com APIs de metadados (Google Books, Open Library).
+*   **Status:** ✅ Concluído.
+*   **Implementação:** Engine `cataloger.ts` integrada com o botão **Neural Scan (Refinar com IA)**, permitindo atualização instantânea de metadados.
 
 ### GMUD 10: Sincronização Neural Silenciosa
 *   **Objetivo:** O Brain Layer se atualiza em segundo plano via Web Workers, sem impactar a fluidez do UI principal.

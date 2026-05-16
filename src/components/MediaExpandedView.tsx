@@ -12,20 +12,41 @@ import {
   ChevronRight,
   TrendingUp,
   Headphones,
-  FileText
+  FileText,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import { Book } from '@/data/books';
 import { useMedia } from '@/context/MediaContext';
 import UniversalPlayer from './UniversalPlayer';
+import { autoCatalogMedia } from '@/lib/cataloger';
 
 interface MediaExpandedViewProps {
   onUpdateProgress?: (bookId: string, updates: Partial<Book>) => void;
 }
 
 export default function MediaExpandedView({ onUpdateProgress }: MediaExpandedViewProps) {
-  const { activeMedia, closeMedia } = useMedia();
+  const { activeMedia, closeMedia, updateActiveMedia } = useMedia();
+  const [isScanning, setIsScanning] = React.useState(false);
 
   if (!activeMedia) return null;
+
+  const handleAIScan = async () => {
+    setIsScanning(true);
+    try {
+      const refined = await autoCatalogMedia(activeMedia.title);
+      updateActiveMedia({
+        title: refined.title,
+        author: refined.author,
+        description: refined.description,
+        category: refined.category
+      });
+    } catch (error) {
+      console.error("AI Scan failed", error);
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -56,10 +77,25 @@ export default function MediaExpandedView({ onUpdateProgress }: MediaExpandedVie
                 <span className="px-3 py-1 rounded-full bg-gold/90 text-bg text-[10px] font-black uppercase tracking-widest">
                   {activeMedia.category}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-white/10">
-                  Premium
-                </span>
               </div>
+
+              <button 
+                onClick={handleAIScan}
+                disabled={isScanning}
+                className={`w-full py-4 rounded-2xl border transition-all flex items-center justify-center gap-3 font-black uppercase tracking-widest text-[10px] ${isScanning ? 'bg-gold/20 border-gold text-gold animate-pulse' : 'bg-white/10 backdrop-blur-xl border-white/20 text-white hover:bg-gold hover:text-bg hover:border-gold'}`}
+              >
+                {isScanning ? (
+                  <>
+                    <Zap size={14} className="animate-bounce" />
+                    Neural Scanning...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={14} />
+                    Refinar com IA
+                  </>
+                )}
+              </button>
             </div>
           </div>
 

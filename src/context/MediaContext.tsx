@@ -9,6 +9,7 @@ interface MediaContextType {
   playMedia: (book: Book) => void;
   closeMedia: () => void;
   toggleMinimize: (minimized?: boolean) => void;
+  updateActiveMedia: (updates: Partial<Book>) => void;
 }
 
 const MediaContext = createContext<MediaContextType | undefined>(undefined);
@@ -31,8 +32,12 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     setIsMinimized(minimized !== undefined ? minimized : !isMinimized);
   };
 
+  const updateActiveMedia = (updates: Partial<Book>) => {
+    setActiveMedia(prev => prev ? { ...prev, ...updates } : null);
+  };
+
   return (
-    <MediaContext.Provider value={{ activeMedia, isMinimized, playMedia, closeMedia, toggleMinimize }}>
+    <MediaContext.Provider value={{ activeMedia, isMinimized, playMedia, closeMedia, toggleMinimize, updateActiveMedia }}>
       {children}
     </MediaContext.Provider>
   );
