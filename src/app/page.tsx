@@ -20,9 +20,12 @@ import {
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
-import MobileNav from '@/components/MobileNav';
-import MediaExpandedView from '@/components/MediaExpandedView';
-import GlobalSearch from '@/components/GlobalSearch';
+import dynamic from 'next/dynamic';
+
+const MobileNav = dynamic(() => import('@/components/MobileNav'));
+const MediaExpandedView = dynamic(() => import('@/components/MediaExpandedView'));
+const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'));
+
 import { useMedia } from '@/context/MediaContext';
 import HomeSkeleton from '@/components/HomeSkeleton';
 

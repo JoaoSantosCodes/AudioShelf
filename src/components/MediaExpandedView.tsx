@@ -20,6 +20,7 @@ import { Book } from '@/data/books';
 import { useMedia } from '@/context/MediaContext';
 import UniversalPlayer from './UniversalPlayer';
 import { autoCatalogMedia } from '@/lib/cataloger';
+import Image from 'next/image';
 
 interface MediaExpandedViewProps {
   onUpdateProgress?: (bookId: string, updates: Partial<Book>) => void;
@@ -65,10 +66,12 @@ export default function MediaExpandedView({ onUpdateProgress }: MediaExpandedVie
 
           {/* CAPA & INFO LATERAL */}
           <div className="w-full md:w-2/5 relative h-64 md:h-auto overflow-hidden group">
-            <img 
+            <Image 
               src={activeMedia.cover} 
               alt={activeMedia.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              fill
+              priority
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-surface-1 via-transparent to-transparent opacity-60" />
             

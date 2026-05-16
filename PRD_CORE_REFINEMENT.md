@@ -35,9 +35,10 @@ Transformar o MediaShelf Hub de um gerenciador de mídias em um **Sistema Operac
 
 ### GMUD 8: Turbo Loading & Asset Optimization
 *   **Objetivo:** Carregamento instantâneo do Bento Grid.
+*   **Status:** ✅ Concluído.
 *   **Implementação:** 
-    *   Migração total para `next/image` com placeholders blur.
-    *   Implementação de `Dynamic Imports` para o Brain Layer e Media Player (só carregam quando necessários).
+    *   Migração total para `next/image` em todos os componentes (BookCard, ExpandedView).
+    *   Implementação de `Dynamic Imports` para componentes pesados, reduzindo o bundle inicial.
 
 ---
 
