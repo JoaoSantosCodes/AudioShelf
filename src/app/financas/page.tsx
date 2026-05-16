@@ -186,9 +186,23 @@ export default function FinanceDashboard() {
               </motion.div>
             ))
           ) : (
-            <div className="py-20 text-center border-2 border-dashed border-border-custom rounded-[2.5rem]">
-              <p className="text-text-dim italic font-serif text-sm">Nenhuma transação registrada no sistema neural.</p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-20 bg-surface-1/30 border border-dashed border-border-custom rounded-[2.5rem] text-center"
+            >
+              <div className="w-16 h-16 rounded-3xl bg-surface-2 flex items-center justify-center mb-6 border border-white/5">
+                <Plus className="text-text-dim/30" size={24} />
+              </div>
+              <h3 className="text-xl font-serif font-bold mb-2 text-text/80">Sem transações registradas</h3>
+              <p className="text-sm text-text-dim max-w-xs mb-8">Adicione sua primeira entrada ou saída para começar.</p>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="px-8 py-3 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"
+              >
+                Registrar Agora
+              </button>
+            </motion.div>
           )}
         </div>
       </section>

@@ -115,6 +115,38 @@ export default function Home() {
                       >
                         Mangas, audiobooks e cursos em um único ambiente imersivo. Desenvolvido para quem trata o consumo de conteúdo como um ritual.
                       </motion.p>
+
+                      {/* QUICK DASHBOARD */}
+                      <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto pt-8"
+                      >
+                        <Link href="/financas" className="bg-surface-1/40 backdrop-blur-md border border-white/5 p-5 rounded-3xl hover:border-gold/30 transition-all group text-left">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Wallet size={16} className="text-red-400" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-text-dim">Financeiro</span>
+                          </div>
+                          <p className="text-xl font-bold group-hover:text-gold transition-colors">Ver Saldo</p>
+                        </Link>
+
+                        <Link href="/shopping" className="bg-surface-1/40 backdrop-blur-md border border-white/5 p-5 rounded-3xl hover:border-gold/30 transition-all group text-left">
+                          <div className="flex items-center gap-3 mb-2">
+                            <ShoppingCart size={16} className="text-gold" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-text-dim">Despensa</span>
+                          </div>
+                          <p className="text-xl font-bold group-hover:text-gold transition-colors">Lista de Compras</p>
+                        </Link>
+
+                        <Link href="/brain" className="bg-surface-1/40 backdrop-blur-md border border-white/5 p-5 rounded-3xl hover:border-gold/30 transition-all group text-left">
+                          <div className="flex items-center gap-3 mb-2">
+                            <BrainIcon size={16} className="text-emerald-400" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-text-dim">Inteligência</span>
+                          </div>
+                          <p className="text-xl font-bold group-hover:text-gold transition-colors">IA Insights</p>
+                        </Link>
+                      </motion.div>
                     </div>
                   </section>
                 )}
