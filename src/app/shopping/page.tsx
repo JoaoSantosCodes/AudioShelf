@@ -16,6 +16,8 @@ import { supabase } from '@/lib/supabase';
 
 export default function ShoppingDashboard() {
   const [items, setItems] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newItem, setNewItem] = useState({ title: '', quantity: '', category: 'Geral' });
 
   useEffect(() => {
     fetchShoppingList();
@@ -24,6 +26,22 @@ export default function ShoppingDashboard() {
   const fetchShoppingList = async () => {
     const { data } = await supabase.from('shopping_list').select('*').order('created_at', { ascending: false });
     if (data) setItems(data);
+  };
+
+  const handleAddItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.from('shopping_list').insert([{
+      title: newItem.title,
+      quantity: newItem.quantity,
+      category: newItem.category,
+      completed: false
+    }]);
+
+    if (!error) {
+      setNewItem({ title: '', quantity: '', category: 'Geral' });
+      setIsModalOpen(false);
+      fetchShoppingList();
+    }
   };
 
   const toggleItem = async (id: string, current: boolean) => {
@@ -55,7 +73,10 @@ export default function ShoppingDashboard() {
              <Zap className="text-gold" size={18} />
              <h3 className="text-sm font-bold">Itens Ativos</h3>
            </div>
-           <button className="px-4 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all">
+           <button 
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"
+           >
              Adicionar Item
            </button>
         </div>
@@ -93,6 +114,78 @@ export default function ShoppingDashboard() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-bg/80 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-full max-w-md bg-surface-1 border border-border-custom rounded-[2.5rem] p-10 shadow-2xl relative"
+            >
+              <h2 className="text-2xl font-serif font-bold mb-6">Novo Item</h2>
+              <form onSubmit={handleAddItem} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-dim block mb-2">Nome do Produto</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newItem.title}
+                    onChange={(e) => setNewItem({...newItem, title: e.target.value})}
+                    placeholder="Ex: Leite, Arroz, Detergente..."
+                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold/50 outline-none transition-all"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-text-dim block mb-2">Quantidade</label>
+                    <input 
+                      type="text" 
+                      value={newItem.quantity}
+                      onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
+                      placeholder="Ex: 2 un, 1kg..."
+                      className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold/50 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-text-dim block mb-2">Categoria</label>
+                    <select 
+                      value={newItem.category}
+                      onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                      className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold/50 outline-none transition-all appearance-none"
+                    >
+                      <option value="Geral">Geral</option>
+                      <option value="Alimentação">Alimentação</option>
+                      <option value="Limpeza">Limpeza</option>
+                      <option value="Higiene">Higiene</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="pt-6 flex gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 py-4 bg-surface-2 text-text-dim rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-surface-3 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 py-4 bg-gold text-bg rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all shadow-lg shadow-gold/20"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

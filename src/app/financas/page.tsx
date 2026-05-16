@@ -16,6 +16,8 @@ import { supabase } from '@/lib/supabase';
 export default function FinanceDashboard() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTx, setNewTx] = useState({ description: '', amount: '', type: 'expense' });
 
   useEffect(() => {
     fetchFinanceData();
@@ -27,6 +29,22 @@ export default function FinanceDashboard() {
       setTransactions(data);
       const total = data.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
       setBalance(total);
+    }
+  };
+
+  const handleAddTx = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.from('transactions').insert([{
+      description: newTx.description,
+      amount: parseFloat(newTx.amount),
+      type: newTx.type
+    }]);
+
+    if (!error) {
+      setNewTx({ description: '', amount: '', type: 'expense' });
+      setIsModalOpen(false);
+      fetchFinanceData();
+      window.dispatchEvent(new CustomEvent('neural-sync'));
     }
   };
 
@@ -67,7 +85,10 @@ export default function FinanceDashboard() {
              <h4 className="text-lg font-bold mb-2">Fluxo de Caixa</h4>
              <p className="text-sm text-text-dim">Integração ativa com o Brain Layer para otimização de gastos.</p>
            </div>
-           <button className="w-14 h-14 rounded-2xl bg-gold text-bg flex items-center justify-center shadow-lg shadow-gold/20 hover:scale-105 transition-transform">
+           <button 
+            onClick={() => setIsModalOpen(true)}
+            className="w-14 h-14 rounded-2xl bg-gold text-bg flex items-center justify-center shadow-lg shadow-gold/20 hover:scale-105 transition-transform"
+           >
              <Plus size={24} />
            </button>
         </div>
@@ -106,6 +127,80 @@ export default function FinanceDashboard() {
           )}
         </div>
       </section>
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-bg/80 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-full max-w-md bg-surface-1 border border-border-custom rounded-[2.5rem] p-10 shadow-2xl relative"
+            >
+              <h2 className="text-2xl font-serif font-bold mb-6">Nova Transação</h2>
+              <form onSubmit={handleAddTx} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-dim block mb-2">Descrição</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newTx.description}
+                    onChange={(e) => setNewTx({...newTx, description: e.target.value})}
+                    placeholder="Ex: Compra de Livro, Aluguel..."
+                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold/50 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-dim block mb-2">Valor (R$)</label>
+                  <input 
+                    type="number" 
+                    required
+                    value={newTx.amount}
+                    onChange={(e) => setNewTx({...newTx, amount: e.target.value})}
+                    placeholder="0.00"
+                    className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold/50 outline-none transition-all"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                   <button 
+                    type="button"
+                    onClick={() => setNewTx({...newTx, type: 'income'})}
+                    className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${newTx.type === 'income' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-surface-2 border-border-custom text-text-dim'}`}
+                   >
+                     Entrada
+                   </button>
+                   <button 
+                    type="button"
+                    onClick={() => setNewTx({...newTx, type: 'expense'})}
+                    className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${newTx.type === 'expense' ? 'bg-red-500/10 border-red-500 text-red-400' : 'bg-surface-2 border-border-custom text-text-dim'}`}
+                   >
+                     Saída
+                   </button>
+                </div>
+                <div className="pt-6 flex gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 py-4 bg-surface-2 text-text-dim rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-surface-3 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 py-4 bg-gold text-bg rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all shadow-lg shadow-gold/20"
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

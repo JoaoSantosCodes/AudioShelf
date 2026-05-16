@@ -34,6 +34,15 @@ export default function BrainDashboard() {
   const [insight, setInsight] = useState("Analisando conexões neurais...");
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState("");
+
+  const startNeuralProcess = (msg: string) => {
+    setProcessingMessage(msg);
+    setIsProcessing(true);
+    setTimeout(() => setIsProcessing(false), 2500);
+  };
+
   useEffect(() => {
     fetchGlobalData();
 
@@ -106,7 +115,7 @@ export default function BrainDashboard() {
           </p>
           <div className="mt-8 flex gap-4">
             <button 
-              onClick={() => alert("Otimizando fluxos de trabalho e consumo...")}
+              onClick={() => startNeuralProcess("Otimizando fluxos de trabalho e consumo...")}
               className="px-6 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"
             >
               Otimizar Rotina
@@ -167,6 +176,29 @@ export default function BrainDashboard() {
           </div>
         </div>
       </main>
+
+      <AnimatePresence>
+        {isProcessing && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-bg/80 backdrop-blur-md"
+          >
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full border-2 border-gold/20 animate-ping absolute inset-0" />
+                <div className="w-24 h-24 rounded-full border-b-2 border-gold animate-spin" />
+                <BrainIcon className="absolute inset-0 m-auto text-gold" size={32} />
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gold mb-2">Neural Engine</p>
+                <p className="text-xl font-serif font-bold text-text">{processingMessage}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
