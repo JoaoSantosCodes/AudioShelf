@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  // Fix for Turbopack + PWA Plugin conflict in Next.js 15
+  experimental: {
+    // Setting an empty turbopack config allows the build to proceed 
+    // when using plugins that modify webpack.
+    turbopack: {},
+  } as any,
 };
 
 export default withPWA(nextConfig);
