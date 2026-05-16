@@ -15,7 +15,9 @@ import {
   GraduationCap,
   TrendingUp,
   BellOff,
-  Brain as BrainIcon
+  Brain as BrainIcon,
+  Wallet,
+  ShoppingCart
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
