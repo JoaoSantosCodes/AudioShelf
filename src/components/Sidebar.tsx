@@ -7,23 +7,19 @@ import {
   Headphones, 
   Library, 
   Brain as BrainIcon, 
-  X 
+  X,
+  LogOut
 } from 'lucide-react';
 import { useNavigation } from '@/context/NavigationContext';
 import { useMedia } from '@/context/MediaContext';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { isSidebarOpen, setIsSidebarOpen, selectedCategory, setSelectedCategory, isPureMode } = useNavigation();
   const { activeMedia, closeMedia } = useMedia();
-  const [user, setUser] = React.useState<any>(null);
-
-  React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-  }, []);
+  const { user, signOut } = useAuth();
 
   const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
 
@@ -87,12 +83,21 @@ export default function Sidebar() {
       <div className="p-6 border-t border-border-custom bg-surface-1/50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center border border-white/5 shadow-xl">
-            <span className="text-xs font-bold text-gold">{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
+            <span className="text-xs font-bold text-gold">{user?.email?.charAt(0).toUpperCase() || 'V'}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-text truncate">{user?.email || 'Visitante'}</p>
             <p className="text-[10px] text-text-dim truncate">Membro Premium</p>
           </div>
+          {user && (
+            <button 
+              onClick={() => signOut()}
+              className="p-2 text-text-dim hover:text-red-400 transition-colors"
+              title="Encerrar Sessão"
+            >
+              <LogOut size={18} />
+            </button>
+          )}
         </div>
       </div>
     </aside>

@@ -11,7 +11,8 @@ import {
   Wallet, 
   Command,
   ArrowRight,
-  Clock
+  Clock,
+  Zap
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMedia } from '@/context/MediaContext';
@@ -22,7 +23,7 @@ interface SearchResult {
   id: string;
   title: string;
   subtitle: string;
-  type: 'book' | 'task' | 'shopping' | 'finance';
+  type: 'book' | 'shopping' | 'finance';
   path: string;
 }
 
@@ -32,15 +33,6 @@ export default function GlobalSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Mock de dados para busca (Em um cenário real, viria do Supabase ou Contexto)
-  const mockData: SearchResult[] = [
-    { id: '1', title: '1984 - George Orwell', subtitle: 'Livro • Audiobook', type: 'book', path: '/' },
-    { id: '2', title: 'Academia (Pernas)', subtitle: 'Tarefa • Hoje', type: 'task', path: '/kanban' },
-    { id: '3', title: 'Leite Desnatado', subtitle: 'Mercado • Faltando', type: 'shopping', path: '/shopping' },
-    { id: '4', title: 'Supermercado Central', subtitle: 'Finanças • R$ 342,90', type: 'finance', path: '/financas' },
-    { id: '5', title: 'O Alquimista', subtitle: 'Livro • Paulo Coelho', type: 'book', path: '/' },
-  ];
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -143,7 +135,6 @@ export default function GlobalSearch() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'book': return <Book size={16} className="text-gold" />;
-      case 'task': return <CheckCircle2 size={16} className="text-emerald-400" />;
       case 'shopping': return <ShoppingCart size={16} className="text-blue-400" />;
       case 'finance': return <Wallet size={16} className="text-red-400" />;
       default: return <Search size={16} />;

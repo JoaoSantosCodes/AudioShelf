@@ -9,41 +9,47 @@ interface NeuralShieldProps {
   children: React.ReactNode;
 }
 
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
+
 export default function NeuralShield({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
   const { showToast } = useToast();
-  const [isLocked, setIsLocked] = useState(true);
-  const [pin, setPin] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // No MVP, usamos um PIN fixo ou vindo do .env. 
-  // Para demonstração, usaremos '1234'
-  const MASTER_PIN = '1234';
-
-  useEffect(() => {
-    const sessionToken = localStorage.getItem('ms-neural-token');
-    if (sessionToken === 'authenticated') {
-      setIsLocked(false);
-    }
-  }, []);
-
-  const handleVerify = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsVerifying(true);
 
-    setTimeout(() => {
-      if (pin === MASTER_PIN) {
-        localStorage.setItem('ms-neural-token', 'authenticated');
-        setIsLocked(false);
-        showToast("Acesso Neural Concedido", "success");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        showToast(error.message, "error");
       } else {
-        showToast("Código Inválido", "error");
-        setPin('');
+        showToast("Conexão Neural Estabelecida", "success");
       }
+    } catch (err: any) {
+      showToast("Erro de conexão com a rede neural.", "error");
+    } finally {
       setIsVerifying(false);
-    }, 1000);
+    }
   };
 
-  if (!isLocked) return <>{children}</>;
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-bg flex items-center justify-center">
+        <Zap className="text-gold animate-spin" size={40} />
+      </div>
+    );
+  }
+
+  if (user) return <>{children}</>;
 
   return (
     <div className="fixed inset-0 z-[150] bg-bg flex items-center justify-center p-6 overflow-hidden">
@@ -59,21 +65,30 @@ export default function NeuralShield({ children }: { children: React.ReactNode }
             <Lock className="text-gold" size={28} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-2">Security Protocol</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-2">Protocolo de Identidade</p>
             <h2 className="text-3xl font-serif font-bold">Camada Neural Trancada</h2>
-            <p className="text-xs text-text-dim mt-4 leading-relaxed">Insira sua chave de acesso para desbloquear as funções de inteligência e finanças.</p>
+            <p className="text-xs text-text-dim mt-4 leading-relaxed">Identifique-se para descriptografar os dados de inteligência e finanças.</p>
           </div>
         </div>
 
-        <form onSubmit={handleVerify} className="space-y-6">
-          <div className="relative">
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <input 
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              className="w-full bg-surface-2 border border-border-custom rounded-2xl px-6 py-4 text-sm focus:border-gold/50 outline-none transition-all"
+              required
+            />
+          </div>
+          <div>
             <input 
               type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="••••"
-              className="w-full bg-surface-2 border border-border-custom rounded-2xl px-6 py-5 text-center text-2xl tracking-[1em] focus:border-gold/50 outline-none transition-all placeholder:tracking-normal placeholder:text-sm"
-              maxLength={4}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Sua senha neural"
+              className="w-full bg-surface-2 border border-border-custom rounded-2xl px-6 py-4 text-sm focus:border-gold/50 outline-none transition-all"
               required
             />
           </div>
@@ -81,13 +96,13 @@ export default function NeuralShield({ children }: { children: React.ReactNode }
           <button 
             type="submit"
             disabled={isVerifying}
-            className="w-full py-5 bg-gold text-bg rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+            className="w-full py-5 bg-gold text-bg rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all flex items-center justify-center gap-2 group disabled:opacity-50 mt-6"
           >
             {isVerifying ? (
               <Zap className="animate-spin" size={18} />
             ) : (
               <>
-                Desbloquear Camada <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                Sincronizar Identidade <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
