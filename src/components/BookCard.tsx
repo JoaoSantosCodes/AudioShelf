@@ -16,13 +16,13 @@ export default function BookCard({ book, onClick }: BookCardProps) {
 
   return (
     <motion.div 
-      layout
+      layoutId={`book-${book.id}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -8, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick(book)}
-      className="group relative glass-card p-3 cursor-pointer overflow-hidden transition-all duration-500 border-gold/10 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/10"
+      className="group relative glass-card p-3 cursor-pointer overflow-hidden transition-all duration-500 border-gold/10 hover:border-gold/40 hover:shadow-2xl hover:shadow-gold/10 shimmer-effect"
     >
       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-2 mb-4 shadow-xl">
         <img 
