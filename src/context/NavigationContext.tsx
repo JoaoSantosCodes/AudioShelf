@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface NavigationContextType {
   isSidebarOpen: boolean;
@@ -18,6 +18,22 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [isPureMode, setIsPureMode] = useState(false);
+
+  // Persistência
+  useEffect(() => {
+    const savedCategory = localStorage.getItem('ms-category');
+    const savedSidebar = localStorage.getItem('ms-sidebar');
+    if (savedCategory) setSelectedCategory(savedCategory);
+    if (savedSidebar) setIsSidebarOpen(savedSidebar === 'true');
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('ms-category', selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    localStorage.setItem('ms-sidebar', String(isSidebarOpen));
+  }, [isSidebarOpen]);
 
   const togglePureMode = () => {
     if (!isPureMode) {

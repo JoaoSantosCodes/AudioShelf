@@ -68,17 +68,21 @@ export default function BrainDashboard() {
     const { count: booksCount } = await supabase.from('books').select('*', { count: 'exact', head: true });
 
     setStats({
-      totalStudyHours: (booksCount || 0) * 2.5, // Heuristic
+      totalStudyHours: (booksCount || 0) * 2.5,
       totalExpenses: expenses,
-      familyHarmony: 85, // Mocked balance
-      topCategory: 'Educação'
+      familyHarmony: 85,
+      topCategory: 'Produtividade'
     });
 
-    // Simulated AI Insight
-    setTimeout(() => {
-      setInsight("Seu foco em estudos aumentou 15% esta semana. O equilíbrio financeiro permite um novo investimento em cursos. A harmonia familiar está estável.");
-      setIsLoading(false);
-    }, 2000);
+    if (expenses > 500) {
+      setInsight("Suas saídas mensais estão elevadas. Recomendo revisar a lista de suprimentos para otimizar gastos.");
+    } else if (shoppingCount && shoppingCount > 5) {
+      setInsight("Sua lista de mercado está crescendo. Otimize sua rotina para realizar as compras acumuladas.");
+    } else {
+      setInsight("Ecossistema em harmonia. O equilíbrio entre estudo e finanças está em nível otimizado.");
+    }
+
+    setIsLoading(false);
   };
 
   return (

@@ -17,6 +17,7 @@ export default function FinanceDashboard() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [newTx, setNewTx] = useState({ description: '', amount: '', type: 'expense' });
 
   useEffect(() => {
@@ -24,11 +25,16 @@ export default function FinanceDashboard() {
   }, []);
 
   const fetchFinanceData = async () => {
-    const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
-    if (data) {
-      setTransactions(data);
-      const total = data.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
-      setBalance(total);
+    setIsLoading(true);
+    try {
+      const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
+      if (data) {
+        setTransactions(data);
+        const total = data.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
+        setBalance(total);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -117,7 +123,20 @@ export default function FinanceDashboard() {
       <section>
         <h3 className="text-xs font-black uppercase tracking-widest text-text-dim mb-6 px-2">Transações Recentes</h3>
         <div className="space-y-3">
-          {transactions.length > 0 ? (
+          {isLoading ? (
+            [1, 2, 3].map((i) => (
+              <div key={i} className="bg-surface-1/50 border border-border-custom p-4 rounded-2xl flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-surface-2" />
+                  <div className="space-y-2">
+                    <div className="w-24 h-4 bg-surface-2 rounded" />
+                    <div className="w-16 h-2 bg-surface-2 rounded" />
+                  </div>
+                </div>
+                <div className="w-20 h-6 bg-surface-2 rounded" />
+              </div>
+            ))
+          ) : transactions.length > 0 ? (
             transactions.map((t, i) => (
               <motion.div 
                 key={t.id}

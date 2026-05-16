@@ -88,7 +88,20 @@ export default function ShoppingDashboard() {
            </button>
         </div>
         <div className="divide-y divide-border-custom">
-          {items.length > 0 ? (
+          {isLoading ? (
+             [1, 2, 3].map(i => (
+               <div key={i} className="p-6 flex items-center justify-between animate-pulse">
+                 <div className="flex items-center gap-4">
+                   <div className="w-6 h-6 rounded-full bg-surface-2" />
+                   <div className="space-y-2">
+                     <div className="w-32 h-4 bg-surface-2 rounded" />
+                     <div className="w-20 h-2 bg-surface-2 rounded" />
+                   </div>
+                 </div>
+                 <div className="w-12 h-6 bg-surface-2 rounded-full" />
+               </div>
+             ))
+          ) : items.length > 0 ? (
             items.map((item) => (
               <div 
                 key={item.id}
