@@ -34,11 +34,11 @@ export default function Home() {
 
   useEffect(() => {
     const cachedBooks = localStorage.getItem('dbBooks');
-    if (cachedBooks) setDbBooks(JSON.parse(cachedBooks));
+    if (cachedBooks) {
+      setDbBooks(JSON.parse(cachedBooks));
+      setIsLoading(false); // Carrega do cache instantaneamente
+    }
     fetchBooks();
-
-    const timer = setTimeout(() => setIsLoading(false), 5000);
-    return () => clearTimeout(timer);
   }, []);
 
   const fetchBooks = async () => {

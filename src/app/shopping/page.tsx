@@ -13,8 +13,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/context/ToastContext';
+import NeuralShield from '@/components/NeuralShield';
 
 export default function ShoppingDashboard() {
+  const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,15 +48,16 @@ export default function ShoppingDashboard() {
       }]);
 
       if (error) {
-        alert(`Erro ao salvar item: ${error.message}`);
+        showToast(`Erro ao salvar item: ${error.message}`, "error");
         return;
       }
 
+      showToast("Item adicionado ao inventário.");
       setNewItem({ title: '', quantity: '', category: 'Geral' });
       setIsModalOpen(false);
       fetchShoppingList();
     } catch (err: any) {
-      alert(`Erro inesperado: ${err.message}`);
+      showToast(`Erro inesperado: ${err.message}`, "error");
     }
   };
 
@@ -63,22 +67,23 @@ export default function ShoppingDashboard() {
   };
 
   return (
-    <div className="p-6 md:p-12 max-w-4xl mx-auto">
-      <header className="mb-12">
-        <Link href="/" className="inline-flex items-center gap-2 text-text-dim hover:text-gold transition-all text-xs font-bold uppercase tracking-widest mb-6 group">
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          Voltar para Biblioteca
-        </Link>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 shadow-lg shadow-blue-500/10">
-            <ShoppingCart className="text-blue-400" size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Inventory Hub</p>
-            <h1 className="text-3xl font-serif font-bold">Lista de Suprimentos</h1>
+    <NeuralShield>
+      <div className="bg-background text-text p-6 md:p-12 pb-32">
+        <div className="max-w-6xl mx-auto mb-12">
+          <Link href="/" className="inline-flex items-center gap-2 text-text-dim hover:text-gold transition-all text-xs font-bold uppercase tracking-widest mb-6 group">
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Voltar para Biblioteca
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-lg shadow-gold/10">
+              <ShoppingCart className="text-gold" size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Inventory Hub</p>
+              <h1 className="text-3xl font-serif font-bold">Suprimentos e Mercado</h1>
+            </div>
           </div>
         </div>
-      </header>
 
       <div className="bg-surface-1 border border-border-custom rounded-[2.5rem] overflow-hidden shadow-elegant mb-12">
         <div className="p-8 border-b border-border-custom bg-surface-2/50 flex items-center justify-between">
@@ -212,6 +217,7 @@ export default function ShoppingDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </NeuralShield>
   );
 }

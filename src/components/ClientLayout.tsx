@@ -10,6 +10,8 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { supabase } from "@/lib/supabase";
 import NeuralSyncIndicator from "@/components/NeuralSyncIndicator";
+import { ToastProvider } from "@/context/ToastContext";
+import QuickActions from "@/components/QuickActions";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -42,22 +44,25 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <ThemeProvider>
-      <MediaProvider>
-        <NavigationProvider>
-          <div className="flex h-screen overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
-              <Header />
-              <main className="flex-1 overflow-y-auto no-scrollbar relative">
-                {children}
-              </main>
+      <ToastProvider>
+        <MediaProvider>
+          <NavigationProvider>
+            <div className="flex h-screen overflow-hidden">
+              <Sidebar />
+              <div className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-y-auto no-scrollbar relative">
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-          <NeuralSyncIndicator />
-          <MediaExpandedView />
-          <MobileNav />
-        </NavigationProvider>
-      </MediaProvider>
+            <NeuralSyncIndicator />
+            <MediaExpandedView />
+            <MobileNav />
+            <QuickActions />
+          </NavigationProvider>
+        </MediaProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

@@ -64,17 +64,55 @@ export default function GlobalSearch() {
     }
   }, [isOpen]);
 
-  const handleSearch = (val: string) => {
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = async (val: string) => {
     setQuery(val);
     if (val.length < 2) {
       setResults([]);
       return;
     }
-    const filtered = mockData.filter(item => 
-      item.title.toLowerCase().includes(val.toLowerCase()) || 
-      item.subtitle.toLowerCase().includes(val.toLowerCase())
-    );
-    setResults(filtered);
+
+    setIsSearching(true);
+    
+    try {
+      // Busca em 3 frentes simultâneas
+      const [booksRes, txsRes, shopRes] = await Promise.all([
+        supabase.from('books').select('id, title, author').ilike('title', `%${val}%`).limit(3),
+        supabase.from('transactions').select('id, description, amount, type').ilike('description', `%${val}%`).limit(3),
+        supabase.from('shopping_list').select('id, title, quantity').ilike('title', `%${val}%`).limit(3)
+      ]);
+
+      const mergedResults: SearchResult[] = [
+        ...(booksRes.data || []).map(b => ({
+          id: b.id,
+          title: b.title,
+          subtitle: `Livro • ${b.author}`,
+          type: 'book' as const,
+          path: '/'
+        })),
+        ...(txsRes.data || []).map(t => ({
+          id: t.id,
+          title: t.description,
+          subtitle: `Finanças • R$ ${t.amount} (${t.type === 'income' ? 'Entrada' : 'Saída'})`,
+          type: 'finance' as const,
+          path: '/financas'
+        })),
+        ...(shopRes.data || []).map(s => ({
+          id: s.id,
+          title: s.title,
+          subtitle: `Mercado • Qtd: ${s.quantity || 'N/A'}`,
+          type: 'shopping' as const,
+          path: '/shopping'
+        }))
+      ];
+
+      setResults(mergedResults);
+    } catch (err) {
+      console.error("Erro na busca global:", err);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const { playMedia } = useMedia();
@@ -143,19 +181,30 @@ export default function GlobalSearch() {
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               className="relative w-full max-w-2xl bg-surface-1 border border-border-custom rounded-[2rem] shadow-2xl overflow-hidden glass-panel"
             >
-              <div className="p-6 flex items-center gap-4 border-b border-border-custom">
-                <Search className="text-gold" size={22} />
+              <div className="relative">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-dim" size={20} />
                 <input 
                   ref={inputRef}
                   type="text" 
-                  placeholder="Pesquise por livros, tarefas, compras ou notas..." 
                   value={query}
-                  onChange={e => handleSearch(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none text-lg font-medium text-text placeholder:text-text-dim"
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder="Pesquisar em todo o ecossistema... (Ctrl + K)"
+                  className="w-full bg-surface-2/50 border-b border-border-custom px-16 py-8 text-xl outline-none focus:bg-surface-2/80 transition-all placeholder:text-text-dim/30 font-serif"
                 />
-                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-surface-2 rounded-full text-text-dim transition-colors">
-                  <X size={20} />
-                </button>
+                {isSearching && (
+                  <div className="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    <Zap className="text-gold animate-spin" size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gold">Escaneando...</span>
+                  </div>
+                )}
+                {!isSearching && query.length > 0 && (
+                  <button 
+                    onClick={() => setQuery('')}
+                    className="absolute right-8 top-1/2 -translate-y-1/2 text-text-dim hover:text-text p-2"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
               </div>
 
               <div className="max-h-[60vh] overflow-y-auto no-scrollbar">

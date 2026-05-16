@@ -12,10 +12,13 @@ import {
   Zap,
   ChevronRight,
   ChevronLeft,
-  Target
+  Target,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import NeuralShield from '@/components/NeuralShield';
 
 interface GlobalStats {
   totalStudyHours: number;
@@ -36,6 +39,23 @@ export default function BrainDashboard() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMessage, setProcessingMessage] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const speakInsight = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(insight);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.9; // Um pouco mais lento para soar tático
+    utterance.onend = () => setIsSpeaking(false);
+    
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const startNeuralProcess = (msg: string) => {
     setProcessingMessage(msg);
@@ -86,8 +106,9 @@ export default function BrainDashboard() {
   };
 
   return (
-    <div className="bg-background text-text p-6 md:p-12">
-      <div className="max-w-6xl mx-auto mb-12">
+    <NeuralShield>
+      <div className="bg-background text-text p-6 md:p-12">
+        <div className="max-w-6xl mx-auto mb-12">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-lg shadow-gold/10">
@@ -110,27 +131,50 @@ export default function BrainDashboard() {
           className="md:col-span-3 bg-surface-1 border border-gold/30 p-8 rounded-[2.5rem] relative overflow-hidden shadow-elegant"
         >
           <div className="absolute top-0 right-0 p-8 opacity-5"><Sparkles size={120} /></div>
-          <div className="flex items-center gap-3 mb-6">
-            <Zap className="text-gold" size={20} />
-            <h3 className="text-xs font-black uppercase tracking-widest text-gold">Insight do Ecossistema</h3>
-          </div>
-          <p className="text-2xl font-serif font-bold leading-relaxed italic text-text">
-            "{insight}"
-          </p>
-          <div className="mt-8 flex gap-4">
-            <button 
-              onClick={() => startNeuralProcess("Otimizando fluxos de trabalho e consumo...")}
-              className="px-6 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"
-            >
-              Otimizar Rotina
-            </button>
-            <Link 
-              href="/financas"
-              className="px-6 py-2 bg-surface-2 text-text-dim border border-border-custom rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-gold/50 transition-all text-center flex items-center justify-center"
-            >
-              Ver Detalhes
-            </Link>
-          </div>
+          {isLoading ? (
+            <div className="animate-pulse space-y-4">
+              <div className="w-32 h-4 bg-surface-2 rounded" />
+              <div className="w-full h-8 bg-surface-2 rounded" />
+              <div className="flex gap-4 pt-4">
+                <div className="w-32 h-10 bg-surface-2 rounded-xl" />
+                <div className="w-32 h-10 bg-surface-2 rounded-xl" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 mb-6">
+                <Zap className="text-gold" size={20} />
+                <h3 className="text-xs font-black uppercase tracking-widest text-gold">Insight do Ecossistema</h3>
+              </div>
+              <div className="flex items-start justify-between gap-6">
+                <p className="text-2xl font-serif font-bold leading-relaxed italic text-text flex-1">
+                  "{insight}"
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={speakInsight}
+                  className={`p-3 rounded-2xl border transition-all ${isSpeaking ? 'bg-gold text-bg border-gold shadow-lg shadow-gold/20' : 'bg-surface-2 border-border-custom text-gold hover:border-gold/50'}`}
+                >
+                  {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </motion.button>
+              </div>
+              <div className="mt-8 flex gap-4">
+                <button 
+                  onClick={() => startNeuralProcess("Otimizando fluxos de trabalho e consumo...")}
+                  className="px-6 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"
+                >
+                  Otimizar Rotina
+                </button>
+                <Link 
+                  href="/financas"
+                  className="px-6 py-2 bg-surface-2 text-text-dim border border-border-custom rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-gold/50 transition-all text-center flex items-center justify-center"
+                >
+                  Ver Detalhes
+                </Link>
+              </div>
+            </>
+          )}
         </motion.div>
 
         {/* STATS CARDS */}
@@ -203,7 +247,8 @@ export default function BrainDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </NeuralShield>
   );
 }
 

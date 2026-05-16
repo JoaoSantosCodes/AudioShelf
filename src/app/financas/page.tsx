@@ -12,8 +12,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/context/ToastContext';
+import NeuralShield from '@/components/NeuralShield';
 
 export default function FinanceDashboard() {
+  const { showToast } = useToast();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,7 +52,7 @@ export default function FinanceDashboard() {
       const parsedAmount = parseFloat(amountValue);
       
       if (isNaN(parsedAmount)) {
-        alert("Por favor, insira um valor numérico válido.");
+        showToast("Por favor, insira um valor numérico válido.", "error");
         return;
       }
 
@@ -60,39 +63,40 @@ export default function FinanceDashboard() {
       }]);
 
       if (error) {
-        console.error("Erro Supabase:", error);
-        alert(`Erro ao salvar: ${error.message}. Verifique se a tabela 'transactions' existe no seu Supabase.`);
+        showToast(`Erro ao salvar: ${error.message}`, "error");
         return;
       }
 
+      showToast("Transação registrada com sucesso!");
       setNewTx({ description: '', amount: '', type: 'expense' });
       setIsModalOpen(false);
       fetchFinanceData();
       window.dispatchEvent(new CustomEvent('neural-sync'));
     } catch (err: any) {
-      alert(`Erro inesperado: ${err.message}`);
+      showToast(`Erro inesperado: ${err.message}`, "error");
     }
   };
 
   return (
-    <div className="p-6 md:p-12 max-w-6xl mx-auto">
-      <header className="mb-12">
-        <Link href="/" className="inline-flex items-center gap-2 text-text-dim hover:text-gold transition-all text-xs font-bold uppercase tracking-widest mb-6 group">
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          Voltar para Biblioteca
-        </Link>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-lg shadow-red-500/10">
-            <Wallet className="text-red-400" size={24} />
+    <NeuralShield>
+      <div className="p-6 md:p-12 max-w-6xl mx-auto">
+        <header className="mb-12">
+          <Link href="/" className="inline-flex items-center gap-2 text-text-dim hover:text-gold transition-all text-xs font-bold uppercase tracking-widest mb-6 group">
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Voltar para Biblioteca
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-lg shadow-red-500/10">
+              <Wallet className="text-red-400" size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400">Financial Control</p>
+              <h1 className="text-3xl font-serif font-bold">Gestão de Liquidez</h1>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400">Financial Control</p>
-            <h1 className="text-3xl font-serif font-bold">Gestão de Liquidez</h1>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -106,17 +110,39 @@ export default function FinanceDashboard() {
           </div>
         </motion.div>
 
-        <div className="md:col-span-2 bg-surface-2 border border-border-custom p-8 rounded-[2.5rem] flex items-center justify-between">
-           <div>
-             <h4 className="text-lg font-bold mb-2">Fluxo de Caixa</h4>
-             <p className="text-sm text-text-dim">Integração ativa com o Brain Layer para otimização de gastos.</p>
+        <div className="md:col-span-2 bg-surface-2 border border-border-custom p-8 rounded-[2.5rem] flex flex-col justify-between">
+           <div className="flex items-center justify-between mb-6">
+             <div>
+               <h4 className="text-lg font-bold mb-2">Fluxo de Caixa</h4>
+               <p className="text-sm text-text-dim">Proporção de saúde financeira neural.</p>
+             </div>
+             <button 
+              onClick={() => setIsModalOpen(true)}
+              className="w-12 h-12 rounded-xl bg-gold text-bg flex items-center justify-center shadow-lg shadow-gold/20 hover:scale-105 transition-transform"
+             >
+               <Plus size={24} />
+             </button>
            </div>
-           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="w-14 h-14 rounded-2xl bg-gold text-bg flex items-center justify-center shadow-lg shadow-gold/20 hover:scale-105 transition-transform"
-           >
-             <Plus size={24} />
-           </button>
+           
+           <div className="space-y-2">
+             <div className="h-3 w-full bg-surface-3 rounded-full overflow-hidden flex">
+               {transactions.length > 0 ? (
+                 <>
+                   <div 
+                     className="bg-emerald-500 h-full transition-all duration-1000" 
+                     style={{ width: `${Math.max(10, (transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0) / (transactions.reduce((a, b) => a + b.amount, 0) || 1)) * 100)}%` }} 
+                   />
+                   <div className="bg-surface-1 h-full flex-1" />
+                 </>
+               ) : (
+                 <div className="w-full h-full bg-surface-1" />
+               )}
+             </div>
+             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+               <span className="text-emerald-400">Entradas</span>
+               <span className="text-text-dim">Saídas / Balanço</span>
+             </div>
+           </div>
         </div>
       </div>
 
@@ -196,11 +222,18 @@ export default function FinanceDashboard() {
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-dim block mb-2">Valor (R$)</label>
                   <input 
-                    type="number" 
+                    type="text" 
                     required
                     value={newTx.amount}
-                    onChange={(e) => setNewTx({...newTx, amount: e.target.value})}
-                    placeholder="0.00"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      const formatted = (Number(val) / 100).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      });
+                      setNewTx({...newTx, amount: formatted});
+                    }}
+                    placeholder="0,00"
                     className="w-full bg-surface-2 border border-border-custom rounded-xl px-4 py-3 text-sm focus:border-gold/50 outline-none transition-all"
                   />
                 </div>
@@ -240,6 +273,7 @@ export default function FinanceDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </NeuralShield>
   );
 }
