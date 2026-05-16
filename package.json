@@ -13,6 +13,7 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@supabase/supabase-js": "^2.105.4",
     "dotenv": "^17.4.2",
     "framer-motion": "^12.38.0",

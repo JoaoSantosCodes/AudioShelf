@@ -26,7 +26,8 @@ Transformar o MediaShelf Hub de um gerenciador de mídias em um **Sistema Operac
 
 ### POC 6: Modo Offline (PWA)
 *   **Objetivo:** Acesso total à biblioteca mesmo em ambientes sem conexão.
-*   **Implementação:** Service Workers para cache de capas e metadados.
+*   **Status:** ✅ Concluído.
+*   **Implementação:** Utilizado `@ducanh2912/next-pwa` com suporte total a App Router, Manifest e ícones premium gerados por IA.
 
 ---
 
