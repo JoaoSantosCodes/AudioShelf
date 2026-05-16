@@ -1,29 +1,29 @@
-# PRD — MediaShelf Core (Pure Hub)
+# PRD: MediaShelf Core (Creative Studio)
 
-## 🎯 Visão do Produto
-Transformar o MediaShelf no hub criativo definitivo para consumo imersivo de mídias de nicho (Manga, Suno Audiobooks e Cursos), eliminando qualquer ruído utilitário.
+## 🎯 Objetivo
+Ser o hub central de consumo de mídia (Manga, Audiobooks, Cursos) com zero distração e interface de alta imersão.
 
----
+## 🚀 Status do Projeto
+- **Fase Atual:** Estágio de Maturidade ✅
+- **Última Atualização:** Implementação do **Brain Neural Layer**.
 
-## 🚀 POC 1: Layout Imersivo (Inspirado em Immersive Shelf)
-**Objetivo:** Criar uma experiência de "Estúdio" que valorize o conteúdo.
+## 🛠️ Funcionalidades Implementadas
 
-### Funcionalidades:
-- [ ] **Bento Grid Library:** Organização visual de ativos por relevância e tipo.
-- [ ] **Modo Pure Real:** Toggle que esconde menus e foca 100% no player/leitor.
-- [ ] **Tactical Navigation:** Navbar fixa com efeito glassmorphism e transparência dinâmica.
+### POC 1: Pure Hub
+- [x] Remoção de módulos de Finanças e Shopping.
+- [x] Layout **Bento Grid** dinâmico.
+- [x] Header Minimalista e Sidebar Tática.
 
----
+### GMUD 2: Modo Pure Absoluto
+- [x] Zen Mode com Fullscreen automático.
+- [x] Interface Grayscale/Dark profunda para reduzir ruído visual.
+- [x] Botão de saída tático.
 
-## 📦 GMUD 1: Transição para Player Premium
-**Mudanças Planejadas:**
-- Substituir o player padrão por um player com **Feedback Haptico** no scrub.
-- Implementar transições de página "Noir" (fade-out profundo).
-- Adicionar suporte a capítulos via gestos.
+### POC 4: Neural Brain
+- [x] Dashboard centralizado de estatísticas globais (`/brain`).
+- [x] Integração de dados de Finanças e Família via Supabase.
+- [x] Geração de AI Insights baseados no ecossistema.
 
----
-
-## 🛠️ Requisitos Técnicos
-- **Frontend:** Next.js 15+ (App Router).
-- **Styling:** Tailwind CSS + Framer Motion para micro-interações.
-- **Data:** Supabase (tabelas: `books`, `manga_progress`, `courses`).
+## 📅 Próximos Passos (Backlog)
+- [ ] Integração com Suno.AI para geração de músicas no app.
+- [ ] Player de vídeo dedicado para cursos da Udemy.
