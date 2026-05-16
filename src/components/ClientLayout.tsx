@@ -3,8 +3,11 @@
 import React, { useEffect } from 'react';
 import { ThemeProvider } from "@/context/ThemeContext";
 import { MediaProvider } from "@/context/MediaContext";
+import { NavigationProvider } from "@/context/NavigationContext";
 import MediaExpandedView from "@/components/MediaExpandedView";
 import MobileNav from "@/components/MobileNav";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 import { supabase } from "@/lib/supabase";
 import NeuralSyncIndicator from "@/components/NeuralSyncIndicator";
 
@@ -40,12 +43,20 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <ThemeProvider>
       <MediaProvider>
-        <div className="flex-1 flex flex-col">
-          {children}
-        </div>
-        <NeuralSyncIndicator />
-        <MediaExpandedView />
-        <MobileNav />
+        <NavigationProvider>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
+              <Header />
+              <main className="flex-1 overflow-y-auto no-scrollbar relative">
+                {children}
+              </main>
+            </div>
+          </div>
+          <NeuralSyncIndicator />
+          <MediaExpandedView />
+          <MobileNav />
+        </NavigationProvider>
       </MediaProvider>
     </ThemeProvider>
   );

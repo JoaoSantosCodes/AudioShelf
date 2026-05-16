@@ -14,6 +14,9 @@ import {
   Clock
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useMedia } from '@/context/MediaContext';
+import { supabase } from '@/lib/supabase';
+import { Book as BookData } from '@/data/books';
 
 interface SearchResult {
   id: string;
@@ -74,8 +77,28 @@ export default function GlobalSearch() {
     setResults(filtered);
   };
 
-  const navigateTo = (path: string) => {
-    router.push(path);
+  const { playMedia } = useMedia();
+
+  const navigateTo = async (result: SearchResult) => {
+    if (result.type === 'book') {
+      try {
+        const { data, error } = await supabase
+          .from('books')
+          .select('*')
+          .eq('id', result.id)
+          .single();
+        
+        if (data) {
+          playMedia(data);
+          setIsOpen(false);
+          return;
+        }
+      } catch (err) {
+        console.error("Erro ao buscar livro na busca:", err);
+      }
+    }
+    
+    router.push(result.path);
     setIsOpen(false);
   };
 
@@ -142,7 +165,7 @@ export default function GlobalSearch() {
                       results.map((res) => (
                         <button 
                           key={res.id}
-                          onClick={() => navigateTo(res.path)}
+                          onClick={() => navigateTo(res)}
                           className="w-full p-4 rounded-2xl hover:bg-surface-2 transition-all flex items-center justify-between group text-left"
                         >
                           <div className="flex items-center gap-4">
@@ -167,11 +190,11 @@ export default function GlobalSearch() {
                   <div className="p-6">
                     <h5 className="text-[10px] font-bold text-text-dim uppercase tracking-[0.2em] mb-4">Sugestões Rápidas</h5>
                     <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => navigateTo('/shopping')} className="p-4 rounded-2xl bg-surface-2 border border-border-custom hover:border-gold/30 transition-all flex items-center gap-3">
+                      <button onClick={() => navigateTo({ id: 's1', type: 'shopping', path: '/shopping', title: '', subtitle: '' })} className="p-4 rounded-2xl bg-surface-2 border border-border-custom hover:border-gold/30 transition-all flex items-center gap-3">
                         <ShoppingCart size={16} className="text-blue-400" />
                         <span className="text-xs font-bold text-text">Lista de Mercado</span>
                       </button>
-                      <button onClick={() => navigateTo('/financas')} className="p-4 rounded-2xl bg-surface-2 border border-border-custom hover:border-gold/30 transition-all flex items-center gap-3">
+                      <button onClick={() => navigateTo({ id: 's2', type: 'finance', path: '/financas', title: '', subtitle: '' })} className="p-4 rounded-2xl bg-surface-2 border border-border-custom hover:border-gold/30 transition-all flex items-center gap-3">
                         <Wallet size={16} className="text-red-400" />
                         <span className="text-xs font-bold text-text">Resumo Financeiro</span>
                       </button>
