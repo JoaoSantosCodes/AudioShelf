@@ -317,25 +317,11 @@ export default function Home() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             <AnimatePresence>
               {filteredBooks.map((book) => (
-                <motion.div
-                  key={book.id}
-                  whileHover={{ y: -4 }}
-                  className="glass-card group cursor-pointer"
-                  onClick={() => playMedia(book)}
-                >
-                  <div className="aspect-[3/4] relative overflow-hidden rounded-t-2xl">
-                    <img 
-                      src={book.cover_url} 
-                      alt={book.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg/90 via-transparent to-transparent" />
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-serif font-bold text-sm group-hover:text-gold transition-colors line-clamp-1">{book.title}</h4>
-                    <p className="text-[9px] text-text-dim mt-1 uppercase tracking-widest">{book.author}</p>
-                  </div>
-                </motion.div>
+                <BookCard 
+                  key={book.id} 
+                  book={book} 
+                  onClick={() => playMedia(book)} 
+                />
               ))}
             </AnimatePresence>
           </div>
