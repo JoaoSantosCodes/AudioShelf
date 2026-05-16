@@ -34,17 +34,37 @@ export default function FinanceDashboard() {
 
   const handleAddTx = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from('transactions').insert([{
-      description: newTx.description,
-      amount: parseFloat(newTx.amount),
-      type: newTx.type
-    }]);
+    try {
+      // Correção para aceitar vírgula (padrão brasileiro)
+      const amountValue = typeof newTx.amount === 'string' 
+        ? newTx.amount.replace(',', '.') 
+        : newTx.amount;
+        
+      const parsedAmount = parseFloat(amountValue);
+      
+      if (isNaN(parsedAmount)) {
+        alert("Por favor, insira um valor numérico válido.");
+        return;
+      }
 
-    if (!error) {
+      const { error } = await supabase.from('transactions').insert([{
+        description: newTx.description,
+        amount: parsedAmount,
+        type: newTx.type
+      }]);
+
+      if (error) {
+        console.error("Erro Supabase:", error);
+        alert(`Erro ao salvar: ${error.message}. Verifique se a tabela 'transactions' existe no seu Supabase.`);
+        return;
+      }
+
       setNewTx({ description: '', amount: '', type: 'expense' });
       setIsModalOpen(false);
       fetchFinanceData();
       window.dispatchEvent(new CustomEvent('neural-sync'));
+    } catch (err: any) {
+      alert(`Erro inesperado: ${err.message}`);
     }
   };
 

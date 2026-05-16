@@ -30,17 +30,24 @@ export default function ShoppingDashboard() {
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from('shopping_list').insert([{
-      title: newItem.title,
-      quantity: newItem.quantity,
-      category: newItem.category,
-      completed: false
-    }]);
+    try {
+      const { error } = await supabase.from('shopping_list').insert([{
+        title: newItem.title,
+        quantity: newItem.quantity,
+        category: newItem.category,
+        completed: false
+      }]);
 
-    if (!error) {
+      if (error) {
+        alert(`Erro ao salvar item: ${error.message}`);
+        return;
+      }
+
       setNewItem({ title: '', quantity: '', category: 'Geral' });
       setIsModalOpen(false);
       fetchShoppingList();
+    } catch (err: any) {
+      alert(`Erro inesperado: ${err.message}`);
     }
   };
 
