@@ -42,6 +42,8 @@ export default function MediaExpandedView({ onUpdateProgress }: MediaExpandedVie
         description: refined.description,
         category: refined.category
       });
+      // Dispatch global sync event
+      window.dispatchEvent(new CustomEvent('neural-sync'));
     } catch (error) {
       console.error("AI Scan failed", error);
     } finally {

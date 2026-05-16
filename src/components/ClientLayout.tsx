@@ -6,6 +6,7 @@ import { MediaProvider } from "@/context/MediaContext";
 import GlobalMediaContainer from "@/components/GlobalMediaContainer";
 import MobileNav from "@/components/MobileNav";
 import { supabase } from "@/lib/supabase";
+import NeuralSyncIndicator from "@/components/NeuralSyncIndicator";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           {children}
         </div>
         <GlobalMediaContainer />
+        <NeuralSyncIndicator />
         <MobileNav />
       </MediaProvider>
     </ThemeProvider>

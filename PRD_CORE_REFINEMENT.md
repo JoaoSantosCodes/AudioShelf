@@ -51,6 +51,8 @@ Transformar o MediaShelf Hub de um gerenciador de mídias em um **Sistema Operac
 
 ### GMUD 10: Sincronização Neural Silenciosa
 *   **Objetivo:** O Brain Layer se atualiza em segundo plano via Web Workers, sem impactar a fluidez do UI principal.
+*   **Status:** ✅ Concluído.
+*   **Implementação:** Criado o `NeuralSyncIndicator` que sinaliza transferências de dados em tempo real. O Brain Dashboard agora reage instantaneamente a eventos de sincronização global disparados por ações do usuário no Hub.
 
 ---
 

@@ -34,6 +34,13 @@ export default function BrainDashboard() {
 
   useEffect(() => {
     fetchGlobalData();
+
+    const handleSync = () => {
+      fetchGlobalData();
+    };
+
+    window.addEventListener('neural-sync', handleSync);
+    return () => window.removeEventListener('neural-sync', handleSync);
   }, []);
 
   const fetchGlobalData = async () => {
