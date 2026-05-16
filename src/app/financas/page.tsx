@@ -90,8 +90,8 @@ export default function FinanceDashboard() {
               <Wallet className="text-red-400" size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400">Financial Control</p>
-              <h1 className="text-3xl font-serif font-bold">Gestão de Liquidez</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400">Controle de Gastos</p>
+              <h1 className="text-3xl font-serif font-bold">Meu Dinheiro & Finanças</h1>
             </div>
           </div>
         </header>
@@ -114,7 +114,7 @@ export default function FinanceDashboard() {
            <div className="flex items-center justify-between mb-6">
              <div>
                <h4 className="text-lg font-bold mb-2">Fluxo de Caixa</h4>
-               <p className="text-sm text-text-dim">Proporção de saúde financeira neural.</p>
+               <p className="text-sm text-text-dim">Resumo de Entradas e Saídas</p>
              </div>
              <button 
               onClick={() => setIsModalOpen(true)}

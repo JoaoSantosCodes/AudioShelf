@@ -79,18 +79,18 @@ export default function ShoppingDashboard() {
               <ShoppingCart className="text-gold" size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Inventory Hub</p>
-              <h1 className="text-3xl font-serif font-bold">Suprimentos e Mercado</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Minha Despensa & Mercado</p>
+              <h1 className="text-3xl font-serif font-bold">Lista de Compras</h1>
             </div>
           </div>
         </div>
 
       <div className="bg-surface-1 border border-border-custom rounded-[2.5rem] overflow-hidden shadow-elegant mb-12">
         <div className="p-8 border-b border-border-custom bg-surface-2/50 flex items-center justify-between">
-           <div className="flex items-center gap-3">
-             <Zap className="text-gold" size={18} />
-             <h3 className="text-sm font-bold">Itens Ativos</h3>
-           </div>
+          <div>
+            <h4 className="text-lg font-bold">O que está faltando?</h4>
+            <p className="text-sm text-text-dim">Gerencie seu estoque doméstico de forma tática.</p>
+          </div>
            <button 
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"

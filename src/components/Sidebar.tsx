@@ -42,14 +42,17 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 px-4 space-y-1">
-        <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Menu Principal</div>
+        <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Navegação</div>
         <Link 
           href="/"
           onClick={() => { closeMedia(); setIsSidebarOpen(false); setSelectedCategory('Todos'); }}
           className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${pathname === '/' ? 'bg-gold/10 text-gold' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
         >
           <Library size={18} />
-          <span className="text-sm font-semibold">Biblioteca</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">Início</span>
+            <span className="text-[9px] text-text-dim/60">Minha Biblioteca</span>
+          </div>
         </Link>
 
         <Link 
@@ -58,7 +61,10 @@ export default function Sidebar() {
           className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${pathname === '/brain' ? 'bg-gold/10 text-gold' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
         >
           <BrainIcon size={18} />
-          <span className="text-sm font-semibold">Brain Layer</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">Inteligência (IA)</span>
+            <span className="text-[9px] text-text-dim/60">Insights do Sistema</span>
+          </div>
         </Link>
 
         {pathname === '/' && (

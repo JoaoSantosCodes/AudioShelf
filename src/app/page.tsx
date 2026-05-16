@@ -24,11 +24,13 @@ import GlobalSearch from '@/components/GlobalSearch';
 import Link from 'next/link';
 import { useMedia } from '@/context/MediaContext';
 import { useNavigation } from '@/context/NavigationContext';
+import { useAuth } from '@/context/AuthContext';
 import HomeSkeleton from '@/components/HomeSkeleton';
 
 export default function Home() {
   const { playMedia, closeMedia, activeMedia } = useMedia();
   const { selectedCategory, setSelectedCategory, isPureMode } = useNavigation();
+  const { user } = useAuth();
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -94,7 +96,7 @@ export default function Home() {
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-[10px] md:text-xs text-gold uppercase tracking-[0.2em]"
                       >
                         <Sparkles className="h-3 w-3 animate-pulse" />
-                        O Estúdio Criativo Definitivo
+                        Olá, {user?.email?.split('@')[0] || 'Visitante'} • O Estúdio Criativo Definitivo
                       </motion.div>
                       <motion.h1 
                         initial={{ opacity: 0, y: 20 }}

@@ -115,11 +115,11 @@ export default function BrainDashboard() {
               <BrainIcon className="text-gold animate-pulse" size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Neural Layer</p>
-              <h1 className="text-3xl font-serif font-bold">MediaShelf Brain</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Assistente IA</p>
+              <h1 className="text-3xl font-serif font-bold">Cérebro do App (IA)</h1>
             </div>
           </div>
-          <p className="text-text-dim max-w-xl">A camada de inteligência que unifica seu consumo, finanças e vida familiar em uma única consciência digital.</p>
+          <p className="text-text-dim max-w-xl">A inteligência que organiza seus livros, gastos e mercado em um só lugar.</p>
         </div>
       </div>
 
@@ -144,7 +144,7 @@ export default function BrainDashboard() {
             <>
               <div className="flex items-center gap-3 mb-6">
                 <Zap className="text-gold" size={20} />
-                <h3 className="text-xs font-black uppercase tracking-widest text-gold">Insight do Ecossistema</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-gold">Dicas da Inteligência Artificial</h3>
               </div>
               <div className="flex items-start justify-between gap-6">
                 <p className="text-2xl font-serif font-bold leading-relaxed italic text-text flex-1">
@@ -164,7 +164,7 @@ export default function BrainDashboard() {
                   onClick={() => startNeuralProcess("Otimizando fluxos de trabalho e consumo...")}
                   className="px-6 py-2 bg-gold text-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-bright transition-all"
                 >
-                  Otimizar Rotina
+                  Melhorar meu dia
                 </button>
                 <Link 
                   href="/financas"
