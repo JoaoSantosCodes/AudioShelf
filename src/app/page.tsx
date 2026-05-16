@@ -9,25 +9,11 @@ import {
   Headphones, 
   Library, 
   X, 
-  Search, 
-  RefreshCcw, 
-  Database, 
   List, 
-  Clock, 
-  Play, 
-  Calendar, 
-  Activity, 
-  TrendingUp,
-  BarChart3, 
-  Wallet, 
-  ShoppingCart,
   Bell,
-  CheckCircle2,
   Mic,
   Volume2,
-  Send,
-  Sparkles,
-  Moon
+  Sparkles
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -37,11 +23,6 @@ import MobileNav from '@/components/MobileNav';
 import MediaExpandedView from '@/components/MediaExpandedView';
 import GlobalSearch from '@/components/GlobalSearch';
 import { useMedia } from '@/context/MediaContext';
-import { processVoiceCommand } from '@/lib/commandProcessor';
-import PresenceIndicator from '@/components/PresenceIndicator';
-import { checkSmartAlerts, SmartNotification, generateDailyBriefing } from '@/lib/notificationEngine';
-import { sendTelegramMessage, formatTelegramBriefing } from '@/lib/telegramEngine';
-import { isQuietModeActive } from '@/lib/quietMode';
 import Skeleton from '@/components/Skeleton';
 import HomeSkeleton from '@/components/HomeSkeleton';
 
@@ -54,121 +35,23 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
-  const [telegramChatId, setTelegramChatId] = useState('');
-  const [smartNotifications, setSmartNotifications] = useState<any[]>([]);
-  const [dailyBriefing, setDailyBriefing] = useState<any>(null);
-  const [recentActivities, setRecentActivities] = useState<any[]>([]);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [dashboardStats, setDashboardStats] = useState({
-    expenses: 0,
-    shoppingCount: 0,
-    pendingTasks: 0
-  });
-
-  const handleVoiceInput = async () => {
-    if (!user) return;
-
-    if (isListening) {
-      // STOP RECORDING
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
-        setIsListening(false);
-      }
-      return;
-    }
-
-    // START RECORDING
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        console.log("Audio captured, ready for Whisper processing:", audioBlob);
-        
-        // Simulação de processamento Whisper
-        alert("Áudio capturado! Processando intenção via Whisper (Simulado)...");
-        const simulatedCommand = "Adicionar leite na lista de compras";
-        const result = await processVoiceCommand(simulatedCommand, user.id);
-        
-        if (result.success) {
-          fetchDashboardStats(user.id);
-          alert("Missão cumprida: Leite adicionado via comando de voz real!");
-        }
-
-        // Parar todos os tracks do stream
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      setIsListening(true);
-    } catch (err) {
-      console.error("Erro ao acessar microfone:", err);
-      alert("Não foi possível acessar o microfone.");
-    }
-  };
-
-  const handleSendToTelegram = async () => {
-    if (!telegramChatId || !dailyBriefing) {
-      setIsTelegramModalOpen(true);
-      return;
-    }
-
-    const message = formatTelegramBriefing(dailyBriefing);
-    const result = await sendTelegramMessage(telegramChatId, message, true);
-    
-    if (result.success) {
-      alert("Briefing enviado com sucesso para o Telegram!");
-    } else {
-      alert(`Erro ao enviar: ${result.error}`);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(true);
 
   const notifications = [
-    ...smartNotifications.map(n => ({
-      ...n,
-      icon: n.icon === 'Wallet' ? Wallet : (n.icon === 'Calendar' ? Calendar : (n.icon === 'TrendingUp' ? TrendingUp : Activity))
-    })),
-    ...(dashboardStats.pendingTasks > 0 ? [
-      { id: 1, type: 'task', title: 'Missões Pendentes', text: `Você tem ${dashboardStats.pendingTasks} tarefas para hoje`, time: 'Agora', icon: Calendar, color: 'text-gold' },
-    ] : [
-      { id: 0, type: 'system', title: 'Sistema Pronto', text: 'Tudo sincronizado e atualizado.', time: 'Agora', icon: CheckCircle2, color: 'text-emerald-400' }
-    ])
+    { id: 0, type: 'system', title: 'Sistema Pronto', text: 'Sua biblioteca está sincronizada.', time: 'Agora', icon: Bell, color: 'text-emerald-400' }
   ];
-
-  const budget = 5000;
-  const expensePercentage = Math.min(100, (dashboardStats.expenses / budget) * 100);
 
   const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
 
   useEffect(() => {
     // SMART CACHE: Load from localStorage first
-    const cachedStats = localStorage.getItem('dashboardStats');
-    const cachedActivities = localStorage.getItem('recentActivities');
     const cachedBooks = localStorage.getItem('dbBooks');
-
-    if (cachedStats) setDashboardStats(JSON.parse(cachedStats));
-    if (cachedActivities) setRecentActivities(JSON.parse(cachedActivities));
     if (cachedBooks) setDbBooks(JSON.parse(cachedBooks));
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        Promise.all([
-          fetchRecentActivities(session.user.id),
-          fetchDashboardStats(session.user.id),
-          checkSmartAlerts(session.user.id).then(setSmartNotifications),
-          generateDailyBriefing(session.user.id).then(setDailyBriefing)
-        ]).finally(() => setIsLoading(false));
+        setIsLoading(false);
       } else {
         setIsLoading(false);
       }
@@ -176,40 +59,6 @@ export default function Home() {
     });
   }, []);
 
-  const fetchDashboardStats = async (userId: string) => {
-    const [txRes, shopRes, tasksRes] = await Promise.all([
-      supabase.from('transactions').select('amount').eq('user_id', userId).eq('type', 'expense'),
-      supabase.from('shopping_list').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('completed', false),
-      supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId).neq('status', 'done')
-    ]);
-    const totalExp = txRes.data?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
-
-    setDashboardStats({
-      expenses: totalExp,
-      shoppingCount: shopRes.count || 0,
-      pendingTasks: tasksRes.count || 0
-    });
-    localStorage.setItem('dashboardStats', JSON.stringify({
-      expenses: totalExp,
-      shoppingCount: shopRes.count || 0,
-      pendingTasks: tasksRes.count || 0
-    }));
-  };
-
-  const fetchRecentActivities = async (userId: string) => {
-    const { data } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'done')
-      .order('created_at', { ascending: false })
-      .limit(3);
-    
-    if (data) {
-      setRecentActivities(data);
-      localStorage.setItem('recentActivities', JSON.stringify(data));
-    }
-  };
 
   const fetchBooks = async () => {
     const { data, error } = await supabase
@@ -288,70 +137,7 @@ export default function Home() {
                 <span className="text-sm font-semibold">Biblioteca</span>
               </button>
               
-              <Link href="/agenda" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-                <Calendar size={18} />
-                <span className="text-sm font-semibold">Agenda Semanal</span>
-              </Link>
 
-              <Link href="/kanban" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-                <Database size={18} />
-                <span className="text-sm font-semibold">Projetos & Kanban</span>
-              </Link>
-
-              <Link href="/insights" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-                <BarChart3 size={18} />
-                <span className="text-sm font-semibold">Insights & Resultados</span>
-              </Link>
-              <Link href="/shopping" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-                <ShoppingCart size={18} />
-                <span className="text-sm font-semibold">Lista de Mercado</span>
-              </Link>
-
-              <Link href="/financas" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all">
-                <Wallet size={18} />
-                <span className="text-sm font-semibold">Finanças</span>
-              </Link>
-
-              <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Integrações</div>
-              <button 
-                onClick={() => setIsTelegramModalOpen(true)}
-                className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-2 hover:text-text transition-all group"
-              >
-                <Send size={18} className="group-hover:text-sky-400 transition-colors" />
-                <div className="text-left">
-                  <span className="text-sm font-semibold block">Telegram Bot</span>
-                  <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">Ativo</span>
-                </div>
-              </button>
-
-              <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Atividades Recentes</div>
-              <div className="space-y-4">
-              {isLoading && recentActivities.length === 0 ? (
-                [1, 2, 3].map(i => (
-                  <div key={i} className="flex items-center gap-3 p-3">
-                    <Skeleton variant="rect" className="w-8 h-8 rounded-lg" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton variant="text" className="w-full h-3" />
-                      <Skeleton variant="text" className="w-1/2 h-2" />
-                    </div>
-                  </div>
-                ))
-              ) : recentActivities.length > 0 ? recentActivities.map((act) => (
-                <div key={act.id} className="flex items-center gap-4 p-4 rounded-2xl bg-surface-2 border border-border-custom hover:border-gold/30 transition-all group">
-                  <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold group-hover:scale-110 transition-transform shrink-0">
-                    <CheckCircle2 size={18} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-text truncate">{act.title}</p>
-                    <p className="text-[10px] text-text-dim mt-0.5">Concluído</p>
-                  </div>
-                </div>
-              )) : (
-                <div className="p-8 text-center bg-surface-2 rounded-2xl border border-dashed border-border-custom">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Nenhuma missão recente</p>
-                </div>
-              )}
-            </div>
 
               <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>
               <div className="grid grid-cols-1 gap-1">
@@ -398,27 +184,11 @@ export default function Home() {
             <h2 className="text-lg md:text-xl font-serif font-bold text-text truncate">Sua Biblioteca</h2>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden sm:block">
-              <PresenceIndicator />
-            </div>
             <GlobalSearch />
             <div className="hidden xs:block">
               <ThemeToggle />
             </div>
             
-            {/* VOICE ASSISTANT */}
-            <button 
-              onClick={handleVoiceInput}
-              className={`w-10 h-10 rounded-full transition-all relative group flex items-center justify-center ${isListening ? 'bg-gold text-bg shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-pulse' : 'bg-surface-2 text-text-muted hover:text-gold border border-border-custom hover:border-gold/30'}`}
-            >
-              {isListening ? <Volume2 size={18} className="animate-pulse text-gold" /> : <Mic size={18} />}
-              {isListening && (
-                <span className="absolute top-14 right-0 whitespace-nowrap text-[10px] font-bold text-gold uppercase tracking-widest bg-bg/80 backdrop-blur-md px-3 py-1 rounded-full border border-gold/20 z-50 shadow-xl flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
-                  Gravando Áudio Real...
-                </span>
-              )}
-            </button>
             
             {/* NOTIFICATION CENTER */}
             <div className="relative">
@@ -469,109 +239,6 @@ export default function Home() {
         </header>
 
         <div className="p-4 md:p-8 space-y-6 md:space-y-10 pb-32 md:pb-10">
-          {/* SMART WIDGETS SECTION */}
-          {/* BRIEFING AI SECTION */}
-          {dailyBriefing && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-br from-gold/20 via-surface-1 to-surface-2 border border-gold/30 shadow-2xl relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Sparkles size={80} className="text-gold" />
-              </div>
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 bg-gold text-bg text-[9px] font-black uppercase tracking-[0.2em] rounded-full">Inteligência Estratégica</span>
-                  {isQuietModeActive() && (
-                    <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-500/20">
-                      <Moon size={10} fill="currentColor" /> Quiet Mode Ativo
-                    </span>
-                  )}
-                  <span className="text-[10px] font-bold text-gold/60">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-                </div>
-                <h2 className="text-3xl font-serif font-bold text-text">{dailyBriefing.title}</h2>
-                <p className="text-sm text-text-muted max-w-2xl leading-relaxed">
-                  {dailyBriefing.summary} {dailyBriefing.urgent > 0 ? `Atenção especial para as ${dailyBriefing.urgent} missões críticas.` : 'Seu dia parece sob controle.'}
-                </p>
-                <div className="flex flex-wrap gap-3 md:gap-4 pt-2">
-                  <Link href="/kanban" className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border-custom rounded-xl text-xs font-bold transition-all flex items-center gap-2">
-                    <Calendar size={14} className="text-gold" /> Ver Missões
-                  </Link>
-                  <Link href="/shopping" className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border-custom rounded-xl text-xs font-bold transition-all flex items-center gap-2">
-                    <ShoppingCart size={14} className="text-gold" /> Lista de Mercado
-                  </Link>
-                  <button 
-                    onClick={handleSendToTelegram}
-                    className="px-6 py-2.5 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 rounded-xl text-xs font-bold transition-all flex items-center gap-2 group"
-                  >
-                    <Send size={14} className="group-hover:translate-x-1 transition-transform" /> 
-                    Enviar p/ Telegram
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* GASTOS WIDGET */}
-            <Link href="/financas" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-red-500/30 transition-all shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Wallet size={60} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Gastos do Mês</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-text">R$ {dashboardStats.expenses.toLocaleString('pt-BR')}</span>
-                <span className="text-[10px] font-bold text-red-400">-15% do limite</span>
-              </div>
-              <div className="mt-4 w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${expensePercentage}%` }}
-                  className="h-full bg-red-400/50 rounded-full"
-                />
-              </div>
-            </Link>
-
-            {/* MERCADO WIDGET */}
-            <Link href="/shopping" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-gold/30 transition-all shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <ShoppingCart size={60} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Lista de Mercado</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-text">{dashboardStats.shoppingCount} Itens</span>
-                <span className="text-[10px] font-bold text-gold">{dashboardStats.shoppingCount > 0 ? 'Faltam comprar' : 'Estoque em dia'}</span>
-              </div>
-              <div className="mt-4 flex -space-x-2">
-                {dashboardStats.shoppingCount > 0 ? (
-                  [1, 2, 3].slice(0, dashboardStats.shoppingCount).map(i => <div key={i} className="w-6 h-6 rounded-full bg-surface-3 border border-border-custom flex items-center justify-center text-[8px] font-bold text-gold">{i}</div>)
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-surface-2 border border-border-custom flex items-center justify-center">
-                    <CheckCircle2 size={10} className="text-emerald-400" />
-                  </div>
-                )}
-              </div>
-            </Link>
-
-            {/* MISSÕES WIDGET */}
-            <Link href="/kanban" className="group p-6 rounded-3xl bg-surface-1 border border-border-custom hover:border-emerald-500/30 transition-all shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Calendar size={60} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Missões de Hoje</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-text">{dashboardStats.pendingTasks} Pendentes</span>
-                <span className="text-[10px] font-bold text-emerald-400">Foco total</span>
-              </div>
-              <div className="mt-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-text-muted truncate">
-                  {recentActivities.length > 0 ? `Próxima: ${recentActivities[0].title}` : 'Sem pendências'}
-                </span>
-              </div>
-            </Link>
-          </section>
 
           <div>
             <div className="flex items-center justify-between mb-8">
@@ -610,63 +277,6 @@ export default function Home() {
         onUpdateProgress={handleUpdateProgress}
       />
 
-      {/* TELEGRAM CONNECTION MODAL */}
-      <AnimatePresence>
-        {isTelegramModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-surface-1 border border-border-custom w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl"
-            >
-              <div className="p-8 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
-                      <Send className="text-sky-400" size={20} />
-                    </div>
-                    <h3 className="text-xl font-serif font-bold text-text">Conectar Telegram</h3>
-                  </div>
-                  <button onClick={() => setIsTelegramModalOpen(false)} className="text-text-muted hover:text-text"><X size={24} /></button>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="p-4 bg-surface-2 rounded-2xl border border-border-custom text-xs leading-relaxed text-text-muted">
-                    <p className="mb-2">Para receber alertas e resumos diários:</p>
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>Inicie uma conversa com <span className="text-sky-400 font-bold">@MediaShelf_Bot</span></li>
-                      <li>Envie o comando <span className="text-gold font-bold">/start</span></li>
-                      <li>Cole o seu <span className="text-text font-bold">Chat ID</span> abaixo:</li>
-                    </ol>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-dim px-2">Seu Telegram Chat ID</label>
-                    <input 
-                      type="text" 
-                      placeholder="Ex: 123456789"
-                      value={telegramChatId}
-                      onChange={e => setTelegramChatId(e.target.value)}
-                      className="w-full bg-surface-2 border border-border-custom rounded-2xl py-4 px-6 text-sm font-mono focus:border-sky-400 outline-none transition-all"
-                    />
-                  </div>
-
-                  <button 
-                    onClick={() => {
-                      alert("Simulando envio de resumo para o Telegram...");
-                      setIsTelegramModalOpen(false);
-                    }}
-                    className="w-full py-4 bg-sky-500 text-white rounded-2xl font-bold hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2"
-                  >
-                    <Send size={18} /> Testar Notificação Push
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
