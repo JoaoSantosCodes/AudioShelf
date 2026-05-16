@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback` // URL de redirecionamento, pode precisar de ajuste dependendo do seu setup no Supabase
+        redirectTo: window.location.origin
       }
     });
     return { error };
