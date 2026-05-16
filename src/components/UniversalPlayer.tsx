@@ -16,6 +16,7 @@ import {
   Maximize
 } from 'lucide-react';
 import { Book } from '@/data/books';
+import Image from 'next/image';
 
 interface UniversalPlayerProps {
   media: Book;
@@ -40,7 +41,7 @@ export default function UniversalPlayer({ media }: UniversalPlayerProps) {
             className="text-center space-y-6"
           >
             <div className="w-64 h-64 mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-gold/20 relative group">
-               <img src={media.cover} className="w-full h-full object-cover" />
+               <Image src={media.cover} alt={media.title} fill className="object-cover" />
                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
                  <Play size={48} className="text-gold fill-gold" />
                </div>
@@ -66,10 +67,10 @@ export default function UniversalPlayer({ media }: UniversalPlayerProps) {
         {isManga && (
           <div className="w-full h-full flex items-center justify-center p-8">
             <div className="relative w-full max-w-2xl aspect-[3/4] bg-white rounded-lg shadow-2xl overflow-hidden">
-              <img src={media.cover} className="w-full h-full object-contain bg-surface-3" />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-bold text-white border border-white/10">
-                Página 42 / 180
-              </div>
+               <Image src={media.cover} alt={media.title} fill className="object-contain bg-surface-3" />
+               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-bold text-white border border-white/10">
+                 Página 42 / 180
+               </div>
             </div>
           </div>
         )}

@@ -11,9 +11,11 @@ import {
   Sparkles,
   Zap,
   ChevronRight,
+  ChevronLeft,
   Target
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 interface GlobalStats {
   totalStudyHours: number;
@@ -72,17 +74,26 @@ export default function BrainDashboard() {
 
   return (
     <div className="min-h-screen bg-background text-text p-6 md:p-12">
-      <header className="max-w-6xl mx-auto mb-12">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-lg shadow-gold/10">
-            <BrainIcon className="text-gold animate-pulse" size={24} />
+      <header className="max-w-6xl mx-auto mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex flex-col gap-4">
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 text-text-dim hover:text-gold transition-colors text-[10px] font-black uppercase tracking-widest mb-2 group"
+          >
+            <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Voltar para Biblioteca
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-lg shadow-gold/10">
+              <BrainIcon className="text-gold animate-pulse" size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Neural Layer</p>
+              <h1 className="text-3xl font-serif font-bold">MediaShelf Brain</h1>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Neural Layer</p>
-            <h1 className="text-3xl font-serif font-bold">MediaShelf Brain</h1>
-          </div>
+          <p className="text-text-dim max-w-xl">A camada de inteligência que unifica seu consumo, finanças e vida familiar em uma única consciência digital.</p>
         </div>
-        <p className="text-text-dim max-w-xl">A camada de inteligência que unifica seu consumo, finanças e vida familiar em uma única consciência digital.</p>
       </header>
 
       <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
