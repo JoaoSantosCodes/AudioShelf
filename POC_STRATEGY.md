@@ -36,7 +36,7 @@ Extrair o módulo financeiro como uma aplicação web separada, focada em veloci
 ---
 
 ## 🏠 POC 3: Family Collab Layer (Real-time)
-**Status:** ⏳ Planejada
+**Status:** ✅ Concluída (Mini-App Standalone)
 
 ### Visão
 Isolar a lista de compras e quadros compartilhados em uma interface ultra-simples com foco em sincronização instantânea.

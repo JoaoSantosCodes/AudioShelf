@@ -1,9 +1,7 @@
 'use client';
-// MediaShelf v1.5.0-stable | Tactical Performance Hub
 
-import React, { useState, useEffect, useRef } from 'react';
-import { books as initialBooks, Book } from '@/data/books';
-import BookCard from '@/components/BookCard';
+import React, { useState, useEffect } from 'react';
+import { Book } from '@/data/books';
 import ThemeToggle from '@/components/ThemeToggle';
 import { 
   Headphones, 
@@ -11,57 +9,51 @@ import {
   X, 
   List, 
   Bell,
-  Mic,
-  Volume2,
-  Sparkles
+  Sparkles,
+  BookOpen,
+  GraduationCap,
+  TrendingUp,
+  BellOff
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileNav from '@/components/MobileNav';
 import MediaExpandedView from '@/components/MediaExpandedView';
 import GlobalSearch from '@/components/GlobalSearch';
 import { useMedia } from '@/context/MediaContext';
-import Skeleton from '@/components/Skeleton';
 import HomeSkeleton from '@/components/HomeSkeleton';
 
 export default function Home() {
-  const { activeMedia, playMedia, closeMedia } = useMedia();
+  const { playMedia, closeMedia, activeMedia } = useMedia();
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<User | null>(null);
-  const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
 
   const notifications = [
     { id: 0, type: 'system', title: 'Sistema Pronto', text: 'Sua biblioteca está sincronizada.', time: 'Agora', icon: Bell, color: 'text-emerald-400' }
   ];
 
-  const categories = ['Todos', 'Manga', 'Audiobook', 'Cursos', 'Música'];
-
   useEffect(() => {
-    // SMART CACHE: Load from localStorage first
     const cachedBooks = localStorage.getItem('dbBooks');
     if (cachedBooks) setDbBooks(JSON.parse(cachedBooks));
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
       }
       fetchBooks();
     });
   }, []);
 
-
   const fetchBooks = async () => {
-    const { data, error } = await supabase
+    setIsLoading(true);
+    const { data } = await supabase
       .from('books')
       .select('*')
       .order('created_at', { ascending: false });
@@ -69,35 +61,17 @@ export default function Home() {
     if (data) {
       setDbBooks(data);
       localStorage.setItem('dbBooks', JSON.stringify(data));
-    } else {
-      setDbBooks(initialBooks);
     }
-  };
-
-  const handleUpdateProgress = async (bookId: string, updates: Partial<Book>) => {
-    try {
-      const { error } = await supabase
-        .from('books')
-        .update(updates)
-        .eq('id', bookId);
-      
-      if (error) throw error;
-      
-      setDbBooks(prev => prev.map(book => book.id === bookId ? { ...book, ...updates } : book));
-      if (activeMedia?.id === bookId) {
-        playMedia({ ...activeMedia, ...updates });
-      }
-    } catch (err: any) {
-      console.error("Erro ao atualizar:", err);
-    }
+    setIsLoading(false);
   };
 
   const filteredBooks = dbBooks.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         book.author.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'Todos' || book.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return selectedCategory === 'Todos' || book.category === selectedCategory;
   });
+
+  if (isLoading && dbBooks.length === 0) {
+    return <HomeSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col md:flex-row overflow-hidden">
@@ -112,71 +86,63 @@ export default function Home() {
             className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] md:hidden"
           />
         )}
-        <motion.aside 
-          className={`fixed md:sticky top-0 left-0 z-[110] w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar shadow-2xl md:shadow-none transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
-        >
-            <div className="p-8 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-lg shadow-gold/20">
-                  <Headphones className="text-bg" size={20} />
-                </div>
-                <h1 className="text-xl font-serif font-bold tracking-tight text-text">MediaShelf</h1>
-              </div>
-              <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-text-muted hover:text-text">
-                <X size={20} />
-              </button>
-            </div>
-
-            <nav className="flex-1 px-4 space-y-1">
-              <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Menu Principal</div>
-              <button 
-                onClick={() => { closeMedia(); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${!activeMedia ? 'bg-gold/10 text-gold shadow-[0_0_20px_rgba(212,175,55,0.1)]' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
-              >
-                <Library size={18} />
-                <span className="text-sm font-semibold">Biblioteca</span>
-              </button>
-              
-
-
-              <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>
-              <div className="grid grid-cols-1 gap-1">
-                {categories.map(cat => (
-                  <button 
-                    key={cat}
-                    onClick={() => { setSelectedCategory(cat); setIsSidebarOpen(false); }}
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-medium transition-all ${selectedCategory === cat ? 'text-gold bg-gold/5' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
-                  >
-                    {cat === 'Todos' ? <List size={14} /> : <div className="w-1 h-1 rounded-full bg-text-dim/30" />}
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </nav>
-
-            <div className="p-6 border-t border-border-custom bg-surface-1/50 backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center border border-white/5 shadow-xl">
-                  <span className="text-xs font-bold text-gold">{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-text truncate">{user?.email || 'Visitante'}</p>
-                  <p className="text-[10px] text-text-dim truncate">Membro Premium</p>
-                </div>
-              </div>
-            </div>
-            <div className="md:hidden p-4 flex justify-end">
-              <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-text-muted"><X size={24} /></button>
-            </div>
-        </motion.aside>
       </AnimatePresence>
 
-      {/* MAIN CONTENT */}
-      {isLoading && dbBooks.length === 0 ? (
-        <HomeSkeleton />
-      ) : (
-        <main className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-32 md:pb-0">
-          <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+      <motion.aside 
+        className={`fixed md:sticky top-0 left-0 z-[110] w-72 h-screen bg-surface-1 border-r border-border-custom flex flex-col shrink-0 overflow-y-auto no-scrollbar shadow-2xl md:shadow-none transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+      >
+        <div className="p-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-lg shadow-gold/20">
+              <Headphones className="text-bg" size={20} />
+            </div>
+            <h1 className="text-xl font-serif font-bold tracking-tight text-text">MediaShelf</h1>
+          </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-text-muted hover:text-text">
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-1">
+          <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Menu Principal</div>
+          <button 
+            onClick={() => { closeMedia(); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${!activeMedia ? 'bg-gold/10 text-gold shadow-[0_0_20px_rgba(212,175,55,0.1)]' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
+          >
+            <Library size={18} />
+            <span className="text-sm font-semibold">Biblioteca</span>
+          </button>
+
+          <div className="pt-8 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim/50">Categorias</div>
+          <div className="grid grid-cols-1 gap-1">
+            {categories.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => { setSelectedCategory(cat); setIsSidebarOpen(false); }}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-medium transition-all ${selectedCategory === cat ? 'text-gold bg-gold/5' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
+              >
+                <div className={selectedCategory === cat ? "w-1 h-1 rounded-full bg-gold" : "w-1 h-1 rounded-full bg-text-dim/30"} />
+                {cat}
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        <div className="p-6 border-t border-border-custom bg-surface-1/50 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center border border-white/5 shadow-xl">
+              <span className="text-xs font-bold text-gold">{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-text truncate">{user?.email || 'Visitante'}</p>
+              <p className="text-[10px] text-text-dim truncate">Membro Premium</p>
+            </div>
+          </div>
+        </div>
+      </motion.aside>
+
+      <div className="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto no-scrollbar pb-32 md:pb-0">
+        <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border-custom bg-background/50 backdrop-blur-xl sticky top-0 z-40">
           <div className="flex items-center gap-3 md:gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-text-muted hover:text-text bg-surface-2 rounded-lg">
               <List size={20} />
@@ -185,12 +151,8 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <GlobalSearch />
-            <div className="hidden xs:block">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
             
-            
-            {/* NOTIFICATION CENTER */}
             <div className="relative">
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -228,9 +190,6 @@ export default function Home() {
                         </div>
                       ))}
                     </div>
-                    <div className="p-3 bg-surface-2 text-center">
-                      <button className="text-[10px] font-bold text-text-dim uppercase tracking-widest hover:text-text transition-colors">Ver histórico completo</button>
-                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -238,45 +197,155 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="p-4 md:p-8 space-y-6 md:space-y-10 pb-32 md:pb-10">
+        {/* HERO IMMERSIVE */}
+        <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 px-6 md:px-12 overflow-hidden border-b border-border-custom/30">
+          <div className="absolute inset-0 -z-10 bg-[image:var(--gradient-noir)] opacity-50" />
+          <div className="max-w-5xl mx-auto text-center space-y-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-[10px] md:text-xs text-gold uppercase tracking-[0.2em]"
+            >
+              <Sparkles className="h-3 w-3 animate-pulse" />
+              O Estúdio Criativo Definitivo
+            </motion.div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-5xl md:text-8xl font-serif font-bold tracking-tight leading-[0.95] text-gradient"
+            >
+              Sua mídia. <br />
+              <span className="text-text">Sem ruído.</span>
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-sm md:text-lg text-text-dim max-w-2xl mx-auto leading-relaxed"
+            >
+              Mangas, audiobooks e cursos em um único ambiente imersivo. Desenvolvido para quem trata o consumo de conteúdo como um ritual.
+            </motion.p>
+          </div>
+        </section>
 
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-lg font-serif font-bold text-text">Sua Coleção</h3>
-              <div className="flex bg-surface-2 p-1 rounded-xl border border-border-custom">
-                {['Todos', 'Manga', 'Audiobook'].map(cat => (
-                  <button 
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${selectedCategory === cat ? 'bg-gold text-bg shadow-lg' : 'text-text-muted hover:text-text'}`}
-                  >
-                    {cat}
+        {/* BENTO LIBRARY GRID */}
+        <section className="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-8">
+          <div className="flex items-end justify-between px-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-2">Curadoria</p>
+              <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">Sua Coleção</h2>
+            </div>
+            <div className="text-right hidden md:block">
+              <p className="text-2xl font-black text-text">{dbBooks.length}</p>
+              <p className="text-[10px] text-text-dim uppercase tracking-widest">Ativos Totais</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[200px]">
+            {/* MANGA - GRANDE DESTAQUE */}
+            <motion.div 
+              whileHover={{ scale: 1.01 }}
+              className="md:col-span-4 md:row-span-2 group relative overflow-hidden rounded-[2.5rem] border border-border-custom bg-surface-1 shadow-elegant"
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-transparent z-10" />
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700" />
+              <div className="relative h-full flex flex-col justify-end p-8 z-20">
+                <BookOpen className="h-8 w-8 text-gold mb-4" />
+                <h3 className="text-4xl font-serif font-bold mb-2">Mangateca</h3>
+                <p className="text-sm text-text-dim max-w-md">Leitor tático com progresso silencioso e marcações imersivas.</p>
+                <div className="mt-6">
+                  <button className="px-6 py-2.5 bg-gold text-bg rounded-xl text-xs font-bold hover:bg-gold-bright transition-all shadow-lg shadow-gold/20">
+                    Continuar Lendo
                   </button>
-                ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* AUDIOBOOKS - MÉDIO */}
+            <motion.div 
+              whileHover={{ scale: 1.01 }}
+              className="md:col-span-2 md:row-span-1 group relative overflow-hidden rounded-[2.5rem] border border-border-custom bg-surface-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/10 to-transparent z-10" />
+              <div className="relative h-full flex flex-col justify-between p-6 z-20">
+                <Headphones className="h-6 w-6 text-gold" />
+                <div>
+                  <h3 className="text-xl font-serif font-bold">Audiobooks</h3>
+                  <p className="text-xs text-text-dim mt-1">{dbBooks.filter(b => b.category === 'Audiobook').length} títulos processados</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* CURSOS - MÉDIO */}
+            <motion.div 
+              whileHover={{ scale: 1.01 }}
+              className="md:col-span-2 md:row-span-1 group relative overflow-hidden rounded-[2.5rem] border border-border-custom bg-surface-3"
+            >
+              <div className="relative h-full flex flex-col justify-between p-6">
+                <GraduationCap className="h-6 w-6 text-gold" />
+                <div>
+                  <h3 className="text-xl font-serif font-bold">Estudos</h3>
+                  <p className="text-xs text-text-dim mt-1">Udemy & Manuais</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* QUICK STATS */}
+            <div className="md:col-span-1 rounded-[2.5rem] border border-border-custom bg-surface-1 p-6 flex flex-col justify-between">
+              <TrendingUp className="h-5 w-5 text-emerald-400" />
+              <div>
+                <p className="text-2xl font-black text-text">84%</p>
+                <p className="text-[10px] text-text-dim uppercase tracking-widest">Foco</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              <AnimatePresence>
-                {filteredBooks.map((book) => (
-                  <BookCard 
-                    key={book.id} 
-                    book={book} 
-                    onClick={() => playMedia(book)} 
-                  />
-                ))}
-              </AnimatePresence>
+            {/* PURE MODE STATUS */}
+            <div className="md:col-span-1 rounded-[2.5rem] border border-border-custom bg-surface-2 p-6 flex flex-col justify-between">
+              <BellOff className="h-5 w-5 text-gold" />
+              <div>
+                <p className="text-lg font-bold text-text leading-tight">Pure Mode</p>
+                <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-black">Ativo</p>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-      )}
+        </section>
+
+        {/* LISTA DE MÍDIAS (LEGACY LIST) */}
+        <section className="max-w-7xl mx-auto px-6 py-12 space-y-6">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-text-dim px-2">Acervo Completo</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <AnimatePresence>
+              {filteredBooks.map((book) => (
+                <motion.div
+                  key={book.id}
+                  whileHover={{ y: -4 }}
+                  className="glass-card group cursor-pointer"
+                  onClick={() => playMedia(book)}
+                >
+                  <div className="aspect-[3/4] relative overflow-hidden rounded-t-2xl">
+                    <img 
+                      src={book.cover_url} 
+                      alt={book.title} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg/90 via-transparent to-transparent" />
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-serif font-bold text-sm group-hover:text-gold transition-colors line-clamp-1">{book.title}</h4>
+                    <p className="text-[9px] text-text-dim mt-1 uppercase tracking-widest">{book.author}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </section>
+      </div>
 
       <MobileNav />
       <MediaExpandedView 
-        onUpdateProgress={handleUpdateProgress}
+        onUpdateProgress={fetchBooks}
       />
-
     </div>
   );
 }
