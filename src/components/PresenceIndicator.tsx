@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
+import type { RealtimeChannel, User as SupabaseUser } from '@supabase/supabase-js';
 
 interface PresenceUser {
   user_id: string;
@@ -13,33 +14,29 @@ interface PresenceUser {
 
 export default function PresenceIndicator() {
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
-    // Pegar usuário atual
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUser(user);
-        setupPresence(user);
-      }
-    });
+    let active = true;
+    let channel: RealtimeChannel | null = null;
 
-    const setupPresence = (user: any) => {
-      const channel = supabase.channel('online-users', {
+    const setupPresence = (user: SupabaseUser) => {
+      const ch = supabase.channel('online-users', {
         config: {
           presence: {
             key: user.id,
           },
         },
       });
+      channel = ch;
 
-      channel
+      ch
         .on('presence', { event: 'sync' }, () => {
-          const newState = channel.presenceState();
+          const newState = ch.presenceState<{ email?: string; online_at: string }>();
           const users: PresenceUser[] = [];
-          
+
           for (const id in newState) {
-            const userState = newState[id][0] as any;
+            const userState = newState[id][0];
             users.push({
               user_id: id,
               email: userState.email || 'Usuário',
@@ -56,17 +53,27 @@ export default function PresenceIndicator() {
         })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
-            await channel.track({
+            await ch.track({
               user_id: user.id,
               email: user.email,
               online_at: new Date().toISOString(),
             });
           }
         });
+    };
 
-      return () => {
-        channel.unsubscribe();
-      };
+    // Pegar usuário atual
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user && active) {
+        setCurrentUser(user);
+        setupPresence(user);
+      }
+    });
+
+    // A limpeza fica no retorno do efeito: antes ela era devolvida por setupPresence e nunca executada.
+    return () => {
+      active = false;
+      channel?.unsubscribe();
     };
   }, []);
 

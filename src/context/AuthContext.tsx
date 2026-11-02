@@ -2,14 +2,14 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  signInWithProvider: (provider: 'google' | 'github') => Promise<{ error: any }>;
+  signInWithProvider: (provider: 'google' | 'github') => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

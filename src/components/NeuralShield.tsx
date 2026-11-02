@@ -28,7 +28,7 @@ export default function NeuralShield({ children }: { children: React.ReactNode }
         setIsVerifying(null);
       }
       // Se não houver erro, o Supabase fará o redirecionamento, então não precisamos setar false aqui se for bem sucedido
-    } catch (err: any) {
+    } catch {
       showToast(`Erro de conexão com a rede neural via ${provider}.`, "error");
       setIsVerifying(null);
     }

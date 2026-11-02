@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     console.log(`Processing: Book="${bookTitle}", Chapter="${chapterTitle}", Category="${category}"`);
 
     // 1. Buscar ou Criar o Livro
-    let { data: book, error: bookError } = await supabase
+    let { data: book } = await supabase
       .from('books')
       .select('id')
       .eq('title', bookTitle)
@@ -145,8 +145,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (err: any) {
-    console.error('Webhook Error:', err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Webhook Error:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
