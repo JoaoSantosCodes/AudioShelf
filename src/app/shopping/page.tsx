@@ -16,19 +16,23 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/context/ToastContext';
 import NeuralShield from '@/components/NeuralShield';
 
+interface ShoppingItem {
+  id: string;
+  title: string;
+  quantity: string;
+  category: string;
+  completed: boolean;
+}
+
 export default function ShoppingDashboard() {
   const { showToast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<ShoppingItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [newItem, setNewItem] = useState({ title: '', quantity: '', category: 'Geral' });
 
-  useEffect(() => {
-    fetchShoppingList();
-  }, []);
-
-  const fetchShoppingList = async () => {
-    setIsLoading(true);
+  // Só faz setState depois do await, então pode ser chamado direto do efeito.
+  const loadShoppingList = async () => {
     try {
       const { data } = await supabase.from('shopping_list').select('*').order('created_at', { ascending: false });
       if (data) setItems(data);
@@ -36,6 +40,15 @@ export default function ShoppingDashboard() {
       setIsLoading(false);
     }
   };
+
+  const fetchShoppingList = async () => {
+    setIsLoading(true);
+    await loadShoppingList();
+  };
+
+  useEffect(() => {
+    loadShoppingList();
+  }, []);
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,8 +69,9 @@ export default function ShoppingDashboard() {
       setNewItem({ title: '', quantity: '', category: 'Geral' });
       setIsModalOpen(false);
       fetchShoppingList();
-    } catch (err: any) {
-      showToast(`Erro inesperado: ${err.message}`, "error");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      showToast(`Erro inesperado: ${message}`, "error");
     }
   };
 

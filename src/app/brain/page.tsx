@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   Target,
   Volume2,
-  VolumeX
+  VolumeX,
+  type LucideIcon
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -63,47 +64,49 @@ export default function BrainDashboard() {
     setTimeout(() => setIsProcessing(false), 2500);
   };
 
+  // Só faz setState depois do primeiro await, então pode ser chamado direto do efeito.
+  const loadGlobalData = async () => {
+    try {
+      // 1. Fetch Finance Data
+      const { data: txs } = await supabase.from('transactions').select('amount, type');
+      const expenses = txs?.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0) || 0;
+
+      // 2. Fetch Collab Data (Mocked harmony for now as it's in localStorage of the other app)
+      const { count: shoppingCount } = await supabase.from('shopping_list').select('*', { count: 'exact', head: true });
+      
+      // 3. Fetch Books Data
+      const { count: booksCount } = await supabase.from('books').select('*', { count: 'exact', head: true });
+
+      setStats({
+        totalStudyHours: (booksCount || 0) * 2.5,
+        totalExpenses: expenses,
+        familyHarmony: 85,
+        topCategory: 'Produtividade'
+      });
+
+      if (expenses > 500) {
+        setInsight("Suas saídas mensais estão elevadas. Recomendo revisar a lista de suprimentos para otimizar gastos.");
+      } else if (shoppingCount && shoppingCount > 5) {
+        setInsight("Sua lista de mercado está crescendo. Otimize sua rotina para realizar as compras acumuladas.");
+      } else {
+        setInsight("Ecossistema em harmonia. O equilíbrio entre estudo e finanças está em nível otimizado.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchGlobalData();
+    loadGlobalData();
 
     const handleSync = () => {
-      fetchGlobalData();
+      setIsLoading(true);
+      loadGlobalData();
     };
 
     window.addEventListener('neural-sync', handleSync);
     return () => window.removeEventListener('neural-sync', handleSync);
   }, []);
-
-  const fetchGlobalData = async () => {
-    setIsLoading(true);
-    
-    // 1. Fetch Finance Data
-    const { data: txs } = await supabase.from('transactions').select('amount, type');
-    const expenses = txs?.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0) || 0;
-
-    // 2. Fetch Collab Data (Mocked harmony for now as it's in localStorage of the other app)
-    const { count: shoppingCount } = await supabase.from('shopping_list').select('*', { count: 'exact', head: true });
-    
-    // 3. Fetch Books Data
-    const { count: booksCount } = await supabase.from('books').select('*', { count: 'exact', head: true });
-
-    setStats({
-      totalStudyHours: (booksCount || 0) * 2.5,
-      totalExpenses: expenses,
-      familyHarmony: 85,
-      topCategory: 'Produtividade'
-    });
-
-    if (expenses > 500) {
-      setInsight("Suas saídas mensais estão elevadas. Recomendo revisar a lista de suprimentos para otimizar gastos.");
-    } else if (shoppingCount && shoppingCount > 5) {
-      setInsight("Sua lista de mercado está crescendo. Otimize sua rotina para realizar as compras acumuladas.");
-    } else {
-      setInsight("Ecossistema em harmonia. O equilíbrio entre estudo e finanças está em nível otimizado.");
-    }
-
-    setIsLoading(false);
-  };
 
   return (
     <div className="min-h-screen bg-bg text-text pb-24 md:pb-8 relative overflow-hidden">
@@ -147,7 +150,7 @@ export default function BrainDashboard() {
               </div>
               <div className="flex items-start justify-between gap-6">
                 <p className="text-2xl font-serif font-bold leading-relaxed italic text-text flex-1">
-                  "{insight}"
+                  &ldquo;{insight}&rdquo;
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -250,7 +253,15 @@ export default function BrainDashboard() {
   );
 }
 
-function StatItem({ icon: Icon, label, value, sub, color }: any) {
+interface StatItemProps {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  sub: string;
+  color: string;
+}
+
+function StatItem({ icon: Icon, label, value, sub, color }: StatItemProps) {
   return (
     <div className="bg-surface-1 border border-border-custom p-8 rounded-[2.5rem] shadow-sm">
       <div className="flex items-center gap-3 mb-6">

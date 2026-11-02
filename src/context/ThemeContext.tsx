@@ -17,6 +17,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedTheme = localStorage.getItem('mediashelf-theme') as Theme;
     if (savedTheme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage só existe no cliente; ler no render quebraria a hidratação do SSR.
       setTheme(savedTheme);
       document.documentElement.className = savedTheme === 'cyber' ? 'theme-cyber' : '';
     }

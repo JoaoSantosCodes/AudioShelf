@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
     ],
   },
   // Setting turbopack config at the root as suggested by the error message
-  // @ts-ignore - Turbopack key might not be in the type yet
   turbopack: {},
 };
 

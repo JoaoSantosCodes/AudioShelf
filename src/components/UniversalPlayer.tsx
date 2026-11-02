@@ -22,6 +22,9 @@ interface UniversalPlayerProps {
   media: Book;
 }
 
+// Durações fixas por barra: Math.random no render é impuro e muda a cada renderização.
+const EQUALIZER_DURATIONS = Array.from({ length: 12 }, () => 0.5 + Math.random());
+
 export default function UniversalPlayer({ media }: UniversalPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(media.progress || 0);
@@ -56,7 +59,7 @@ export default function UniversalPlayer({ media }: UniversalPlayerProps) {
                 <motion.div 
                   key={i}
                   animate={{ height: isPlaying ? [10, 30, 15, 25, 10] : 4 }}
-                  transition={{ repeat: Infinity, duration: 0.5 + Math.random(), ease: "easeInOut" }}
+                  transition={{ repeat: Infinity, duration: EQUALIZER_DURATIONS[i], ease: "easeInOut" }}
                   className="w-1 bg-gold/60 rounded-full"
                 />
               ))}

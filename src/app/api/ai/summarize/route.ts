@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ summary });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro no resumo:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

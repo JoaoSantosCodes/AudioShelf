@@ -23,6 +23,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const savedCategory = localStorage.getItem('ms-category');
     const savedSidebar = localStorage.getItem('ms-sidebar');
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage só existe no cliente; ler no render quebraria a hidratação do SSR.
     if (savedCategory) setSelectedCategory(savedCategory);
     if (savedSidebar) setIsSidebarOpen(savedSidebar === 'true');
   }, []);

@@ -36,15 +36,6 @@ export default function Home() {
   const [dbBooks, setDbBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const cachedBooks = localStorage.getItem('dbBooks');
-    if (cachedBooks) {
-      setDbBooks(JSON.parse(cachedBooks));
-      setIsLoading(false); // Carrega do cache instantaneamente
-    }
-    fetchBooks();
-  }, []);
-
   const fetchBooks = async () => {
     setIsLoading(true);
     const { data } = await supabase
@@ -58,6 +49,16 @@ export default function Home() {
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    const cachedBooks = localStorage.getItem('dbBooks');
+    if (cachedBooks) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage só existe no cliente; ler no render quebraria a hidratação do SSR.
+      setDbBooks(JSON.parse(cachedBooks));
+      setIsLoading(false); // Carrega do cache instantaneamente
+    }
+    fetchBooks();
+  }, []);
 
   const filteredBooks = dbBooks.filter(book => {
     return selectedCategory === 'Todos' || book.category === selectedCategory;

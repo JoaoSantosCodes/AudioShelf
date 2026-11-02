@@ -33,13 +33,20 @@ export default function GlobalSearch() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Fechar sempre limpa a busca; antes isso era feito num efeito reagindo a isOpen.
+  const closeSearch = () => {
+    setIsOpen(false);
+    setQuery("");
+    setResults([]);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen(true);
       }
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape') closeSearch();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -47,12 +54,7 @@ export default function GlobalSearch() {
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      inputRef.current?.focus();
-    } else {
-      setQuery('');
-      setResults([]);
-    }
+    if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
 
   const [isSearching, setIsSearching] = useState(false);
@@ -119,7 +121,7 @@ export default function GlobalSearch() {
         
         if (data) {
           playMedia(data);
-          setIsOpen(false);
+          closeSearch();
           return;
         }
       } catch (err) {
@@ -128,7 +130,7 @@ export default function GlobalSearch() {
     }
     
     router.push(result.path);
-    setIsOpen(false);
+    closeSearch();
   };
 
   const getTypeIcon = (type: string) => {
@@ -161,7 +163,7 @@ export default function GlobalSearch() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={() => closeSearch()}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
             
@@ -221,7 +223,7 @@ export default function GlobalSearch() {
                       ))
                     ) : (
                       <div className="py-12 text-center">
-                        <p className="text-sm text-text-dim font-serif italic">Nenhum resultado encontrado para "{query}"</p>
+                        <p className="text-sm text-text-dim font-serif italic">Nenhum resultado encontrado para &ldquo;{query}&rdquo;</p>
                       </div>
                     )}
                   </div>

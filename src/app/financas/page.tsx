@@ -15,20 +15,24 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/context/ToastContext';
 import NeuralShield from '@/components/NeuralShield';
 
+interface FinanceTransaction {
+  id: string;
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  created_at: string;
+}
+
 export default function FinanceDashboard() {
   const { showToast } = useToast();
   const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [newTx, setNewTx] = useState({ description: '', amount: '', type: 'expense' });
 
-  useEffect(() => {
-    fetchFinanceData();
-  }, []);
-
-  const fetchFinanceData = async () => {
-    setIsLoading(true);
+  // Só faz setState depois do await, então pode ser chamado direto do efeito.
+  const loadFinanceData = async () => {
     try {
       const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
       if (data) {
@@ -40,6 +44,15 @@ export default function FinanceDashboard() {
       setIsLoading(false);
     }
   };
+
+  const fetchFinanceData = async () => {
+    setIsLoading(true);
+    await loadFinanceData();
+  };
+
+  useEffect(() => {
+    loadFinanceData();
+  }, []);
 
   const handleAddTx = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,8 +85,9 @@ export default function FinanceDashboard() {
       setIsModalOpen(false);
       fetchFinanceData();
       window.dispatchEvent(new CustomEvent('neural-sync'));
-    } catch (err: any) {
-      showToast(`Erro inesperado: ${err.message}`, "error");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      showToast(`Erro inesperado: ${message}`, "error");
     }
   };
 

@@ -48,23 +48,18 @@ export default function AudioPlayer({ book, userId }: AudioPlayerProps) {
   const animationRef = useRef<number | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
 
-  useEffect(() => {
+  // Reinicia transcrição e resumo quando o livro ou o capítulo mudam, durante o render (padrão recomendado pelo React em vez de efeito).
+  const [syncedWith, setSyncedWith] = useState({ book, chapter: currentChapter });
+  if (syncedWith.book !== book || syncedWith.chapter !== currentChapter) {
+    setSyncedWith({ book, chapter: currentChapter });
     setTranscription(book.chapters[currentChapter]?.transcription || '');
     setSummary(book.summary || '');
-  }, [currentChapter, book]);
-
-  useEffect(() => {
-    if (isPlaying && !isMinimized) {
-      setupVisualizer();
-    } else if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-  }, [isPlaying, isMinimized]);
+  }
 
   const setupVisualizer = () => {
     if (!audioRef.current || !canvasRef.current) return;
 
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext!)();
     const source = audioContext.createMediaElementSource(audioRef.current);
     const analyser = audioContext.createAnalyser();
 
@@ -101,6 +96,14 @@ export default function AudioPlayer({ book, userId }: AudioPlayerProps) {
 
     draw();
   };
+
+  useEffect(() => {
+    if (isPlaying && !isMinimized) {
+      setupVisualizer();
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+  }, [isPlaying, isMinimized]);
 
   const handleTranscribe = async () => {
     setIsTranscribing(true);

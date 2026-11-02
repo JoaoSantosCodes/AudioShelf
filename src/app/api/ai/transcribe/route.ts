@@ -41,8 +41,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ text: transcription.text });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na transcrição:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
